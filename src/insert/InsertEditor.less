@@ -1,0 +1,150 @@
+@import '../theme';
+
+.bg {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 1000;
+  background-color: rgba(255, 255, 255, 0.5);
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.view {
+  border-left: 1px solid #CCC;
+  width: 500px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  background: #FFF;
+
+  .toolbar {
+    height: 42px;
+    background: #FAFAFA;
+    //margin-bottom: -1px;
+    position: relative;
+    z-index: 12233;
+    text-align: right;
+    padding: 10px;
+    border-bottom: 1px solid #EEE;
+
+    button {
+      background: @color-primary;
+      color: #FFF;
+      font-weight: bold;
+      padding: 1px 8px;
+      //border: 1px solid #DDD;
+      border-radius: 3px;
+      height: 22px;
+    }
+  }
+
+  .main {
+    flex: 1;
+    overflow: auto;
+  }
+}
+
+.segTitle {
+  position: relative;
+  padding: 15px 10px 3px 15px;
+  font-style: italic;
+  color: #999;
+  //border-top: 1px dashed #ddd;
+  //border-bottom: 1px dashed #eee;
+  //background: #FAFAFA;
+
+  //&:not(:first-of-type) {
+  //  border-top: 1px dashed #eee;
+  //}
+}
+
+.selectDom {
+  margin: 0 10px;
+  color: #333;
+  font-style: normal;
+}
+
+.content {
+  padding-top: 20px;
+  flex: 1;
+  overflow: auto;
+  user-select: text;
+
+  .scroll {
+    position: relative;
+    height: fit-content;
+    min-height: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+
+    .from {
+      //width: 250px;
+    }
+
+    .to {
+      //width: 250px;
+    }
+
+    .relations {
+      pointer-events: none;
+      //flex: 1;
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      left: 0;
+      top: 0;
+      overflow: hidden;
+
+
+      svg {
+        width: 100%;
+        height: 100%;
+
+        polyline {
+          cursor: pointer;
+          //pointer-events: auto;
+          //shape-rendering: crispEdges;
+          stroke: @color-primary;
+          stroke-width: 1px;
+        }
+      }
+
+      .conMenu {
+        display: none;
+        pointer-events: auto;
+        position: absolute;
+        background: #FFF;
+        z-index: 1000;
+        width: 80px;
+        //border: 1px solid #DDD;
+        box-shadow: #ccc 1px 2px 6px;
+
+        .menuItem {
+          padding: 5px 8px;
+          cursor: pointer;
+
+          &:hover {
+            background: #F7F7F7;
+          }
+        }
+      }
+    }
+  }
+
+  .mover {
+    background: #FFF;
+    border-radius: 5px;
+    min-height: 25px;
+    outline: 1px solid @color-primary;
+    padding: 5px 8px;
+    position: absolute;
+    z-index: 100;
+    width: fit-content;
+    user-select: none !important;
+  }
+}

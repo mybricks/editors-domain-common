@@ -1,0 +1,104 @@
+@import "./QueryEditor";
+
+.where {
+  position: relative;
+  padding-bottom: 20px;
+
+  .addWhere {
+    font-style: normal;
+    margin-left: 22px;
+    font-size: 18px;
+    color: #333;
+    margin-top: 5px;
+  }
+
+  .popMenu {
+    width: 250px;
+    background-color: #FFF;
+    min-height: 50px;
+    position: absolute;
+    z-index: 10000;
+    left: 220px;
+    border: 1px solid #DDD;
+    box-shadow: -3px 3px 7px #ddd;
+    padding: 5px 0;
+
+    .item {
+      height: 28px;
+      padding: 0 15px 0 28px;
+      display: flex;
+      align-items: center;
+      color: #333;
+      font-style: normal;
+      position: relative;
+
+      &:hover {
+        background-color: #F7F7F7;
+      }
+    }
+
+    .used {
+      //background-color: #F7F7F7;
+
+      &:before {
+        content: "✓";
+        position: absolute;
+        left: 10px;
+      }
+    }
+  }
+
+  .conditions {
+    .condition {
+      display: flex;
+      align-items: center;
+      padding: 7px 10px;
+      position: relative;
+
+      &:not(:first-of-type):after {
+        content: attr(data-joiner);
+        color: #AAA;
+        font-style: italic;
+        position: absolute;
+        top: -12px;
+        right: 140px;
+      }
+
+
+      .name {
+        width: 100px;
+        text-align: right;
+      }
+
+      select {
+        //border: 1px solid #DDD;
+        margin: 0 10px;
+        color: #8d7a34;
+      }
+
+      input {
+        width: 120px;
+        border: 1px solid #DDD;
+        margin-left: 10px;
+        padding: 1px 5px;
+      }
+
+      .icons {
+        margin-left: 10px;
+        height: 16px;
+
+        svg {
+          max-width: 16px;
+        }
+      }
+    }
+
+    .empty {
+      padding: 10px;
+      display: flex;
+      justify-content: center;
+      color: #AAA;
+      font-style: italic;
+    }
+  }
+}
