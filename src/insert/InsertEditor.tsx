@@ -1,6 +1,6 @@
 import css from "./InsertEditor.less";
 import React, {useCallback, useEffect} from "react";
-import {getPosition, useComputed, useObservable} from "@mybricks/rxui";
+import {evt, getPosition, useComputed, useObservable} from "@mybricks/rxui";
 import InsertCtx from "./InsertCtx";
 import FromRender from "./FromRender";
 import ToRender from "./ToRender";
@@ -38,7 +38,7 @@ export default function InsertEditor({domainModel, paramSchema, value, close}) {
 
   return (
     <div className={css.bg} onClick={close}>
-      <div className={css.view} onClick={ctx.blurAll}>
+      <div className={css.view} onClick={evt(ctx.blurAll).stop}>
         <div className={css.toolbar}>
           <button onClick={ctx.save}>确定</button>
         </div>
