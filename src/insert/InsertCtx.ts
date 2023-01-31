@@ -1,4 +1,4 @@
-import {DomainViewModel} from "@mybricks/desn-domain-view";
+import {DomainViewModel} from "../types";
 
 export type T_Field = {
   id,
