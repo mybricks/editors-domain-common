@@ -1,12 +1,14 @@
 //import "./index.less";
 import {typeCheck} from "./utils";
 
-//import EditorSelect from "./select";
+import EditorSelect from "./select";
 import EditorInsert from "./insert";
+import Code from "./jsCoder";
 
 
 const EditorMap: any = {
-  //'DOMAIN.DBSELECT': EditorSelect,
+  'DOMAIN.DBSELECT': EditorSelect,
+  'CODE': Code,
   'DOMAIN.DBINSERT': EditorInsert,
 }
 
@@ -17,9 +19,9 @@ function Editors(editConfig, extOpts): any {
   } catch (err) {
     console.error(err);
   }
-
+	
   if (typeCheck(editor, "function")) {
-    return editor(editConfig, extOpts);
+    return editor({ editConfig }, extOpts);
   }
 
   if (typeCheck(editor, "object") && typeCheck(editor.render, "function")) {

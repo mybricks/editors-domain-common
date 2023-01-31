@@ -14,6 +14,17 @@ export type T_Entity = {
   fieldAry: T_Field[]
 }
 
+const getTypeQuote = (type) => {
+	switch (type) {
+		case 'string': {
+			return `'`
+		}
+		case 'number': {
+			return ''
+		}
+	}
+}
+
 export default class InsertCtx {
   domainModel: DomainViewModel
 
@@ -147,7 +158,7 @@ export default class InsertCtx {
           const con = conAry.find(con => con.to === `/${fieldName}`)
           if (con) {
             const fromPropName = con.from.substring(con.from.indexOf('/') + 1)
-            const q = field.getTypeQuote()
+            const q = getTypeQuote(field.bizType);
             valueAry.push(`${q}\${params.${fromPropName}}${q}`)
           } else {
             valueAry.push('null')

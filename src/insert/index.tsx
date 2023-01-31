@@ -5,7 +5,7 @@ import {observe, useObservable} from "@mybricks/rxui";
 import InsertEditor from "./InsertEditor";
 import {createPortal} from "react-dom";
 
-export default function ({title, value, options}, {domainModel, canvasEle}) {
+export default function ({ editConfig: {title, value, options} }, {domainModel, canvasEle}) {
   const [popTrue, pop] = useState(false)
   // const openEditor = useCallback(() => {
   //   function doJSX({close}) {
