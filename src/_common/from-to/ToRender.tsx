@@ -1,30 +1,31 @@
 import css from './ToRender.less'
 import {dragable, IgnoreObservable, observe, useComputed, useObservable} from "@mybricks/rxui";
 import React, {useCallback, useEffect, useState} from "react";
-import EdtCtx from "./InsertCtx";
-import {XPATH_ARRAY} from "../constants";
-import {getTypeTitleBySchema} from "../utils";
-import {getPinTypeStyle} from "./utils";
-import InsertCtx from "./InsertCtx";
+
+import {getPinTypeStyle, getTypeTitleBySchema} from "./utils";
+import Ctx from "./Ctx";
+import {XPATH_ARRAY} from "./constants";
 
 class MyCtx {
+  title: string
+
   @IgnoreObservable
   schema: {}
 }
 
-let edtCtx: EdtCtx
+let edtCtx: Ctx
+let myCtx: MyCtx
 
-export default function ToRender({schema}: { schema: {} }) {
-  edtCtx = observe(InsertCtx, {from: 'parents'})
-
-  const ctx = useObservable(MyCtx, next => {
-    next({schema})
+export default function ToRender({title, schema}: { schema: {} }) {
+  edtCtx = observe(Ctx, {from: 'parents'})
+  myCtx = useObservable(MyCtx, next => {
+    next({title, schema})
   }, [schema])
 
-  return ctx.schema ? (
+  return myCtx.schema ? (
     <div className={`${css.schema} ${edtCtx.mover ? css.draging : ''}`}>
       {/*<div className={css.tt}>表中的字段</div>*/}
-      <ProItem val={ctx.schema} xpath={''} root={true}/>
+      <ProItem val={myCtx.schema} xpath={''} root={true}/>
     </div>
   ) : null
 }
@@ -96,19 +97,19 @@ function ProItem({val, keyName, xpath, root}: { val, keyName?, xpath?, root? }) 
   }, [])
 
   const [_hasCon, hasChildrenCon, hasParentCon] = useComputed(() => {
-    const hasCon = edtCtx.nowValue.conAry.find(con => con.to === xpath)
+    const hasCon = edtCtx.conAry.find(con => con.to === xpath)
 
     // if(keyName==='solution'){
     //   debugger
     // }
 
-    const hasChildrenCon = edtCtx.nowValue.conAry.find(con => {
+    const hasChildrenCon = edtCtx.conAry.find(con => {
       if (!hasCon && con.to.indexOf(xpath + '/') === 0) {
         return true
       }
     })
 
-    const hasParentCon = edtCtx.nowValue.conAry.find(con => {
+    const hasParentCon = edtCtx.conAry.find(con => {
       if (!hasCon) {
         const ary = xpath.split('/')
 
@@ -117,7 +118,7 @@ function ProItem({val, keyName, xpath, root}: { val, keyName?, xpath?, root? }) 
           //if(now!==''){
           tPath += `/${now}`
           tPath = tPath.replace(/\/\//, '/')
-          if (edtCtx.nowValue.conAry.find(con => con.to === tPath)) {
+          if (edtCtx.conAry.find(con => con.to === tPath)) {
             return true
           }
           //}
@@ -165,7 +166,7 @@ function ProItem({val, keyName, xpath, root}: { val, keyName?, xpath?, root? }) 
         }
         {keyName}
         <span className={css.typeName} style={{color: st.strokeColor}}>
-          {root ? edtCtx.nowValue.entity.name : `（${getTypeTitleBySchema(val)}）`}
+           {root ? myCtx.title : `（${getTypeTitleBySchema(val)}）`}
         </span>
       </div>
       {jsx}

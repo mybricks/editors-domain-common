@@ -48,76 +48,6 @@ export default class InsertCtx {
 
   blurAry = []
 
-  //------------------------------------------------------------
-
-  ele: HTMLElement
-
-  contentEle: HTMLElement
-
-  fromEle: HTMLElement
-
-  toEle: HTMLElement
-
-  consEle: HTMLElement
-
-  mover: {
-    x: number
-    y: number
-    title: string
-    schema: { type }
-    xpath: string
-  }
-
-  hoverFromXpath: string
-
-  focusCon: {
-    id
-    fromXpath
-    toXpath
-    position: { x, y }
-  }
-
-  finishMover() {
-    const conAry = this.nowValue.conAry
-    if (this.hoverFromXpath !== void 0
-      && !conAry.find(con => con.from === this.hoverFromXpath && con.to === this.mover.xpath)) {
-      this.nowValue.conAry = conAry.filter(con => {
-        if (con.to !== this.mover.xpath) {
-          return true
-        }
-      })
-
-      this.nowValue.conAry.push({
-        from: this.hoverFromXpath,
-        to: this.mover.xpath
-      })
-    }
-
-    this.mover = void 0
-  }
-
-  removeCon({fromXpath, toXpath}) {
-    const conAry = this.nowValue.conAry
-    conAry.forEach((con, idx) => {
-      if (con.from === fromXpath &&
-        con.to === toXpath) {
-        conAry.splice(idx, 1)
-      }
-    })
-  }
-
-  delFocusCon() {
-    if (this.focusCon) {
-      const conAry = this.nowValue.conAry
-      conAry.forEach((con, idx) => {
-        if (con.from === this.focusCon.fromXpath &&
-          con.to === this.focusCon.toXpath) {
-
-          conAry.splice(idx, 1)
-        }
-      })
-    }
-  }
 
   //------------------------------------------------------------
 
@@ -126,12 +56,8 @@ export default class InsertCtx {
   }
 
   blurAll() {
-    this.focusCon = void 0
-
     if (this.blurAry.length > 0) {
       this.blurAry.forEach(fn => fn())
-
-      this.blurAry = []
     }
   }
 
@@ -140,7 +66,6 @@ export default class InsertCtx {
     let desc
 
     const conAry = this.nowValue.conAry
-
 
     if (nowValue.entity && nowValue.entity.fieldAry.length > 0) {
       desc = `${nowValue.entity.name}`
