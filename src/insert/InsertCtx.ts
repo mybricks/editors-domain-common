@@ -1,4 +1,4 @@
-import {DomainViewModel} from "../types";
+import {DomainViewModel} from "../typing";
 
 export type T_Field = {
   id,

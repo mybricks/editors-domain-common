@@ -1,46 +1,37 @@
-import React, {useCallback, useState} from 'react'
-import css from './index.less'
-import {observe, useObservable} from "@mybricks/rxui";
-// import {NS_Emits} from "@sdk";
-import QueryEditor from "./QueryEditor";
-import {createPortal} from "react-dom";
+import React, { useCallback, useState } from 'react';
+import { createPortal } from 'react-dom';
+import QueryEditor from './QueryEditor';
+import { AnyType } from '../typing';
 
-export default function ServiceSelect({ editConfig: { value, options } }, { domainModel, canvasEle }) {
-  // const emitView = useObservable(NS_Emits.Views, {expectTo: 'parents'})
-	const [popTrue, pop] = useState(false);
+// @ts-ignore
+import css from './index.less';
 
-  //const entityAry = dsCtx.model.domainView.entityAry
+const ServiceSelect = ({ editConfig: { value, options } }: AnyType, { domainModel, canvasEle }: AnyType) => {
+	const [visible, setVisible] = useState(false);
 
-  // const openEditor = useCallback(() => {
-  //   function doJSX({close}) {
-  //     return <QueryEditor domainModel={domainModel}
-  //                         paramSchema={options.paramSchema}
-  //                         value={value} close={close}/>
-  //   }
-	//
-  //   emitView.popView('查询数据', doJSX as any, {width: 500, beforeEditView: true})
-  // }, [])
-
-  const val = value.get()
+	const val = value.get();
 	const openPop = useCallback(() => {
-		pop(true)
-	}, [])
+		setVisible(true);
+	}, []);
 	
 	const close = useCallback(() => {
-		pop(false)
-	}, [])
+		setVisible(false);
+	}, []);
 
-  return (
-    <div className={`${css.editor} ${css[options?.type]}`}
-         onClick={openPop}>
-      <span>已选择:</span>
-      <span className={css.tt}>{val?.desc ? `${val.desc}` : '[空] 点击选择..'}</span>
-      {/*{selectedCon ? <span className={css.type}>{selectedCon.icon}</span> : null}*/}
+	return (
+		<>
+	    <div className={`${css.editor} ${css[options?.type]}`} onClick={openPop}>
+		    <span>已选择:</span>
+		    <span className={css.tt}>{val?.desc ? `${val.desc}` : '[空] 点击选择..'}</span>
+	    </div>
 	    {
-		    popTrue ? createPortal(<QueryEditor domainModel={domainModel}
-		                                        paramSchema={options.paramSchema}
-		                                        value={value} close={close} />, canvasEle) : null
+		    visible ? createPortal(
+			    <QueryEditor domainModel={domainModel} paramSchema={options.paramSchema} value={value} close={close} />,
+			    canvasEle
+		    ) : null
 	    }
-    </div>
-  )
-}
+		</>
+	);
+};
+
+export default ServiceSelect;

@@ -1,14 +1,10 @@
-//import "./index.less";
 import {typeCheck} from "./utils";
-
 import EditorSelect from "./select";
 import EditorInsert from "./insert";
-import Code from "./jsCoder";
 
 
 const EditorMap: any = {
   'DOMAIN.DBSELECT': EditorSelect,
-  'CODE': Code,
   'DOMAIN.DBINSERT': EditorInsert,
 }
 
