@@ -1,10 +1,10 @@
 import React, { useCallback, useState } from 'react';
 import { createPortal } from 'react-dom';
 import InsertEditor from './InsertEditor';
-import { AnyType } from '../typing';
 
 // @ts-ignore
 import css from './index.less';
+import {AnyType} from "../_types";
 
 export default function ({ editConfig: { value, options } }: AnyType, { domainModel, canvasEle }: AnyType) {
 	const [visible, setVisible] = useState(false);
