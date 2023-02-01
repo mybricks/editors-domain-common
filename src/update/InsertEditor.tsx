@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
-import { useObservable } from '@mybricks/rxui';
+// @ts-ignore
+import { evt, useObservable } from '@mybricks/rxui';
 import InsertCtx from './InsertCtx';
 import FromTo from '../_common/from-to';
 import PopView from '../_common/pop-view';
@@ -59,7 +60,7 @@ export default function InsertEditor({ domainModel, paramSchema, value, close }:
 	}, []);
 
 	return (
-		<PopView close={close} save={ctx.save}>
+		<PopView close={close} save={ctx.save} clickView={evt(ctx.blurAll).stop}>
 			<div className={css.segTitle}>
 				向
 				<select className={css.selectDom}

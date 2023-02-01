@@ -1,15 +1,16 @@
 import React from 'react';
-import { useComputed, useObservable } from '@mybricks/rxui';
-import QueryCtx from './QueryCtx';
-import Where from './Where';
-import PopView from '../_common/pop-view';
-
 // @ts-ignore
+import { evt, useComputed, useObservable } from '@mybricks/rxui';
+import QueryCtx from './QueryCtx';
+import Where from '../_common/where';
+import PopView from '../_common/pop-view';
+import { AnyType } from '../_types';
+
 import css from './QueryEditor.less';
 
 let ctx: QueryCtx;
 
-export default function QueryEditor({ domainModel, paramSchema, value, close }) {
+export default function QueryEditor({ domainModel, paramSchema, value, close }: AnyType) {
 	ctx = useObservable(QueryCtx, next => {
 		const oriVal = value.get();
 		let val;
@@ -33,12 +34,19 @@ export default function QueryEditor({ domainModel, paramSchema, value, close }) 
 	}, { to: 'children' });
 
 	return (
-		<PopView close={close} save={ctx.save}>
+		<PopView close={close} save={ctx.save} clickView={evt(ctx.blurAll).stop}>
 		  <SelectFrom/>
 		  {
 			  ctx.nowValue.entity ? (
 				  <>
-					  <Where/>
+					  <Where
+						  addBlur={ctx.addBlur}
+						  nowValue={ctx.nowValue}
+						  paramSchema={ctx.paramSchema}
+						  // @ts-ignore
+						  addCondition={ctx.addCondition}
+						  removeCondition={ctx.removeCondition}
+					  />
 					  <Limit/>
 				  </>
 			  ) : null

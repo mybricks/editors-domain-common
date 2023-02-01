@@ -10,3 +10,8 @@ export enum FieldDBType {
 	BIGINT = 'bigint',
 	MEDIUMTEXT = 'mediumtext',
 }
+
+export enum SQLWhereJoiner {
+	AND = 'and',
+	OR = 'or',
+}

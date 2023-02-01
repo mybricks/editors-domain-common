@@ -1,10 +1,9 @@
 import React, { useCallback, useState } from 'react';
 import { createPortal } from 'react-dom';
 import QueryEditor from './QueryEditor';
+import { AnyType } from '../_types';
 
-// @ts-ignore
 import css from './index.less';
-import {AnyType} from "../_types";
 
 const ServiceSelect = ({ editConfig: { value, options } }: AnyType, { domainModel, canvasEle }: AnyType) => {
 	const [visible, setVisible] = useState(false);

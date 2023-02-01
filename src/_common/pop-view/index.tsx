@@ -5,18 +5,16 @@ import styles from './index.less';
 interface PopViewProps {
 	close(): void;
 	save(): void;
+	clickView(): void;
 	children: ReactNode;
 }
 
 const PopView: FC<PopViewProps> = props => {
-	const { close, save, children } = props;
-	const stopBubble = useCallback((event) => {
-		event.stopPropagation();
-	}, []);
+	const { close, save, children, clickView } = props;
 	
 	return (
 		<div className={styles.bg} onClick={close}>
-			<div className={styles.view} onClick={stopBubble}>
+			<div className={styles.view} onClick={clickView}>
 				<div className={styles.toolbar}>
 					<div className={styles.closeIcon} onClick={close}>
 						<svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" width="16" height="16">

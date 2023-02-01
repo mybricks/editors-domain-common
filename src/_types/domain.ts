@@ -23,3 +23,14 @@ export interface Field {
 	/** 是否为主键 */
 	isPrimaryKey: boolean;
 }
+
+export interface Condition {
+	/** 字段 ID */
+	fieldId: string;
+	/** 字段名 */
+	fieldName: string;
+	/** 操作符 */
+	operator?: string;
+	/** 条件语句值 */
+	value: string;
+}
