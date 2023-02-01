@@ -1,0 +1,48 @@
+@import '../theme';
+
+.editor {
+  background-color: #FFF;
+  border-radius: 3px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+
+  flex: 1;
+  //border: 1px solid #EEE;
+  cursor: pointer;
+  font-style: italic;
+  color: #AAA;
+  overflow: hidden;
+  height: 30px;
+  padding: 0 10px;
+  //justify-content: center;
+
+  span {
+    display: inline-block;
+  }
+
+  span:first-child {
+    width: 40px;
+  }
+
+  .tt {
+    overflow: hidden;
+    color: #333;
+    font-style: normal;
+    padding-left: 2px;
+    word-wrap: break-word;
+    //line-height: 14px;
+  }
+
+  .type {
+    color: #AAA;
+    font-style: italic;
+    margin-left: auto;
+    padding-top: 5px;
+    width: 18px;
+
+    svg {
+      max-width: 16px;
+    }
+  }
+}

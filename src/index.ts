@@ -1,11 +1,13 @@
 import {typeCheck} from "./utils";
 import EditorSelect from "./select";
 import EditorInsert from "./insert";
+import EditorUpdate from './update'
 
 
 const EditorMap: any = {
   'DOMAIN.DBSELECT': EditorSelect,
   'DOMAIN.DBINSERT': EditorInsert,
+  'DOMAIN.DBUPDATE': EditorUpdate,
 }
 
 function Editors(editConfig, extOpts): any {
@@ -15,9 +17,9 @@ function Editors(editConfig, extOpts): any {
   } catch (err) {
     console.error(err);
   }
-	
+
   if (typeCheck(editor, "function")) {
-    return editor({ editConfig }, extOpts);
+    return editor({editConfig}, extOpts);
   }
 
   if (typeCheck(editor, "object") && typeCheck(editor.render, "function")) {
