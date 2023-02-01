@@ -1,12 +1,14 @@
 import { typeCheck } from './_utils';
 import EditorSelect from './select';
 import EditorInsert from './insert';
+import EditorUpdate from './update';
 import { AnyType } from './_types';
 
 
 const EditorMap: Record<string, unknown> = {
 	'DOMAIN.DBSELECT': EditorSelect,
 	'DOMAIN.DBINSERT': EditorInsert,
+	'DOMAIN.DBUPDATE': EditorUpdate,
 };
 
 function Editors(editConfig: { type: string; render: AnyType; }, extOpts: Record<string, unknown>): AnyType {
