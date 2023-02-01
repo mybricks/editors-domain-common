@@ -1,7 +1,8 @@
 import React from 'react';
-import { evt, useComputed, useObservable } from '@mybricks/rxui';
+import { useComputed, useObservable } from '@mybricks/rxui';
 import QueryCtx from './QueryCtx';
 import Where from './Where';
+import PopView from '../_common/pop-view';
 
 // @ts-ignore
 import css from './QueryEditor.less';
@@ -32,25 +33,17 @@ export default function QueryEditor({ domainModel, paramSchema, value, close }) 
 	}, { to: 'children' });
 
 	return (
-	  <div className={css.bg} onClick={close}>
-		  <div className={css.view} onClick={evt(ctx.blurAll).stop}>
-			  <div className={css.toolbar}>
-				  <button onClick={ctx.save}>确定</button>
-			  </div>
-			
-			  <div className={css.main}>
-				  <SelectFrom/>
-				  {
-					  ctx.nowValue.entity ? (
-						  <>
-							  <Where/>
-							  <Limit/>
-						  </>
-					  ) : null
-				  }
-			  </div>
-		  </div>
-	  </div>
+		<PopView close={close} save={ctx.save}>
+		  <SelectFrom/>
+		  {
+			  ctx.nowValue.entity ? (
+				  <>
+					  <Where/>
+					  <Limit/>
+				  </>
+			  ) : null
+		  }
+		</PopView>
 	);
 }
 

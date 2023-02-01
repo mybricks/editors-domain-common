@@ -1,0 +1,69 @@
+@import '../../theme';
+
+.bg {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 1000;
+  background-color: rgba(255, 255, 255, 0.5);
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.view {
+  border-left: 1px solid #CCC;
+  width: 500px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  background: #FFF;
+
+  .toolbar {
+    height: 42px;
+    background: #FAFAFA;
+    //margin-bottom: -1px;
+    position: relative;
+    z-index: 12233;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px;
+    border-bottom: 1px solid #EEE;
+
+    .closeIcon {
+      opacity: 0.5;
+      width: 16px;
+      height: 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      svg {
+        width: 12px;
+        height: 12px;
+      }
+
+      &:hover {
+        opacity: 1;
+      }
+    }
+
+    button {
+      background: @color-primary;
+      color: #FFF;
+      font-weight: bold;
+      padding: 1px 8px;
+      border-radius: 3px;
+      height: 22px;
+    }
+  }
+
+  .main {
+    flex: 1;
+    overflow: auto;
+  }
+}

@@ -1,6 +1,6 @@
 import { FieldBizType, FieldDBType } from '../_constants/field';
 
-interface Entity {
+export interface Entity {
 	/** 表 ID，在前端编辑页使用 */
 	id: string;
 	/** 表名 */
@@ -20,4 +20,6 @@ export interface Field {
 	dbType: FieldDBType;
 	typeLabel: string;
 	desc?: string;
+	/** 是否为主键 */
+	isPrimaryKey: boolean;
 }
