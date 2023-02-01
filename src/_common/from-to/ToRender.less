@@ -1,4 +1,4 @@
-@import '../theme';
+@import '../../theme';
 
 .draging {
   user-select: none !important;
@@ -11,8 +11,7 @@
   //padding: 5px;
 
   .tt {
-    text-align: right;
-    padding-right: 40px;
+    padding-left: 15px;
   }
 
   .invalid {
@@ -41,17 +40,13 @@
   }
 
   .item {
-    margin-right: 20px;
-    padding: 0 5px 0 5px;
+    margin-left: 20px;
+    padding: 0 5px 0 15px;
     position: relative;
-    display: flex;
-    flex-direction: column;
-    /* justify-content: flex-end; */
-    align-items: flex-end;
 
     &:before {
       position: absolute;
-      right: -9px;
+      left: 0;
       top: 0;
       bottom: 0;
       border-left: 1px solid #EEE;
@@ -60,9 +55,9 @@
 
     &:last-child {
       &:before {
-        right: -9px;
+        left: 0;
         top: 0;
-        height: 17px;
+        height: 16px;
         border-left: 1px solid #EEE;
         content: '';
       }
@@ -71,11 +66,10 @@
     .keyName {
       position: relative;
       display: flex;
-      flex-direction: row-reverse;
       align-items: center;
-      height: 23px;
+      height: 32px;
+      width: fit-content;
       padding: 0 5px;
-      margin: 4px 0;
       border-radius: 3px;
       white-space: nowrap;
 
@@ -88,9 +82,9 @@
 
       &:before {
         position: absolute;
-        right: -14px;
+        left: -14px;
         width: 12px;
-        top: 13px;
+        top: 15px;
         border-bottom: 1px solid #EEE;
         content: '';
       }
@@ -100,21 +94,14 @@
         width: 9px;
         height: 9px;
         border-radius: 9px;
-        border: 1px solid transparent;
+        border: 1px solid transparent;;
         cursor: move;
-        right: -7px;
-        top: 9px;
       }
-
-      //
-      //.done{
-      //  background: #27b106 !important;
-      //}
 
       .typeName {
         font-style: italic;
         color: #AAA;
-        padding-right: 3px;
+        padding-left: 3px;
       }
 
       button {
@@ -129,18 +116,10 @@
 
     .done {
       //color: @color-primary !important;
-
+      //
       //.typeName {
       //  color: #777 !important;
       //}
-    }
-
-    .match {
-      outline: 1px solid @color-primary;
-
-      &:hover {
-        background: #F5F5F5;
-      }
     }
   }
 

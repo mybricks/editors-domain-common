@@ -1,0 +1,81 @@
+@import '../../theme';
+.content {
+  padding-top: 20px;
+  flex: 1;
+  overflow: auto;
+  user-select: text;
+
+  .scroll {
+    position: relative;
+    height: fit-content;
+    min-height: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+
+    .from {
+      //width: 250px;
+    }
+
+    .to {
+      //width: 250px;
+    }
+
+    .relations {
+      pointer-events: none;
+      //flex: 1;
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      left: 0;
+      top: 0;
+      overflow: hidden;
+
+
+      svg {
+        width: 100%;
+        height: 100%;
+
+        polyline {
+          cursor: pointer;
+          //pointer-events: auto;
+          //shape-rendering: crispEdges;
+          stroke: @color-primary;
+          stroke-width: 1px;
+        }
+      }
+
+      .conMenu {
+        display: none;
+        pointer-events: auto;
+        position: absolute;
+        background: #FFF;
+        z-index: 1000;
+        width: 80px;
+        //border: 1px solid #DDD;
+        box-shadow: #ccc 1px 2px 6px;
+
+        .menuItem {
+          padding: 5px 8px;
+          cursor: pointer;
+
+          &:hover {
+            background: #F7F7F7;
+          }
+        }
+      }
+    }
+  }
+
+  .mover {
+    background: #FFF;
+    border-radius: 5px;
+    min-height: 25px;
+    outline: 1px solid @color-primary;
+    padding: 5px 8px;
+    position: absolute;
+    z-index: 100;
+    width: fit-content;
+    user-select: none !important;
+  }
+}

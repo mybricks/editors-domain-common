@@ -2,29 +2,32 @@ import css from './FromRender.less'
 import {IgnoreObservable, observe, useComputed, useObservable} from "@mybricks/rxui";
 import React, {useEffect, useState} from "react";
 
-import {getPinTypeStyle, isTypeMatch, isXpathMatch} from "./utils";
-import {XPATH_ARRAY} from "../constants";
-import {getTypeTitleBySchema} from "../utils";
-import InsertCtx from "./InsertCtx";
+import {getPinTypeStyle, isTypeMatch, isXpathMatch, getTypeTitleBySchema} from "./utils";
+import Ctx from "./Ctx";
+import {XPATH_ARRAY} from "./constants";
+
 
 class MyCtx {
+  title: string
+
   @IgnoreObservable
   schema: {}
 }
 
-let edtCtx: InsertCtx
+let edtCtx: Ctx
+let myCtx: MyCtx
 
-export default function FromRender({schema}: { schema: {} }) {
-  edtCtx = observe(InsertCtx, {from: 'parents'})
+export default function FromRender({title, schema}: { schema: {} }) {
+  edtCtx = observe(Ctx, {from: 'parents'})
 
-  const ctx = useObservable(MyCtx, next => {
-    next({schema})
+  myCtx = useObservable(MyCtx, next => {
+    next({title, schema})
   })
 
-  return ctx.schema ? (
+  return myCtx.schema ? (
     <div className={`${css.schema} ${edtCtx.mover ? css.draging : ''}`}>
       {/*<div className={css.tt}>参数</div>*/}
-      <ProItem val={ctx.schema} xpath={''} root={true}/>
+      <ProItem val={myCtx.schema} xpath={''} root={true}/>
     </div>
   ) : null
 }
@@ -84,7 +87,7 @@ function ProItem({val, keyName, xpath, root}: { val, keyName?, xpath?, root? }) 
     )
   }
 
-  const _hasCon = edtCtx.nowValue.conAry.find(con => con.from === xpath)
+  const _hasCon = edtCtx.conAry.find(con => con.from === xpath)
 
   const [hasCon, setHasCon] = useState(_hasCon)
 
@@ -120,7 +123,7 @@ function ProItem({val, keyName, xpath, root}: { val, keyName?, xpath?, root? }) 
                  }}></span>
         {keyName}
         <span className={css.typeName} style={{color: st.strokeColor}}>
-          {root ? '参数' : `（${getTypeTitleBySchema(val)}）`}
+          {root ? myCtx.title : `（${getTypeTitleBySchema(val)}）`}
         </span>
       </div>
       {jsx}
