@@ -18,11 +18,53 @@ class WhereContext {
 		limit: number;
 	} | undefined;
 	whereEle: HTMLElement | undefined;
-	conditions: Condition[] = [];
 	
 	popEle: HTMLElement | undefined;
 	popParams: { condition: AnyType; field: AnyType } | undefined;
 	paramSchema: Record<string, unknown> = {};
+	
+	addBlur: ((fn: () => void) => void) | undefined;
+	
+	addCondition(params: { isGroup: boolean; parentCondition: Condition }) {
+		const { isGroup, parentCondition } = params;
+		
+		if (parentCondition) {
+			parentCondition.conditions!.push(
+				(isGroup ? {
+					fieldId: String(Date.now()),
+					fieldName: '条件组',
+					conditions: [],
+					whereJoiner: SQLWhereJoiner.AND,
+				} : {
+					entityId: '',
+					fieldId: '',
+					fieldName: '',
+					operator: void 0,
+					value: ''
+				}) as unknown as Condition
+			);
+		} else {
+			this.nowValue!.conditions.conditions!.push(
+				(isGroup ? {
+					fieldId: String(Date.now()),
+					fieldName: '条件组',
+					conditions: [],
+					whereJoiner: SQLWhereJoiner.AND,
+				} : {
+					fieldId: '',
+					fieldName: '',
+					operator: void 0,
+					value: ''
+				}) as unknown as Condition
+			);
+		}
+	}
+	
+	removeCondition(params: { index: number; parentCondition: Condition }) {
+		const { index, parentCondition } = params;
+		
+		parentCondition.conditions = parentCondition.conditions?.filter((_, idx) => idx !== index);
+	}
 }
 
 let whereContext: WhereContext;
@@ -31,18 +73,13 @@ interface WhereProps {
 	nowValue: AnyType;
 	paramSchema: AnyType;
 	addBlur(fn: () => void): void;
-	addCondition(params: Record<string, unknown>): void;
-	removeCondition(params: Record<string, unknown>): void;
 }
 
 const Where: FC<WhereProps> = props => {
-	const { nowValue, addBlur, addCondition, removeCondition, paramSchema } = props;
+	const { nowValue, addBlur, paramSchema } = props;
 	whereContext = useObservable(WhereContext, next => {
 		next({
 			nowValue,
-			addCondition,
-			removeCondition,
-			conditions: JSON.parse(JSON.stringify(nowValue.conditions)),
 			paramSchema,
 			addBlur,
 		});
@@ -155,13 +192,13 @@ const Conditions: FC = () => {
 					</div>
 				) : (
 					<div key={index} className={styles.condition}>
-						<input
-							className={styles.checkbox}
-							type="checkbox"
-							checked={condition.checkExist}
-							onClick={() => condition.checkExist = !condition.checkExist}
-						/>
-						<label>判空</label>
+						{/*<input*/}
+						{/*	className={styles.checkbox}*/}
+						{/*	type="checkbox"*/}
+						{/*	checked={condition.checkExist}*/}
+						{/*	onClick={() => condition.checkExist = !condition.checkExist}*/}
+						{/*/>*/}
+						{/*<label>判空</label>*/}
 						<select
 							className={styles.fieldSelect}
 							value={condition.entityId ? `${condition.entityId}&&${condition.fieldId}` : ''}
@@ -274,7 +311,7 @@ const Conditions: FC = () => {
 	
 	return (
 		<div className={styles.conditions}>
-			{renderConditions(nowValue?.conditions ? [nowValue?.conditions] : [], null)}
+			{renderConditions(whereContext.nowValue?.conditions ? [whereContext.nowValue?.conditions] : [], null)}
 			{popParamValues}
 		</div>
 	);

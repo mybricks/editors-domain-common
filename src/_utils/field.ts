@@ -1,4 +1,4 @@
-import {FieldDBType, SQLOperator} from '../_constants/field';
+import { FieldDBType, SQLOperator } from '../_constants/field';
 
 /** 获取数据库字段类型 schema */
 export const getFieldSchema = (dbType: string) => {
@@ -28,10 +28,10 @@ export const getFieldConditionAry = (dbType: string): Array<{ label: string; val
 		return [
 			{ label: '等于(=)', value: '=' },
 			{ label: '不等于(<>)', value: '<>' },
-			{ label: '匹配(LIKE)', value: 'like' },
-			{ label: '不匹配(NOT LIKE)', value: 'not like' },
-			{ label: '包含(IN)', value: 'in' },
-			{ label: '不包含(NOT IN)', value: 'not in' },
+			{ label: '匹配(LIKE)', value: 'LIKE' },
+			{ label: '不匹配(NOT LIKE)', value: 'NOT LIKE' },
+			{ label: '包含(IN)', value: 'IN' },
+			{ label: '不包含(NOT IN)', value: 'NOT IN' },
 		];
 	}
 	case FieldDBType.BIGINT: {
@@ -40,18 +40,18 @@ export const getFieldConditionAry = (dbType: string): Array<{ label: string; val
 			{ label: '不等于(<>)', value: '<>' },
 			{ label: '大于等于(>=)', value: '>=' },
 			{ label: '小于等于(<=)', value: '<=' },
-			{ label: '包含(IN)', value: 'in' },
-			{ label: '不包含(NOT IN)', value: 'not in' },
+			{ label: '包含(IN)', value: 'IN' },
+			{ label: '不包含(NOT IN)', value: 'NOT IN' },
 		];
 	}
 	case FieldDBType.MEDIUMTEXT: {
 		return [
 			{ label: '等于(=)', value: '=' },
 			{ label: '不等于(<>)', value: '<>' },
-			{ label: '匹配(LIKE)', value: 'like' },
-			{ label: '不匹配(NOT LIKE)', value: 'not like' },
-			{ label: '包含(IN)', value: 'in' },
-			{ label: '不包含(NOT IN)', value: 'not in' },
+			{ label: '匹配(LIKE)', value: 'LIKE' },
+			{ label: '不匹配(NOT LIKE)', value: 'NOT LIKE' },
+			{ label: '包含(IN)', value: 'IN' },
+			{ label: '不包含(NOT IN)', value: 'NOT IN' },
 		];
 	}
 	default: return [];

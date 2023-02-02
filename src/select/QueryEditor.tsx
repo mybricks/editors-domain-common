@@ -67,9 +67,6 @@ export default function QueryEditor({ domainModel, paramSchema, value, close }: 
 						  addBlur={ctx.addBlur}
 						  nowValue={ctx.nowValue}
 						  paramSchema={ctx.paramSchema}
-						  // @ts-ignore
-						  addCondition={ctx.addCondition}
-						  removeCondition={ctx.removeCondition}
 					  />
 					  <Limit/>
 				  </>

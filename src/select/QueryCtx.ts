@@ -96,14 +96,14 @@ export default class QueryCtx {
 	}
 
 	setEntity(entity: AnyType) {
-		const ent = entity.toJSON();
-		const index = this.nowValue.entities?.findIndex(e => e.id === entity.id);
-		
-		if (index >= 0) {
-			this.nowValue.entities.splice(index, 1);
-		} else {
-			this.nowValue.entities.push(ent);
-		}
+		// const index = this.nowValue.entities?.findIndex(e => e.id === entity.id);
+		//
+		// if (index >= 0) {
+		// 	this.nowValue.entities.splice(index, 1);
+		// } else {
+		// 	this.nowValue.entities.push(entity.toJSON());
+		// }
+		this.nowValue.entities = [entity.toJSON()];
 	}
 
 	setField(entity: T_Entity, fieldId: string) {
@@ -131,46 +131,5 @@ export default class QueryCtx {
 				})
 				.filter(Boolean);
 		}
-	}
-
-	addCondition(params: { isGroup: boolean; parentCondition: T_Condition }) {
-		const { isGroup, parentCondition } = params;
-		
-		if (parentCondition) {
-			parentCondition.conditions!.push(
-				isGroup ? {
-					fieldId: String(Date.now()),
-					fieldName: '条件组',
-					conditions: [],
-					whereJoiner: SQLWhereJoiner.AND,
-				} : {
-					entityId: '',
-					fieldId: '',
-					fieldName: '',
-					operator: void 0,
-					value: ''
-				}
-			);
-		} else {
-			this.nowValue.conditions.conditions!.push(
-				isGroup ? {
-					fieldId: String(Date.now()),
-					fieldName: '条件组',
-					conditions: [],
-					whereJoiner: SQLWhereJoiner.AND,
-				} : {
-					fieldId: '',
-					fieldName: '',
-					operator: void 0,
-					value: ''
-				}
-			);
-		}
-	}
-
-	removeCondition(params: { index: number; parentCondition: T_Condition }) {
-		const { index, parentCondition } = params;
-		
-		parentCondition.conditions = parentCondition.conditions?.filter((_, idx) => idx !== index);
 	}
 }
