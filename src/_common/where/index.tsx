@@ -103,6 +103,23 @@ const Conditions: FC = () => {
 		whereContext.removeCondition?.(params);
 	}, []);
 	
+	const conditionFieldIds = useComputed(() => {
+		const fieldIds: string[] = [];
+		const getFieldId = (conditions: Condition[]) => {
+			conditions.forEach((con: Condition) => {
+				if (con.conditions) {
+					getFieldId(con.conditions);
+				} else {
+					fieldIds.push(con.fieldId);
+				}
+			});
+		};
+		
+		getFieldId(whereContext.nowValue?.conditions ? [whereContext.nowValue?.conditions] : []);
+		
+		return fieldIds;
+	});
+	
 	const renderConditions = useComputed(() => {
 		return (conditions: Condition[], parentCondition: Condition | null) => {
 			return conditions.map((condition, index) => {
@@ -139,7 +156,7 @@ const Conditions: FC = () => {
 					fieldSelectOptions.push(
 						...entity?.fieldAry.map((field) => {
 							return (
-								<option key={field.id} value={`${entity.id}&&${field.id}`}>
+								<option key={field.id} value={`${entity.id}&&${field.id}`} disabled={conditionFieldIds.includes(field.id)}>
 									{entity?.name}.{field.name}
 								</option>
 							);
