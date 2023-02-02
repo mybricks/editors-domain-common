@@ -1,4 +1,4 @@
-import { FieldBizType, FieldDBType } from '../_constants/field';
+import {FieldBizType, FieldDBType, SQLWhereJoiner} from '../_constants/field';
 
 export interface Entity {
 	/** 表 ID，在前端编辑页使用 */
@@ -27,10 +27,15 @@ export interface Field {
 export interface Condition {
 	/** 字段 ID */
 	fieldId: string;
+	/** 实体ID */
+	entityId: string;
 	/** 字段名 */
 	fieldName: string;
 	/** 操作符 */
 	operator?: string;
 	/** 条件语句值 */
 	value: string;
+	checkExist: boolean;
+	conditions: Condition[];
+	whereJoiner: SQLWhereJoiner;
 }

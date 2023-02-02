@@ -4,16 +4,14 @@
   display: flex;
   flex-direction: row;
   align-items: center;
-
   flex: 1;
-  //border: 1px solid #EEE;
   cursor: pointer;
   font-style: italic;
   color: #AAA;
   overflow: hidden;
-  height: 30px;
-  padding: 0 10px;
-  //justify-content: center;
+  min-height: 30px;
+  height: auto;
+  padding: 10px;
 
   span {
     display: inline-block;
@@ -21,6 +19,8 @@
 
   span:first-child {
     width: 40px;
+    flex-shrink: 0;
+    margin-right: 4px;
   }
 
   .tt {
@@ -29,6 +29,7 @@
     font-style: normal;
     padding-left: 2px;
     word-wrap: break-word;
+    white-space: pre-wrap;
     //line-height: 14px;
   }
 

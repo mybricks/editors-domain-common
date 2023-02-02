@@ -1,10 +1,12 @@
-import React from 'react';
+import React, { ReactNode } from 'react';
 // @ts-ignore
 import { evt, useComputed, useObservable } from '@mybricks/rxui';
 import QueryCtx from './QueryCtx';
 import Where from '../_common/where';
 import PopView from '../_common/pop-view';
 import { AnyType } from '../_types';
+import { SQLWhereJoiner } from '../_constants/field';
+import { Entity, Field } from '../_types/domain';
 
 import css from './QueryEditor.less';
 
@@ -19,10 +21,32 @@ export default function QueryEditor({ domainModel, paramSchema, value, close }: 
 		} else {
 			val = {
 				whereJoiner: 'and',
-				conditions: [],
+				conditions: {
+					fieldId: Date.now(),
+					fieldName: '条件组',
+					whereJoiner: SQLWhereJoiner.AND,
+					conditions: []
+				},
+				entities: [],
 				limit: 100
 			};
 		}
+		
+		/** 实体信息可能存在变更，每次使用最新的实体信息 */
+		val.entities = val.entities.map((entity: Entity) => {
+			const originEntity = domainModel.entityAry.find((e: Entity) => e.id === entity.id);
+			
+			if (originEntity) {
+				return {
+					...originEntity,
+					fieldAry: entity.fieldAry.map((field: Field) => {
+						const originField = originEntity.fieldAry.find((f: Field) => f.id === field.id);
+						
+						return originField ? { ...originField } : undefined;
+					}).filter(Boolean),
+				};
+			}
+		}).filter(Boolean);
 
 		next({
 			domainModel,
@@ -37,7 +61,7 @@ export default function QueryEditor({ domainModel, paramSchema, value, close }: 
 		<PopView close={close} save={ctx.save} clickView={evt(ctx.blurAll).stop}>
 		  <SelectFrom/>
 		  {
-			  ctx.nowValue.entity ? (
+			  ctx.nowValue.entities?.length ? (
 				  <>
 					  <Where
 						  addBlur={ctx.addBlur}
@@ -60,26 +84,27 @@ function SelectFrom() {
 	const entityAry = ctx.domainModel.entityAry;
 
 	const fields = useComputed(() => {
-		const nowEntity = nowValue.entity;
-		if (nowEntity) {
-			const oriEntity = entityAry.find(et => et.id === nowEntity.id);
-			return (
-				oriEntity.fieldAry.map(field => {
-					const checked = nowEntity.fieldAry.find(f => f.id === field.id) ? true : false;
-
+		const res: ReactNode[] = [];
+		
+		if (nowValue.entities.length) {
+			nowValue.entities.map((entity) => {
+				const originEntity = entityAry.find((et: Entity) => et.id === entity.id);
+				
+				res.push(...originEntity.fieldAry.map((field: Field) => {
+					const checked = Boolean(entity.fieldAry.find(f => f.id === field.id));
+					
 					return (
-						<div key={field.id}
-							className={`${css.field}`}>
-							<input type={'checkbox'}
-								checked={checked}
-								onChange={e => ctx.setField(field.id)}/>
-							{field.name}
+						<div key={field.id} className={css.field}>
+							<input type="checkbox" checked={checked} onChange={() => ctx.setField(entity, field.id)} />
+							{entity.name}.{field.name}
 							<span>{field.desc}</span>
 						</div>
 					);
-				})
-			);
+				}));
+			});
 		}
+		
+		return res;
 	});
 
 	return (
@@ -88,11 +113,15 @@ function SelectFrom() {
 			<div className={css.select}>
 				<div className={css.tables}>
 					{
-						entityAry.map(et => {
+						entityAry.map((et: Entity) => {
+							const selected = Boolean(nowValue.entities?.find(entity => entity.id === et.id));
+							
 							return (
-								<div key={et.id}
-									className={`${css.table} ${nowValue.entity?.id === et.id ? css.selected : ''}`}
-									onClick={e => ctx.setEntity(et)}>
+								<div
+									key={et.id}
+									className={`${css.table} ${selected ? css.selected : ''}`}
+									onClick={() => ctx.setEntity(et)}
+								>
 									{et.name}
 									<span>{et.desc}</span>
 								</div>
@@ -118,9 +147,7 @@ function Limit() {
         3. 限制数量
 				<select className={css.selectDom}
 					value={nowValue.limit}
-					onChange={e => {
-						nowValue.limit = e.target.value;
-					}}>
+					onChange={e => nowValue.limit = e.target.value}>
 					<option value={10}>10条数据</option>
 					<option value={100}>100条数据</option>
 					<option value={500}>500条数据</option>

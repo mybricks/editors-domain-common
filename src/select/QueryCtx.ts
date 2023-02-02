@@ -1,5 +1,6 @@
-import { getValueByFieldType } from '../_utils/field';
 import { AnyType } from '../_types';
+import { SQLWhereJoiner } from '../_constants/field';
+import { spliceWhereSQLByConditions } from '../_utils/sql';
 
 export type T_Field = {
   id,
@@ -16,10 +17,16 @@ export type T_Entity = {
 }
 
 export type T_Condition = {
-  fieldId,
-  fieldName,
-  operator,
-  value
+	/** 是否判断数据为空，为空时条件不生效 */
+	checkExist?: boolean;
+  fieldId: string;
+	entityId?: string;
+  fieldName: string;
+  operator?: string;
+  value?: string;
+	
+	conditions?: T_Condition[];
+	whereJoiner?: SQLWhereJoiner;
 }
 
 export default class QueryCtx {
@@ -36,9 +43,8 @@ export default class QueryCtx {
 	nowValue: {
     desc: string
     sql: string
-    entity: T_Entity,
-    whereJoiner,
-    conditions: T_Condition[],
+    entities: T_Entity[],
+    conditions: T_Condition,
     limit
   };
 
@@ -59,96 +65,112 @@ export default class QueryCtx {
 	}
 
 	save() {
-		const nowValue = this.nowValue;
-		let desc;
+		const { entities, conditions, limit } = this.nowValue;
+		let desc = '';
 
-		if (nowValue.entity && nowValue.entity.fieldAry.length > 0) {
+		if (entities?.length > 0) {
 			const sql = [];
-			const fAry = nowValue.entity.fieldAry.map(field => {
-				return field.name;
-			}).join(',');
+			let fieldList: string[] = [];
+			/** 字段列表 */
+			entities.forEach((entity) => {
+				desc = `${desc ? `${desc};\n` : ''}${entity.name} 的 ${entity.fieldAry.map(field => field.name).join(', ')}`;
+				
+				fieldList.push(...entity.fieldAry.map(field => `${entity.name}.${field.name}`));
+			}, []);
 
-			desc = `${nowValue.entity.name} 的 ${fAry}`;
+			/** 前置 sql */
+			sql.push(`SELECT ${fieldList.join(', ')} FROM ${entities.map(entity => entity.name).join(', ')}`);
 
-			sql.push(`SELECT ${fAry} FROM ${nowValue.entity.name}`);
+			sql.push(spliceWhereSQLByConditions([conditions as AnyType], entities as AnyType));
 
-			if (nowValue.conditions.length > 0) {
-				const wheres = nowValue.conditions.map(con => {
-					if (con.value !== void 0) {
-						const oriField = this.getOriField(con.fieldId);
-						if (oriField) {
-							const val = getValueByFieldType(oriField.dbType, con.value);
-
-							return con.fieldName + con.operator + val;
-						}
-					}
-				}).filter(w => w);
-
-				if (wheres.length > 0) {
-					sql.push(`WHERE ${wheres.join(` ${nowValue.whereJoiner} `)}`);
-				}
-			}
-
-			sql.push(`LIMIT ${nowValue.limit}`);
+			sql.push(`LIMIT ${limit}`);
 
 			this.nowValue.sql = sql.join(' ');
 		} else {
-			this.nowValue.sql = void 0;
+			this.nowValue.sql = '';
 		}
 		this.nowValue.desc = desc;
-
 		this.value.set(this.nowValue);
 
 		this.close();
 	}
 
-	getOriEntity() {
-		const nowEntity = this.nowValue.entity;
-		if (nowEntity) {
-			return this.domainModel.entityAry.find(e => e.id === nowEntity.id);
-		}
-	}
-
-	getOriField(fieldId) {
-		const oriEntity = this.getOriEntity();
-		if (oriEntity) {
-			return oriEntity.fieldAry.find(e => e.id === fieldId);
-		}
-	}
-
-	setEntity(entity) {
+	setEntity(entity: AnyType) {
 		const ent = entity.toJSON();
-		this.nowValue.entity = ent;
+		const index = this.nowValue.entities?.findIndex(e => e.id === entity.id);
+		
+		if (index >= 0) {
+			this.nowValue.entities.splice(index, 1);
+		} else {
+			this.nowValue.entities.push(ent);
+		}
 	}
 
-	setField(fieldId) {
-		const nowEntity = this.nowValue.entity;
-		const oriEntity = this.domainModel.entityAry.find(e => e.id === nowEntity.id);
-
-		if (nowEntity.fieldAry.find(f => f.id === fieldId)) {//exist
+	setField(entity: T_Entity, fieldId: string) {
+		const oriEntity = this.domainModel.entityAry.find((e: T_Entity) => e.id === entity.id);
+		const nowEntity = this.nowValue.entities.find(e => e.id === entity.id);
+		
+		if (!nowEntity) {
+			return;
+		}
+		
+		const field = nowEntity.fieldAry.find(f => f.id === fieldId);
+		
+		if (field) {
 			nowEntity.fieldAry = nowEntity.fieldAry.filter(f => f.id !== fieldId);
 		} else {
-			nowEntity.fieldAry = oriEntity.fieldAry.map(oriF => {
-				let field = nowEntity.fieldAry.find(f => f.id === oriF.id);
-				if (field) {//exits
-					return field;
-				} else if (oriF.id === fieldId) {
-					return oriEntity.fieldAry.find(f => f.id === fieldId).toJSON() as any;
-				}
-			}).filter(f => f);
+			nowEntity.fieldAry = oriEntity.fieldAry
+				.map((oriF: T_Field) => {
+					let field = nowEntity.fieldAry.find(f => f.id === oriF.id);
+				
+					if (field) {//exits
+						return field;
+					} else if (oriF.id === fieldId) {
+						return (oriF as AnyType).toJSON() as T_Field;
+					}
+				})
+				.filter(Boolean);
 		}
 	}
 
-	addCondition(field: T_Field) {
-		this.nowValue.conditions.push({
-			fieldId: field.id,
-			fieldName: field.name,
-			operator: void 0,
-			value: ''
-		});
+	addCondition(params: { isGroup: boolean; parentCondition: T_Condition }) {
+		const { isGroup, parentCondition } = params;
+		
+		if (parentCondition) {
+			parentCondition.conditions!.push(
+				isGroup ? {
+					fieldId: String(Date.now()),
+					fieldName: '条件组',
+					conditions: [],
+					whereJoiner: SQLWhereJoiner.AND,
+				} : {
+					entityId: '',
+					fieldId: '',
+					fieldName: '',
+					operator: void 0,
+					value: ''
+				}
+			);
+		} else {
+			this.nowValue.conditions.conditions!.push(
+				isGroup ? {
+					fieldId: String(Date.now()),
+					fieldName: '条件组',
+					conditions: [],
+					whereJoiner: SQLWhereJoiner.AND,
+				} : {
+					fieldId: '',
+					fieldName: '',
+					operator: void 0,
+					value: ''
+				}
+			);
+		}
 	}
 
-	removeCondition(fieldId) {
-		this.nowValue.conditions = this.nowValue.conditions.filter(con => con.fieldId !== fieldId);
+	removeCondition(params: { index: number; parentCondition: T_Condition }) {
+		const { index, parentCondition } = params;
+		
+		parentCondition.conditions = parentCondition.conditions?.filter((_, idx) => idx !== index);
 	}
 }
