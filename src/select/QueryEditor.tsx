@@ -140,7 +140,7 @@ function SelectFrom() {
 									className={`${css.table} ${selected ? css.selected : ''}`}
 									onClick={() => ctx.setEntity(et)}
 								>
-									{et.name}
+									<span>{et.name}</span>
 									<span>{et.desc}</span>
 								</div>
 							);
@@ -188,7 +188,7 @@ const Offset = () => {
 	
 	const popParamValues = useMemo(() => {
 		if (showPop) {
-			const params = ctx.paramSchema.properties;
+			const params = ctx.paramSchema?.properties;
 			const po = getPosition(popEle.current, containerEle.current);
 			
 			// @ts-ignore
@@ -197,7 +197,7 @@ const Offset = () => {
 			return (
 				<div className={css.popMenu} style={style}>
 					{
-						Object.keys(params as object).map(param => {
+						Object.keys((params || {}) as object).map(param => {
 							return (
 								<div key={param} className={`${css.item}`} onClick={() => addExpression(`{params.${param}}`)}>
 									params.{param}

@@ -297,7 +297,7 @@ const Conditions: FC = () => {
 	
 	const popParamValues = useComputed(() => {
 		if (whereContext.popParams) {
-			const params = whereContext.paramSchema.properties;
+			const params = whereContext.paramSchema?.properties;
 			const po = getPosition(whereContext.popEle, whereContext.whereEle);
 			const popNodes: ReactNode[] = [];
 			
@@ -322,7 +322,7 @@ const Conditions: FC = () => {
 			return (
 				<div className={styles.popMenu} style={style}>
 					{
-						Object.keys(params as object).map(param => {
+						Object.keys((params || {}) as object).map(param => {
 							return (
 								<div key={param} className={`${styles.item}`} onClick={() => addExpression(`{params.${param}}`)}>
 									params.{param}

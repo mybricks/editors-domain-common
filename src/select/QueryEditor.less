@@ -45,13 +45,28 @@
       align-items: center;
       border-radius: 3px;
       box-sizing: border-box;
+      flex-wrap: nowrap;
+      overflow: hidden;
+
+      & > span:first-of-type {
+        flex-shrink: 0;
+      }
+
+      & > span:last-of-type {
+        margin-left: 5px;
+        color: #999;
+        font-style: italic;
+        word-break: break-all;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        overflow: hidden;
+      }
     }
 
     .selected {
       outline: 2px solid #fa6400;
     }
   }
-
 
   .fields {
     flex: 1;
