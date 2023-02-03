@@ -56,7 +56,7 @@
   .fields {
     flex: 1;
     overflow: auto;
-    padding: 10px;
+    padding: 5px 0 10px 5px;
 
     .field {
       height: 30px;
@@ -75,11 +75,17 @@
         height: 16px;
         appearance: none;
         margin-right: 5px;
+        position: relative;
         //background-color: #DDD;
         //border-radius: 3px;
       }
 
       input:not(:checked):after {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 16px;
+        height: 16px;
         border-radius: 3px;
         content: "✓";
         font-size: 12px;
@@ -99,6 +105,50 @@
         text-align: center;
         padding: 0 2px;
       }
+    }
+  }
+}
+
+.offsetContainer {
+  position: relative;
+
+  .content {
+    padding: 0 12px;
+  }
+
+  .pageInput {
+    border-radius: 3px;
+    width: 120px;
+    border: 1px solid #DDD;
+    margin-left: 10px;
+    padding: 1px 5px;
+  }
+}
+
+.popMenu {
+  width: 250px;
+  background-color: #FFF;
+  min-height: 50px;
+  position: absolute;
+  z-index: 10000;
+  left: 220px;
+  border: 1px solid #DDD;
+  box-shadow: -3px 3px 7px #ddd;
+  padding: 5px 0;
+  max-height: 320px;
+  overflow: auto;
+
+  .item {
+    height: 28px;
+    padding: 0 15px 0 28px;
+    display: flex;
+    align-items: center;
+    color: #333;
+    font-style: normal;
+    position: relative;
+
+    &:hover {
+      background-color: #F7F7F7;
     }
   }
 }

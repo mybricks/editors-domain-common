@@ -22,6 +22,7 @@ class WhereContext {
 	popEle: HTMLElement | undefined;
 	popParams: { condition: AnyType; field: AnyType } | undefined;
 	paramSchema: Record<string, unknown> = {};
+	domainModal: AnyType;
 	
 	addBlur: ((fn: () => void) => void) | undefined;
 	
@@ -72,23 +73,25 @@ let whereContext: WhereContext;
 interface WhereProps {
 	nowValue: AnyType;
 	paramSchema: AnyType;
+	domainModal: AnyType;
 	addBlur(fn: () => void): void;
 }
 
 const Where: FC<WhereProps> = props => {
-	const { nowValue, addBlur, paramSchema } = props;
+	const { nowValue, addBlur, paramSchema, domainModal } = props;
 	whereContext = useObservable(WhereContext, next => {
 		next({
 			nowValue,
 			paramSchema,
 			addBlur,
+			domainModal,
 		});
 	});
 	
 	return (
 		<div className={styles.where} ref={ele => ele && (whereContext.whereEle = ele)}>
 			<div className={styles.segTitle}>
-				2. 筛选符合以下条件的数据（判空：当值不存在时该条件不生效）
+				2. 筛选符合以下条件的数据
 			</div>
 			<Conditions />
 		</div>
@@ -104,20 +107,22 @@ const Conditions: FC = () => {
 	}, []);
 	
 	const conditionFieldIds = useComputed(() => {
-		const fieldIds: string[] = [];
-		const getFieldId = (conditions: Condition[]) => {
-			conditions.forEach((con: Condition) => {
-				if (con.conditions) {
-					getFieldId(con.conditions);
-				} else {
-					fieldIds.push(con.fieldId);
-				}
-			});
+		return () => {
+			const fieldIds: string[] = [];
+			const getFieldId = (conditions: Condition[]) => {
+				conditions.forEach((con: Condition) => {
+					if (con.conditions) {
+						getFieldId(con.conditions);
+					} else {
+						fieldIds.push(con.fieldId);
+					}
+				});
+			};
+			
+			getFieldId(whereContext.nowValue?.conditions ? [whereContext.nowValue?.conditions] : []);
+			
+			return fieldIds;
 		};
-		
-		getFieldId(whereContext.nowValue?.conditions ? [whereContext.nowValue?.conditions] : []);
-		
-		return fieldIds;
 	});
 	
 	const renderConditions = useComputed(() => {
@@ -152,17 +157,23 @@ const Conditions: FC = () => {
 				
 				/** 字段选择时下拉列表 */
 				const fieldSelectOptions: ReactNode[] = [];
-				nowValue?.entities.forEach((entity: Entity) => {
-					fieldSelectOptions.push(
-						...entity?.fieldAry.map((field) => {
-							return (
-								<option key={field.id} value={`${entity.id}&&${field.id}`} disabled={conditionFieldIds.includes(field.id)}>
-									{entity?.name}.{field.name}
-								</option>
-							);
-						}) || []
-					);
-				});
+				whereContext.domainModal?.entityAry
+					.filter((oriEntity: Entity) => nowValue?.entities.find(e => e.id === oriEntity.id))
+					.forEach((entity: Entity) => {
+						fieldSelectOptions.push(
+							...entity?.fieldAry.map((field) => {
+								return (
+									<option
+										key={`${entity.id}&&${field.id}`}
+										value={`${entity.id}&&${field.id}`}
+										disabled={conditionFieldIds().includes(field.id)}
+									>
+										{entity?.name}.{field.name}
+									</option>
+								);
+							}) || []
+						);
+					});
 				
 				return condition.conditions ? (
 					<div key={condition.fieldId} className={styles.conditionGroupContainer}>
@@ -184,7 +195,7 @@ const Conditions: FC = () => {
 										whereContext.addCondition?.({ isGroup: false, parentCondition: condition });
 									}).stop}
 								>
-							新增条件
+									新增条件
 								</span>
 								<span
 									className={styles.addWhere}
@@ -192,7 +203,7 @@ const Conditions: FC = () => {
 										whereContext.addCondition?.({ isGroup: true, parentCondition: condition });
 									}).stop}
 								>
-							新增条件组
+									新增条件组
 								</span>
 							</div>
 							{
@@ -222,13 +233,13 @@ const Conditions: FC = () => {
 							/** 更新条件语句 */
 							onChange={(e) => {
 								const [entityId, fieldId] = e.target.value.split('&&');
-								const originEntity = nowValue?.entities.find((entity: Entity) => entity.id === entityId);
+								let originEntity = whereContext?.domainModal.entityAry.find((entity: Entity) => entity.id === entityId);
 								
 								if (originEntity) {
 									const originField = originEntity.fieldAry.find((field: Field) => field.id === fieldId);
 									
 									if (originField) {
-										condition.entityId = originEntity.id;
+										condition.entityId = entityId;
 										condition.fieldId = originField.id;
 										condition.fieldName = `${originEntity.name}.${originField.name}`;
 									}

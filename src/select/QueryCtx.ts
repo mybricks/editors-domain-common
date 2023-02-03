@@ -1,10 +1,10 @@
 import { AnyType } from '../_types';
-import { SQLWhereJoiner } from '../_constants/field';
+import { CountFieldId, SQLOrder, SQLWhereJoiner } from '../_constants/field';
 import { spliceWhereSQLByConditions } from '../_utils/sql';
 
 export type T_Field = {
   id,
-  isPrimaryKey,
+  isPrimaryKey?: boolean;
   name,
   desc
 }
@@ -32,7 +32,7 @@ export type T_Condition = {
 export default class QueryCtx {
 	editorEle:HTMLElement;
 
-	paramSchema:{};
+	paramSchema: Record<string, unknown>;
 
 	domainModel: AnyType;
 
@@ -45,7 +45,9 @@ export default class QueryCtx {
     sql: string
     entities: T_Entity[],
     conditions: T_Condition,
-    limit
+    limit: number | string;
+		pageIndex?: string;
+		orders: Array<{ fieldId: string; fieldName: string; order: SQLOrder; entityId: string }>;
   };
 
 	close;
@@ -65,33 +67,16 @@ export default class QueryCtx {
 	}
 
 	save() {
-		const { entities, conditions, limit } = this.nowValue;
+		const { entities } = this.nowValue;
 		let desc = '';
-
-		if (entities?.length > 0) {
-			const sql = [];
-			let fieldList: string[] = [];
-			/** 字段列表 */
-			entities.forEach((entity) => {
-				desc = `${desc ? `${desc};\n` : ''}${entity.name} 的 ${entity.fieldAry.map(field => field.name).join(', ')}`;
-				
-				fieldList.push(...entity.fieldAry.map(field => `${entity.name}.${field.name}`));
-			}, []);
-
-			/** 前置 sql */
-			sql.push(`SELECT ${fieldList.join(', ')} FROM ${entities.map(entity => entity.name).join(', ')}`);
-
-			sql.push(spliceWhereSQLByConditions([conditions as AnyType], entities as AnyType));
-
-			sql.push(`LIMIT ${limit}`);
-
-			this.nowValue.sql = sql.join(' ');
-		} else {
-			this.nowValue.sql = '';
-		}
+		
+		entities.forEach((entity) => {
+			desc = `${desc ? `${desc};\n` : ''}${entity.name} 的 ${entity.fieldAry.map(field => field.name).join(', ')}`;
+		}, []);
+		
 		this.nowValue.desc = desc;
 		this.value.set(this.nowValue);
-
+		
 		this.close();
 	}
 
@@ -114,22 +99,35 @@ export default class QueryCtx {
 			return;
 		}
 		
-		const field = nowEntity.fieldAry.find(f => f.id === fieldId);
-		
-		if (field) {
-			nowEntity.fieldAry = nowEntity.fieldAry.filter(f => f.id !== fieldId);
+		// count 判断
+		if (fieldId === CountFieldId) {
+			const field = nowEntity.fieldAry.find(f => f.id === fieldId);
+			
+			if (field) {
+				nowEntity.fieldAry = nowEntity.fieldAry.filter(f => f.id !== fieldId);
+			} else {
+				nowEntity.fieldAry = [{ id: CountFieldId, name: '查询总数', desc: 'COUNT(*)' }];
+			}
 		} else {
-			nowEntity.fieldAry = oriEntity.fieldAry
-				.map((oriF: T_Field) => {
-					let field = nowEntity.fieldAry.find(f => f.id === oriF.id);
-				
-					if (field) {//exits
-						return field;
-					} else if (oriF.id === fieldId) {
-						return (oriF as AnyType).toJSON() as T_Field;
-					}
-				})
-				.filter(Boolean);
+			const field = nowEntity.fieldAry.find(f => f.id === fieldId);
+			/** 求总数跟其他字段互斥 */
+			nowEntity.fieldAry = nowEntity.fieldAry.filter(f => f.id !== CountFieldId);
+			
+			if (field) {
+				nowEntity.fieldAry = nowEntity.fieldAry.filter(f => f.id !== fieldId);
+			} else {
+				nowEntity.fieldAry = oriEntity.fieldAry
+					.map((oriF: T_Field) => {
+						let field = nowEntity.fieldAry.find(f => f.id === oriF.id);
+					
+						if (field) {//exits
+							return field;
+						} else if (oriF.id === fieldId) {
+							return (oriF as AnyType).toJSON() as T_Field;
+						}
+					})
+					.filter(Boolean);
+			}
 		}
 	}
 }

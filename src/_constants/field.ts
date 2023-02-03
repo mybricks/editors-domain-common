@@ -34,3 +34,12 @@ export enum SQLOperator {
 	/** 小于等于 */
 	LE = '<=',
 }
+
+/** sql 排序规则 */
+export enum SQLOrder {
+	ASC = 'ASC',
+	DESC = 'DESC',
+}
+
+/** 查询总数的字段 */
+export const CountFieldId = 'count';
