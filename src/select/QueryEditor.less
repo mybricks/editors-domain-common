@@ -79,10 +79,22 @@
       display: flex;
       align-items: center;
 
+      & > span:first-of-type {
+        flex-shrink: 0;
+        color: rgba(0,0,0,.85);
+      }
+
+      & > span:last-of-type {
+        color: #999;
+        font-style: italic;
+        word-break: break-all;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        overflow: hidden;
+      }
+
       span {
         margin-left: 5px;
-        color: #AAA;
-        font-style: italic;
       }
 
       input[type=checkbox] {
@@ -128,7 +140,7 @@
   position: relative;
 
   .content {
-    padding: 0 12px;
+    padding-left: 25px;
   }
 
   .pageInput {

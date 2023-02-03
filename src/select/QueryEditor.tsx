@@ -101,7 +101,7 @@ function SelectFrom() {
 							checked={Boolean(entity.fieldAry.find(f => f.id === CountFieldId))}
 							onChange={() => ctx.setField(entity, CountFieldId)}
 						/>
-						查询总数
+						<span>查询总数</span>
 						<span>COUNT(*)</span>
 					</div>
 				));
@@ -113,7 +113,7 @@ function SelectFrom() {
 						return (
 							<div key={field.id} className={css.field}>
 								<input type="checkbox" checked={checked} onChange={() => ctx.setField(entity, field.id)} />
-								{entity.name}.{field.name}
+								<span>{entity.name}.{field.name}</span>
 								<span>{field.desc}</span>
 							</div>
 						);
