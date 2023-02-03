@@ -215,7 +215,7 @@ const Offset = () => {
 	return (
 		<div ref={containerEle} className={css.offsetContainer}>
 			<div className={css.segTitle}>
-				4. 限制分页
+				5. 限制分页
 			</div>
 			<div className={css.content}>
 				分页数值（页码）为
@@ -228,14 +228,6 @@ const Offset = () => {
 						popEle.current = e.target;
 						setShowPop(true);
 						ctx.addBlur(() => setShowPop(false));
-						// whereContext.popEle = e.target as AnyType;
-						// whereContext.popParams = {
-						// 	condition,
-						// 	field: originField
-						// };
-						// whereContext.addBlur?.(() => {
-						// 	whereContext.popParams = void 0;
-						// });
 					}).stop}/>
 			</div>
 			{popParamValues}
