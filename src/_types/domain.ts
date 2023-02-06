@@ -35,7 +35,6 @@ export interface Condition {
 	operator?: string;
 	/** 条件语句值 */
 	value: string;
-	checkExist: boolean;
 	conditions: Condition[];
 	whereJoiner: SQLWhereJoiner;
 }

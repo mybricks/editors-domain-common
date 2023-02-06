@@ -25,7 +25,13 @@ const ServiceSelect = ({ editConfig: { value, options } }: AnyType, { domainMode
 	    </div>
 	    {
 		    visible ? createPortal(
-			    <QueryEditor domainModel={domainModel} paramSchema={options.paramSchema} value={value} close={close} />,
+			    <QueryEditor
+				    domainModel={domainModel}
+				    paramSchema={options.paramSchema}
+				    showPager={options.showPager}
+				    value={value}
+				    close={close}
+			    />,
 			    canvasEle
 		    ) : null
 	    }

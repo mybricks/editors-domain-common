@@ -4,6 +4,7 @@ import { evt, useComputed, useObservable } from '@mybricks/rxui';
 import { AnyType } from '../../_types';
 import { SQLOrder } from '../../_constants/field';
 import { Entity, Field } from '../../_types/domain';
+import { Remove } from '../../_constants/icons';
 
 import styles from './index.less';
 
@@ -19,6 +20,9 @@ class OrderByContext {
 			entityId: '',
 			order: SQLOrder.DESC
 		});
+	}
+	removeOrder(index: number) {
+		this.nowValue.orders.splice(index, 1);
 	}
 }
 
@@ -42,12 +46,7 @@ const OrderBy: FC<OrderByProps> = props => {
 		<div className={styles.orderByContainer}>
 			<div className={styles.segTitle}>
 				3. 按以下规则排序
-				<span
-					className={styles.addOrder}
-					onClick={evt(() => orderContext.addOrder()).stop}
-				>
-					新增排序规则
-				</span>
+				<span className={styles.addOrder} onClick={evt(() => orderContext.addOrder()).stop}>+</span>
 			</div>
 			
 			<div className={styles.orderList}>
@@ -127,6 +126,12 @@ const OrderItem: FC<OrderItemProps> = props => {
 				<option value={SQLOrder.DESC}>降序</option>
 			</select>
 			排序
+			<span
+				className={`${styles.addOrder} ${styles.icons}`}
+				onClick={() => orderContext.removeOrder(index)}
+			>
+				{Remove}
+			</span>
 		</div>
 	);
 };

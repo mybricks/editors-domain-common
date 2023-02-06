@@ -40,6 +40,3 @@ export enum SQLOrder {
 	ASC = 'ASC',
 	DESC = 'DESC',
 }
-
-/** 查询总数的字段 */
-export const CountFieldId = 'count';

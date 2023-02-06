@@ -101,7 +101,7 @@ const Where: FC<WhereProps> = props => {
 
 const Conditions: FC = () => {
 	const nowValue = whereContext.nowValue;
-	
+	const currentContext = useObservable(class { showFieldGroupId?: string; });
 	const remove = useCallback(params => {
 		whereContext.removeCondition?.(params);
 	}, []);
@@ -124,6 +124,14 @@ const Conditions: FC = () => {
 			return fieldIds;
 		};
 	});
+	
+	const showAdder = useCallback((showFieldGroupId: string) => {
+		currentContext.showFieldGroupId = showFieldGroupId;
+		
+		whereContext.addBlur?.(() => {
+			currentContext.showFieldGroupId = void 0;
+		});
+	}, []);
 	
 	const renderConditions = useComputed(() => {
 		return (conditions: Condition[], parentCondition: Condition | null) => {
@@ -191,20 +199,23 @@ const Conditions: FC = () => {
 								
 								<span
 									className={styles.addWhere}
-									onClick={evt(() => {
-										whereContext.addCondition?.({ isGroup: false, parentCondition: condition });
-									}).stop}
+									style={{ paddingBottom: '2px' }}
+									onClick={evt(() => showAdder(condition.fieldId)).stop}
 								>
-									新增条件
+									+
 								</span>
-								<span
-									className={styles.addWhere}
-									onClick={evt(() => {
-										whereContext.addCondition?.({ isGroup: true, parentCondition: condition });
-									}).stop}
-								>
-									新增条件组
-								</span>
+								{
+									currentContext.showFieldGroupId === condition.fieldId ? (
+										<div className={styles.popMenu} style={{ left: '140px', top: '28px', width: '180px' }}>
+											<div className={styles.item} onClick={() => whereContext.addCondition?.({ isGroup: false, parentCondition: condition })}>
+												新增条件
+											</div>
+											<div className={styles.item} onClick={() => whereContext.addCondition?.({ isGroup: true, parentCondition: condition })}>
+												新增条件组
+											</div>
+										</div>
+									) : null
+								}
 							</div>
 							{
 								condition.conditions.length > 0
@@ -213,20 +224,13 @@ const Conditions: FC = () => {
 							}
 						</div>
 						{parentCondition ? (
-							<span className={styles.icons} onClick={() => remove({ index, parentCondition })}>
+							<span className={`${styles.addWhere} ${styles.icons}`} onClick={() => remove({ index, parentCondition })}>
 								{Remove}
 							</span>
 						) : null}
 					</div>
 				) : (
 					<div key={index} className={styles.condition}>
-						{/*<input*/}
-						{/*	className={styles.checkbox}*/}
-						{/*	type="checkbox"*/}
-						{/*	checked={condition.checkExist}*/}
-						{/*	onClick={() => condition.checkExist = !condition.checkExist}*/}
-						{/*/>*/}
-						{/*<label>判空</label>*/}
 						<select
 							className={styles.fieldSelect}
 							value={condition.entityId ? `${condition.entityId}&&${condition.fieldId}` : ''}
@@ -279,7 +283,7 @@ const Conditions: FC = () => {
 								});
 							}).stop}/>
 						<span
-							className={styles.icons}
+							className={`${styles.addWhere} ${styles.icons}`}
 							onClick={() => remove({ index, parentCondition })}
 						>
 							{Remove}

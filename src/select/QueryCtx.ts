@@ -1,6 +1,5 @@
 import { AnyType } from '../_types';
-import { CountFieldId, SQLOrder, SQLWhereJoiner } from '../_constants/field';
-import { spliceWhereSQLByConditions } from '../_utils/sql';
+import { SQLOrder, SQLWhereJoiner } from '../_constants/field';
 
 export type T_Field = {
   id,
@@ -17,8 +16,6 @@ export type T_Entity = {
 }
 
 export type T_Condition = {
-	/** 是否判断数据为空，为空时条件不生效 */
-	checkExist?: boolean;
   fieldId: string;
 	entityId?: string;
   fieldName: string;
@@ -99,35 +96,23 @@ export default class QueryCtx {
 			return;
 		}
 		
-		// count 判断
-		if (fieldId === CountFieldId) {
-			const field = nowEntity.fieldAry.find(f => f.id === fieldId);
-			
-			if (field) {
-				nowEntity.fieldAry = nowEntity.fieldAry.filter(f => f.id !== fieldId);
-			} else {
-				nowEntity.fieldAry = [{ id: CountFieldId, name: '查询总数', desc: 'COUNT(*)' }];
-			}
+		const field = nowEntity.fieldAry.find(f => f.id === fieldId);
+		
+		if (field) {
+			nowEntity.fieldAry = nowEntity.fieldAry.filter(f => f.id !== fieldId);
 		} else {
-			const field = nowEntity.fieldAry.find(f => f.id === fieldId);
-			/** 求总数跟其他字段互斥 */
-			nowEntity.fieldAry = nowEntity.fieldAry.filter(f => f.id !== CountFieldId);
-			
-			if (field) {
-				nowEntity.fieldAry = nowEntity.fieldAry.filter(f => f.id !== fieldId);
-			} else {
-				nowEntity.fieldAry = oriEntity.fieldAry
-					.map((oriF: T_Field) => {
-						let field = nowEntity.fieldAry.find(f => f.id === oriF.id);
-					
-						if (field) {//exits
-							return field;
-						} else if (oriF.id === fieldId) {
-							return (oriF as AnyType).toJSON() as T_Field;
-						}
-					})
-					.filter(Boolean);
-			}
+			nowEntity.fieldAry = oriEntity.fieldAry
+				.map((oriF: T_Field) => {
+					let field = nowEntity.fieldAry.find(f => f.id === oriF.id);
+				
+					if (field) {//exits
+						return field;
+					} else if (oriF.id === fieldId) {
+						return (oriF as AnyType).toJSON() as T_Field;
+					}
+				})
+				.filter(Boolean);
 		}
+		
 	}
 }

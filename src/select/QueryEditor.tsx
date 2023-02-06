@@ -5,7 +5,7 @@ import QueryCtx from './QueryCtx';
 import Where from '../_common/where';
 import PopView from '../_common/pop-view';
 import { AnyType } from '../_types';
-import { CountFieldId, SQLWhereJoiner } from '../_constants/field';
+import { SQLWhereJoiner } from '../_constants/field';
 import { Entity, Field } from '../_types/domain';
 import OrderBy from '../_common/order-by';
 
@@ -13,7 +13,7 @@ import css from './QueryEditor.less';
 
 let ctx: QueryCtx;
 
-export default function QueryEditor({ domainModel, paramSchema, value, close }: AnyType) {
+export default function QueryEditor({ domainModel, paramSchema, value, close, showPager }: AnyType) {
 	ctx = useObservable(QueryCtx, next => {
 		const oriVal = value.get();
 		let val;
@@ -45,7 +45,7 @@ export default function QueryEditor({ domainModel, paramSchema, value, close }: 
 					fieldAry: entity.fieldAry.map((field: Field) => {
 						const originField = originEntity.fieldAry.find((f: Field) => f.id === field.id);
 						
-						return field.id === CountFieldId ? field : (originField ? { ...originField } : undefined);
+						return originField ? { ...originField } : undefined;
 					}).filter(Boolean),
 				};
 			}
@@ -75,7 +75,7 @@ export default function QueryEditor({ domainModel, paramSchema, value, close }: 
 					  />
 					  <OrderBy nowValue={ctx.nowValue} domainModal={ctx.domainModel} />
 					  <Limit/>
-					  <Offset />
+					  {showPager ? <Offset /> : null}
 				  </>
 			  ) : null
 		  }
@@ -93,18 +93,6 @@ function SelectFrom() {
 		if (nowValue.entities.length) {
 			nowValue.entities.map((entity) => {
 				const originEntity = entityAry.find((et: Entity) => et.id === entity.id);
-				
-				res.push((
-					<div key={CountFieldId} className={css.field}>
-						<input
-							type="checkbox"
-							checked={Boolean(entity.fieldAry.find(f => f.id === CountFieldId))}
-							onChange={() => ctx.setField(entity, CountFieldId)}
-						/>
-						<span>查询总数</span>
-						<span>COUNT(*)</span>
-					</div>
-				));
 				
 				res.push(
 					...originEntity.fieldAry.map((field: Field) => {
