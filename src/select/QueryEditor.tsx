@@ -8,6 +8,7 @@ import { AnyType } from '../_types';
 import { SQLWhereJoiner } from '../_constants/field';
 import { Entity, Field } from '../_types/domain';
 import OrderBy from '../_common/order-by';
+import { formatEntitiesByOriginEntities } from '../_utils/entity';
 
 import css from './QueryEditor.less';
 
@@ -34,22 +35,7 @@ export default function QueryEditor({ domainModel, paramSchema, value, close, sh
 		}
 		
 		/** 实体信息可能存在变更，每次使用最新的实体信息 */
-		val.entities = val.entities.map((entity: Entity) => {
-			let originEntity = domainModel.entityAry.find((e: Entity) => e.id === entity.id);
-			
-			if (originEntity) {
-				originEntity = originEntity.toJSON();
-				
-				return {
-					...originEntity,
-					fieldAry: entity.fieldAry.map((field: Field) => {
-						const originField = originEntity.fieldAry.find((f: Field) => f.id === field.id);
-						
-						return originField ? { ...originField } : undefined;
-					}).filter(Boolean),
-				};
-			}
-		}).filter(Boolean);
+		val.entities = formatEntitiesByOriginEntities(val.entities, domainModel.entityAry);
 		val.originEntities = domainModel.entityAry.map((entity: AnyType) => entity.toJSON());
 
 		next({

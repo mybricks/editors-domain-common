@@ -2,10 +2,10 @@ import React, { FC } from 'react';
 // @ts-ignore
 import { evt, useObservable } from '@mybricks/rxui';
 import { AnyType } from '../_types';
-import { Entity, Field } from '../_types/domain';
 import PopView from '../_common/pop-view';
 import Where from '../_common/where';
 import { SQLWhereJoiner } from '../_constants/field';
+import { formatEntitiesByOriginEntities } from '../_utils/entity';
 
 import styles from './index.less';
 
@@ -70,22 +70,7 @@ const DeleteEditor: FC<DeleteEditorProps> = props => {
 		}
 		
 		/** 实体信息可能存在变更，每次使用最新的实体信息 */
-		val.entities = val.entities.map((entity: Entity) => {
-			let originEntity = domainModel.entityAry.find((e: Entity) => e.id === entity.id);
-			
-			if (originEntity) {
-				originEntity = originEntity.toJSON();
-				
-				return {
-					...originEntity,
-					fieldAry: entity.fieldAry.map((field: Field) => {
-						const originField = originEntity.fieldAry.find((f: Field) => f.id === field.id);
-						
-						return originField ? { ...originField } : undefined;
-					}).filter(Boolean),
-				};
-			}
-		}).filter(Boolean);
+		val.entities = formatEntitiesByOriginEntities(val.entities, domainModel.entityAry);
 		
 		next({
 			domainModel,
