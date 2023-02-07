@@ -73,7 +73,7 @@ let whereContext: WhereContext;
 interface WhereProps {
 	nowValue: AnyType;
 	paramSchema: AnyType;
-	title?: string;
+	title?: ReactNode;
 	titleClassName?: string;
 	domainModal: AnyType;
 	addBlur(fn: () => void): void;

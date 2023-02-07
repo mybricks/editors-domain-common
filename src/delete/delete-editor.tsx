@@ -6,6 +6,7 @@ import PopView from '../_common/pop-view';
 import Where from '../_common/where';
 import { SQLWhereJoiner } from '../_constants/field';
 import { formatEntitiesByOriginEntities } from '../_utils/entity';
+import { Entity } from '../_types/domain';
 
 import styles from './index.less';
 
@@ -85,7 +86,29 @@ const DeleteEditor: FC<DeleteEditorProps> = props => {
 		<PopView close={close} save={deleteContext.save} clickView={evt(deleteContext.blurAll).stop}>
 			<Where
 				titleClassName={styles.whereTitle}
-				title="1. 删除符合以下条件的数据"
+				title={
+					<>
+						1. 删除
+						<select
+							className={styles.selectDom}
+							value={deleteContext.nowValue.entities[0]?.id}
+							onChange={e => {
+								const originEntity = deleteContext.domainModel.entityAry.find((entity: Entity) => entity.id === e.target.value);
+								
+								if (originEntity) {
+									deleteContext.nowValue.entities = [originEntity.toJSON()];
+								}
+							}}
+						>
+							{
+								deleteContext.domainModel.entityAry.map((et: Entity) => {
+									return <option key={et.id} value={et.id}>{et.name}</option>;
+								})
+							}
+						</select>
+						中符合以下条件的数据
+					</>
+				}
 				nowValue={deleteContext.nowValue}
 				paramSchema={deleteContext.paramSchema}
 				addBlur={deleteContext.addBlur}
