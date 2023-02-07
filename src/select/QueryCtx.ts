@@ -1,18 +1,23 @@
 import { AnyType } from '../_types';
-import { SQLOrder, SQLWhereJoiner } from '../_constants/field';
+import { FieldBizType, SQLOrder, SQLWhereJoiner } from '../_constants/field';
+import { Entity, Field } from '../_types/domain';
 
 export type T_Field = {
-  id,
+  id: string;
   isPrimaryKey?: boolean;
-  name,
-  desc
+  name: string;
+  desc?: string;
+	bizType: string;
+	/** 关联的实体表 ID */
+	relationEntityId?: string;
 }
 
 export type T_Entity = {
-  id,
-  name,
-  desc,
-  fieldAry: T_Field[]
+  id: string;
+  name: string;
+  desc?: string;
+	isRelationEntity?: boolean;
+  fieldAry: T_Field[];
 }
 
 export type T_Condition = {
@@ -27,17 +32,18 @@ export type T_Condition = {
 }
 
 export default class QueryCtx {
-	editorEle:HTMLElement;
+	editorEle!:HTMLElement;
 
-	paramSchema: Record<string, unknown>;
+	paramSchema!: Record<string, unknown>;
 
 	domainModel: AnyType;
 
-	value: {
-    get, set
+	value!: {
+    get(): AnyType;
+		set(value: AnyType): void;
   };
 
-	nowValue: {
+	nowValue!: {
     desc: string
     sql: string
     entities: T_Entity[],
@@ -47,7 +53,7 @@ export default class QueryCtx {
 		orders: Array<{ fieldId: string; fieldName: string; order: SQLOrder; entityId: string }>;
   };
 
-	close;
+	close!: () => void;
 
 	blurAry = [];
 
@@ -67,7 +73,7 @@ export default class QueryCtx {
 		const { entities } = this.nowValue;
 		let desc = '';
 		
-		entities.forEach((entity) => {
+		entities.filter(entity => entity.fieldAry.length).forEach((entity) => {
 			desc = `${desc ? `${desc};\n` : ''}${entity.name} 的 ${entity.fieldAry.map(field => field.name).join(', ')}`;
 		}, []);
 		
@@ -78,14 +84,19 @@ export default class QueryCtx {
 	}
 
 	setEntity(entity: AnyType) {
-		// const index = this.nowValue.entities?.findIndex(e => e.id === entity.id);
-		//
-		// if (index >= 0) {
-		// 	this.nowValue.entities.splice(index, 1);
-		// } else {
-		// 	this.nowValue.entities.push(entity.toJSON());
-		// }
-		this.nowValue.entities = [entity.toJSON()];
+		const entities = [];
+		const nowEntity = entity.toJSON();
+		const relationFields = nowEntity.fieldAry.filter((field: Field) => field.bizType === FieldBizType.RELATION);
+		
+		entities.push(entity.toJSON());
+		entities.push(
+			...relationFields
+				.map((field: Field) => (this.domainModel.entityAry.find((entity: Entity) => entity.id === field.relationEntityId) as AnyType)?.toJSON())
+				.filter(Boolean)
+				.map((entity: Entity) => ({ ...entity, isRelationEntity: true, fieldAry: [] }))
+		);
+		
+		this.nowValue.entities = entities;
 	}
 
 	setField(entity: T_Entity, fieldId: string) {
@@ -100,6 +111,11 @@ export default class QueryCtx {
 		
 		if (field) {
 			nowEntity.fieldAry = nowEntity.fieldAry.filter(f => f.id !== fieldId);
+			
+			/** 删除关联实体 */
+			if (field.bizType === FieldBizType.RELATION) {
+				this.nowValue.entities = this.nowValue.entities.filter(entity => field.relationEntityId !== entity.id);
+			}
 		} else {
 			nowEntity.fieldAry = oriEntity.fieldAry
 				.map((oriF: T_Field) => {
@@ -108,6 +124,14 @@ export default class QueryCtx {
 					if (field) {//exits
 						return field;
 					} else if (oriF.id === fieldId) {
+						/** 关联实体 */
+						if (oriF.bizType === FieldBizType.RELATION) {
+							this.nowValue.entities.push(
+								...this.domainModel.entityAry
+									.filter((entity: Entity) => oriF.relationEntityId === entity.id)
+									.map((entity: AnyType) => ({ ...entity.toJSON(), isRelationEntity: true, fieldAry: [] }))
+							);
+						}
 						return (oriF as AnyType).toJSON() as T_Field;
 					}
 				})

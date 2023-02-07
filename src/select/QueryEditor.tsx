@@ -5,7 +5,7 @@ import QueryCtx from './QueryCtx';
 import Where from '../_common/where';
 import PopView from '../_common/pop-view';
 import { AnyType } from '../_types';
-import { SQLWhereJoiner } from '../_constants/field';
+import { FieldBizType, SQLWhereJoiner } from '../_constants/field';
 import { Entity, Field } from '../_types/domain';
 import OrderBy from '../_common/order-by';
 import { formatEntitiesByOriginEntities } from '../_utils/entity';
@@ -71,32 +71,43 @@ export default function QueryEditor({ domainModel, paramSchema, value, close, sh
 
 function SelectFrom() {
 	const nowValue = ctx.nowValue;
-	const entityAry = ctx.domainModel.entityAry;
+	const originEntityAry = ctx.domainModel.entityAry as Entity[];
 
-	const fields = useComputed(() => {
-		const res: ReactNode[] = [];
-		
-		if (nowValue.entities.length) {
-			nowValue.entities.map((entity) => {
-				const originEntity = entityAry.find((et: Entity) => et.id === entity.id);
-				
-				res.push(
-					...originEntity.fieldAry.map((field: Field) => {
-						const checked = Boolean(entity.fieldAry.find(f => f.id === field.id));
+	const renderFieldsByEntities = useComputed(() => {
+		return (entities: Entity[]) => {
+			const res: ReactNode[] = [];
+			
+			if (entities.length) {
+				entities.map((entity) => {
+					const originEntity = (originEntityAry.find((et: Entity) => et.id === entity.id) as AnyType)?.toJSON();
 					
-						return (
-							<div key={field.id} className={css.field}>
-								<input type="checkbox" checked={checked} onChange={() => ctx.setField(entity, field.id)} />
-								<span>{entity.name}.{field.name}</span>
-								<span>{field.desc}</span>
-							</div>
+					if (originEntity) {
+						res.push(
+							...originEntity.fieldAry.map((field: Field) => {
+								const checked = Boolean(entity.fieldAry.find(f => f.id === field.id));
+								
+								return (
+									<div key={field.id} className={css.field} title={`${originEntity.name}.${field.name}(${field.desc})`}>
+										<input type="checkbox" checked={checked} onChange={() => ctx.setField(entity as AnyType, field.id)} />
+										<span>{originEntity.name}.{field.name}</span>
+										<span>{field.desc}</span>
+									</div>
+								);
+							})
 						);
-					})
-				);
-			});
-		}
-		
-		return res;
+					}
+				});
+			}
+			
+			return res;
+		};
+	});
+	
+	const noRelationEntities = useComputed(() => {
+		return nowValue.entities?.filter(entity => !entity.isRelationEntity) ?? [];
+	});
+	const relationEntities = useComputed(() => {
+		return nowValue.entities?.filter(entity => entity.isRelationEntity) ?? [];
 	});
 
 	return (
@@ -105,11 +116,12 @@ function SelectFrom() {
 			<div className={css.select}>
 				<div className={css.tables}>
 					{
-						entityAry.map((et: Entity) => {
-							const selected = Boolean(nowValue.entities?.find(entity => entity.id === et.id));
+						originEntityAry.map((et: Entity) => {
+							const selected = Boolean(noRelationEntities.find(entity => entity.id === et.id));
 							
 							return (
 								<div
+									title={`${et.name}(${et.desc})`}
 									key={et.id}
 									className={`${css.table} ${selected ? css.selected : ''}`}
 									onClick={() => ctx.setEntity(et)}
@@ -122,8 +134,22 @@ function SelectFrom() {
 					}
 				</div>
 				<div className={css.fields}>
-					{fields}
+					{renderFieldsByEntities(noRelationEntities as Entity[])}
 				</div>
+				
+				{/* 关联实体 */}
+				{relationEntities.length ? (
+					<div className={`${css.fields} ${css.relationFields}`}>
+						{relationEntities.map(entity => {
+							return (
+								<div key={entity.id} className={css.entity}>
+									<div className={css.entityName}>关联实体：{entity.name}</div>
+									{renderFieldsByEntities([entity] as Entity[])}
+								</div>
+							);
+						})}
+					</div>
+				) : null}
 			</div>
 		</>
 	);

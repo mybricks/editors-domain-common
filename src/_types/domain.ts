@@ -8,6 +8,8 @@ export interface Entity {
 	/** 表备注 */
 	desc: string;
 	fieldAry: Field[];
+	/** 关联表，在 editor 中使用 */
+	isRelationEntity?: boolean;
 }
 
 export interface Field {

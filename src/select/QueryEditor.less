@@ -31,7 +31,7 @@
   overflow: hidden;
 
   .tables {
-    width: 200px;
+    width: 180px;
     border-right: 1px solid #EEE;
     padding: 10px;
     background: #F7F7F7;
@@ -72,6 +72,22 @@
     flex: 1;
     overflow: auto;
     padding: 5px 0 10px 5px;
+
+    &.relationFields {
+      border-left: 1px dashed #ddd;
+      padding-right: 5px;
+
+      .entity {
+        width: 100%;
+      }
+
+      .entityName {
+        color: #777;
+        font-style: italic;
+        margin-bottom: 5px;
+        padding: 0 10px;
+      }
+    }
 
     .field {
       height: 30px;
