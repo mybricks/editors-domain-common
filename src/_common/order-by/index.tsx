@@ -101,7 +101,7 @@ const OrderItem: FC<OrderItemProps> = props => {
 				/** 更新条件语句 */
 				onChange={(e) => {
 					const [entityId, fieldId] = e.target.value.split('&&');
-					const originEntity = orderContext.nowValue?.entities.find((entity: Entity) => entity.id === entityId);
+					const originEntity = orderContext.domainModal.entityAry.find((entity: Entity) => entity.id === entityId);
 					
 					if (originEntity) {
 						const originField = originEntity.fieldAry.find((field: Field) => field.id === fieldId);
