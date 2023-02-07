@@ -40,7 +40,7 @@ export default class InsertCtx {
 	nowValue: {
     desc: string
     script: string
-    entity: T_Entity,
+		entities: T_Entity[],
     conAry: { from: string, to: string }[]
   };
 
@@ -63,53 +63,20 @@ export default class InsertCtx {
 
 	save() {
 		const nowValue = this.nowValue;
-		let desc;
+		let desc = '';
 
-		const conAry = this.nowValue.conAry;
-
-		if (nowValue.entity && nowValue.entity.fieldAry.length > 0) {
-			desc = `${nowValue.entity.name}`;
-
-			const sql = `INSERT INTO ${nowValue.entity.name} `;
-
-			const fieldAry = [], valueAry = [];
-			nowValue.entity.fieldAry.forEach(f => {
-				const fieldName = f.name;
-				const field = this.getOriField(fieldName);
-
-				if (!field.isPrimaryKey) {
-					fieldAry.push(fieldName);
-
-					const con = conAry.find(con => con.to === `/${fieldName}`);
-					if (con) {
-						const fromPropName = con.from.substring(con.from.indexOf('/') + 1);
-						const q = getTypeQuote(field.bizType);
-						valueAry.push(`${q}\${params.${fromPropName}}${q}`);
-					} else {
-						valueAry.push('null');
-					}
-				}
-			});
-
-			const script = `
-      (params)=>{
-        return \`${sql}(${fieldAry.join(',')}) VALUES (${valueAry.join(',')})\`
-      }
-      `;
-			this.nowValue.script = script;
-		} else {
-			this.nowValue.script = void 0;
+		if (nowValue.entities?.length && nowValue.entities[0].fieldAry.length > 0) {
+			desc = `${nowValue.entities[0].name}`;
 		}
 
 		this.nowValue.desc = desc;
-
 		this.value.set(this.nowValue);
 
 		this.close();
 	}
 
 	getOriEntity() {
-		const nowEntity = this.nowValue.entity;
+		const nowEntity = this.nowValue.entities[0];
 		if (nowEntity) {
 			return this.domainModel.entityAry.find(e => e.id === nowEntity.id);
 		}
@@ -125,6 +92,6 @@ export default class InsertCtx {
 	setEntity(entityId) {
 		const entity = this.domainModel.entityAry.find(e => e.id === entityId);
 		const ent = entity.toJSON();
-		this.nowValue.entity = ent;
+		this.nowValue.entities = [ent];
 	}
 }

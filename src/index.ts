@@ -2,6 +2,7 @@ import { typeCheck } from './_utils';
 import EditorSelect from './select';
 import EditorInsert from './insert';
 import EditorUpdate from './update';
+import EditorDelete from './delete';
 import { AnyType } from './_types';
 
 
@@ -9,6 +10,7 @@ const EditorMap: Record<string, unknown> = {
 	'DOMAIN.DBSELECT': EditorSelect,
 	'DOMAIN.DBINSERT': EditorInsert,
 	'DOMAIN.DBUPDATE': EditorUpdate,
+	'DOMAIN.DBDELETE': EditorDelete,
 };
 
 function Editors(editConfig: { type: string; render: AnyType; }, extOpts: Record<string, unknown>): AnyType {

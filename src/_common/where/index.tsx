@@ -73,12 +73,14 @@ let whereContext: WhereContext;
 interface WhereProps {
 	nowValue: AnyType;
 	paramSchema: AnyType;
+	title?: string;
+	titleClassName?: string;
 	domainModal: AnyType;
 	addBlur(fn: () => void): void;
 }
 
 const Where: FC<WhereProps> = props => {
-	const { nowValue, addBlur, paramSchema, domainModal } = props;
+	const { nowValue, addBlur, paramSchema, domainModal, title = '2. 筛选符合以下条件的数据', titleClassName = '' } = props;
 	whereContext = useObservable(WhereContext, next => {
 		next({
 			nowValue,
@@ -90,8 +92,8 @@ const Where: FC<WhereProps> = props => {
 	
 	return (
 		<div className={styles.where} ref={ele => ele && (whereContext.whereEle = ele)}>
-			<div className={styles.segTitle}>
-				2. 筛选符合以下条件的数据
+			<div className={`${styles.segTitle} ${titleClassName}`}>
+				{title}
 			</div>
 			<Conditions />
 		</div>
@@ -106,24 +108,9 @@ const Conditions: FC = () => {
 		whereContext.removeCondition?.(params);
 	}, []);
 	
-	const conditionFieldIds = useComputed(() => {
-		return () => {
-			const fieldIds: string[] = [];
-			const getFieldId = (conditions: Condition[]) => {
-				conditions.forEach((con: Condition) => {
-					if (con.conditions) {
-						getFieldId(con.conditions);
-					} else {
-						fieldIds.push(con.fieldId);
-					}
-				});
-			};
-			
-			getFieldId(whereContext.nowValue?.conditions ? [whereContext.nowValue?.conditions] : []);
-			
-			return fieldIds;
-		};
-	});
+	const getConditionFieldIds = useCallback((conditions: Condition[]) => {
+		return conditions.filter(con => !con.conditions).map(con => con.fieldId);
+	}, []);
 	
 	const showAdder = useCallback((showFieldGroupId: string) => {
 		currentContext.showFieldGroupId = showFieldGroupId;
@@ -135,6 +122,8 @@ const Conditions: FC = () => {
 	
 	const renderConditions = useComputed(() => {
 		return (conditions: Condition[], parentCondition: Condition | null) => {
+			const conditionFieldIds = getConditionFieldIds(conditions);
+			
 			return conditions.map((condition, index) => {
 				let originField: Field | null = null;
 				
@@ -166,7 +155,7 @@ const Conditions: FC = () => {
 				/** 字段选择时下拉列表 */
 				const fieldSelectOptions: ReactNode[] = [];
 				whereContext.domainModal?.entityAry
-					.filter((oriEntity: Entity) => nowValue?.entities.find(e => e.id === oriEntity.id))
+					.filter((oriEntity: Entity) => nowValue?.entities?.find(e => e.id === oriEntity.id))
 					.forEach((entity: Entity) => {
 						fieldSelectOptions.push(
 							...entity?.fieldAry.map((field) => {
@@ -174,7 +163,7 @@ const Conditions: FC = () => {
 									<option
 										key={`${entity.id}&&${field.id}`}
 										value={`${entity.id}&&${field.id}`}
-										disabled={conditionFieldIds().includes(field.id)}
+										disabled={conditionFieldIds.includes(field.id)}
 									>
 										{entity?.name}.{field.name}
 									</option>

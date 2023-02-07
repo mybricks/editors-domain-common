@@ -7,6 +7,8 @@ import PopView from '../_common/pop-view';
 import { Entity, Field } from '../_types/domain';
 import { getFieldSchema } from '../_utils/field';
 import { AnyType } from '../_types';
+import Where from '../_common/where';
+import { SQLWhereJoiner } from '../_constants/field';
 
 import css from './InsertEditor.less';
 
@@ -20,9 +22,34 @@ export default function InsertEditor({ domainModel, paramSchema, value, close }:
 			val = JSON.parse(JSON.stringify(oriVal));
 		} else {
 			val = {
-				conAry: []
+				conAry: [],
+				entities: [domainModel.entityAry[0]?.toJSON()] ?? [],
+				conditions: {
+					fieldId: Date.now(),
+					fieldName: '条件组',
+					whereJoiner: SQLWhereJoiner.AND,
+					conditions: []
+				},
 			};
 		}
+		
+		/** 实体信息可能存在变更，每次使用最新的实体信息 */
+		val.entities = val.entities.map((entity: Entity) => {
+			let originEntity = domainModel.entityAry.find((e: Entity) => e.id === entity.id);
+			
+			if (originEntity) {
+				originEntity = originEntity.toJSON();
+				
+				return {
+					...originEntity,
+					fieldAry: entity.fieldAry.map((field: Field) => {
+						const originField = originEntity.fieldAry.find((f: Field) => f.id === field.id);
+						
+						return originField ? { ...originField } : undefined;
+					}).filter(Boolean),
+				};
+			}
+		}).filter(Boolean);
 
 		next({
 			domainModel,
@@ -36,12 +63,8 @@ export default function InsertEditor({ domainModel, paramSchema, value, close }:
 	const nowValue = ctx.nowValue;
 	const entityAry = ctx.domainModel.entityAry;
 
-	if (!nowValue.entity && entityAry.length > 0) {
-		ctx.setEntity(entityAry[0].id);
-	}
-
 	const fieldSchema = useMemo(() => {
-		const nowEntity = nowValue.entity;
+		const nowEntity = nowValue.entities[0];
 		if (nowEntity) {
 			const oriEntity = entityAry.find((et: Entity) => et.id === nowEntity.id);
 			const properties: Record<string, unknown> = {};
@@ -62,12 +85,12 @@ export default function InsertEditor({ domainModel, paramSchema, value, close }:
 	return (
 		<PopView close={close} save={ctx.save} clickView={evt(ctx.blurAll).stop}>
 			<div className={css.segTitle}>
-				向
-				<select className={css.selectDom}
-				        value={nowValue.entity?.id}
-				        onChange={e => {
-					        ctx.setEntity(e.target.value);
-				        }}>
+				1. 向
+				<select
+					className={css.selectDom}
+					value={nowValue.entities[0]?.id}
+					onChange={e => ctx.setEntity(e.target.value)}
+				>
 					{
 						entityAry.map((et: Entity) => {
 							return (
@@ -83,8 +106,16 @@ export default function InsertEditor({ domainModel, paramSchema, value, close }:
 			<FromTo
 				conAry={nowValue.conAry}
 				from={{ title: '参数', schema: paramSchema }}
-				to={{ title: nowValue.entity.name, schema: fieldSchema }}
+				to={{ title: nowValue.entities[0]?.name, schema: fieldSchema }}
 				addBlurFn={ctx.addBlur}
+			/>
+			
+			<Where
+				title="2. 更新符合以下条件的数据"
+				nowValue={ctx.nowValue}
+				paramSchema={ctx.paramSchema}
+				addBlur={ctx.addBlur}
+				domainModal={ctx.domainModel}
 			/>
 		</PopView>
 	);
