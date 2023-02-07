@@ -20,8 +20,10 @@ export interface Field {
 	dbType: FieldDBType;
 	typeLabel: string;
 	desc?: string;
+	/** 关联的实体表 ID */
+	relationEntityId?: string;
 	/** 是否为主键 */
-	isPrimaryKey: boolean;
+	isPrimaryKey?: boolean;
 }
 
 export interface Condition {

@@ -21,6 +21,9 @@ export default function InsertEditor({ domainModel, paramSchema, value, close }:
 		let val;
 		if (oriVal) {
 			val = JSON.parse(JSON.stringify(oriVal));
+			
+			/** 实体信息可能存在变更，每次使用最新的实体信息 */
+			val.entities = formatEntitiesByOriginEntities(val.entities, domainModel.entityAry);
 		} else {
 			val = {
 				conAry: [],
@@ -33,9 +36,6 @@ export default function InsertEditor({ domainModel, paramSchema, value, close }:
 				},
 			};
 		}
-		
-		/** 实体信息可能存在变更，每次使用最新的实体信息 */
-		val.entities = formatEntitiesByOriginEntities(val.entities, domainModel.entityAry);
 
 		next({
 			domainModel,

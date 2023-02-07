@@ -75,20 +75,6 @@ export default class InsertCtx {
 		this.close();
 	}
 
-	getOriEntity() {
-		const nowEntity = this.nowValue.entities[0];
-		if (nowEntity) {
-			return this.domainModel.entityAry.find(e => e.id === nowEntity.id);
-		}
-	}
-
-	getOriField(fieldName) {
-		const oriEntity = this.getOriEntity();
-		if (oriEntity) {
-			return oriEntity.fieldAry.find(e => e.name === fieldName);
-		}
-	}
-
 	setEntity(entityId) {
 		const entity = this.domainModel.entityAry.find(e => e.id === entityId);
 		const ent = entity.toJSON();

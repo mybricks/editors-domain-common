@@ -2,6 +2,8 @@
 export enum FieldBizType {
 	STRING = 'string',
 	NUMBER = 'number',
+	/** 外键，关联其他表 */
+	RELATION = 'relation',
 }
 
 /** 数据库字段类型 */

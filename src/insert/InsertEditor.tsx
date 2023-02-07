@@ -7,9 +7,9 @@ import { AnyType } from '../_types';
 import { getFieldSchema } from '../_utils/field';
 import PopView from '../_common/pop-view';
 import { Entity } from '../_types/domain';
+import { formatEntitiesByOriginEntities } from '../_utils/entity';
 
-// @ts-ignore
-import css from './InsertEditor.less';
+import styles from './InsertEditor.less';
 
 let ctx: InsertCtx;
 
@@ -19,9 +19,13 @@ const InsertEditor = ({ domainModel, paramSchema, value, close }: AnyType) => {
 		let val;
 		if (oriVal) {
 			val = JSON.parse(JSON.stringify(oriVal));
+			
+			/** 实体信息可能存在变更，每次使用最新的实体信息 */
+			val.entities = formatEntitiesByOriginEntities(val.entities ?? [], domainModel.entityAry);
 		} else {
 			val = {
-				conAry: []
+				conAry: [],
+				entities: [domainModel.entityAry[0]?.toJSON()] ?? [],
 			};
 		}
 
@@ -37,12 +41,8 @@ const InsertEditor = ({ domainModel, paramSchema, value, close }: AnyType) => {
 	const nowValue = ctx.nowValue;
 	const entityAry = ctx.domainModel.entityAry;
 
-	if (!nowValue.entity && entityAry.length > 0) {
-		ctx.setEntity(entityAry[0].id);
-	}
-
 	const fieldSchema = useMemo(() => {
-		const nowEntity = nowValue.entity;
+		const nowEntity = nowValue.entities[0];
 		if (nowEntity) {
 			const oriEntity = entityAry.find((et: { id: string }) => et.id === nowEntity.id);
 			const properties: Record<string, unknown> = {};
@@ -62,20 +62,16 @@ const InsertEditor = ({ domainModel, paramSchema, value, close }: AnyType) => {
 
 	return (
 		<PopView close={close} save={ctx.save} clickView={evt(ctx.blurAll).stop}>
-			<div className={css.segTitle}>
+			<div className={styles.segTitle}>
 				向
-				<select className={css.selectDom}
-				        value={nowValue.entity?.id}
-				        onChange={e => {
-					        ctx.setEntity(e.target.value);
-				        }}>
+				<select
+					className={styles.selectDom}
+				  value={nowValue.entities[0]?.id}
+	        onChange={e => ctx.setEntity(e.target.value)}
+				>
 					{
 						entityAry.map((et: Entity) => {
-							return (
-								<option key={et.id} value={et.id}>
-									{et.name}
-								</option>
-							);
+							return <option key={et.id} value={et.id}>{et.name}</option>;
 						})
 					}
 				</select>
@@ -84,7 +80,7 @@ const InsertEditor = ({ domainModel, paramSchema, value, close }: AnyType) => {
 			<FromTo
 				conAry={nowValue.conAry}
 			  from={{ title: '参数', schema: paramSchema }}
-				to={{ title: nowValue.entity.name, schema: fieldSchema }}
+				to={{ title: nowValue.entities[0]?.name, schema: fieldSchema }}
 				addBlurFn={ctx.addBlur}
 			/>
 		</PopView>

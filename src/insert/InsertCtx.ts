@@ -1,5 +1,4 @@
 import { DomainViewModel } from '../typing';
-import { getQuoteByFieldType } from '../_utils/field';
 
 export type T_Field = {
   id,
@@ -30,7 +29,7 @@ export default class InsertCtx {
 	nowValue: {
     desc: string
     script: string
-    entity: T_Entity,
+		entities: T_Entity[],
     conAry: { from: string, to: string }[]
   };
 
@@ -52,69 +51,22 @@ export default class InsertCtx {
 	}
 
 	save() {
-		const nowValue = this.nowValue;
-		let desc;
-
-		const conAry = this.nowValue.conAry;
-
-		if (nowValue.entity && nowValue.entity.fieldAry.length > 0) {
-			desc = `${nowValue.entity.name}`;
-
-			const sql = `INSERT INTO ${nowValue.entity.name} `;
-
-			const fieldAry = [], valueAry = [];
-			nowValue.entity.fieldAry.forEach(f => {
-				const fieldName = f.name;
-				const field = this.getOriField(fieldName);
-
-				if (!field.isPrimaryKey) {
-					fieldAry.push(fieldName);
-
-					const con = conAry.find(con => con.to === `/${fieldName}`);
-					if (con) {
-						const fromPropName = con.from.substring(con.from.indexOf('/') + 1);
-						const q = getQuoteByFieldType(field.dbType);
-						valueAry.push(`${q}\${params.${fromPropName}}${q}`);
-					} else {
-						valueAry.push('null');
-					}
-				}
-			});
-
-			const script = `
-      (params)=>{
-        return \`${sql}(${fieldAry.join(',')}) VALUES (${valueAry.join(',')})\`
-      }
-      `;
-			this.nowValue.script = script;
-		} else {
-			this.nowValue.script = void 0;
+		const { entities } = this.nowValue;
+		let desc = '';
+		
+		if (entities.length && entities[0].fieldAry.length > 0) {
+			desc = `${entities[0].name}`;
 		}
-
+		
 		this.nowValue.desc = desc;
-
 		this.value.set(this.nowValue);
-
+		
 		this.close();
 	}
 
-	getOriEntity() {
-		const nowEntity = this.nowValue.entity;
-		if (nowEntity) {
-			return this.domainModel.entityAry.find(e => e.id === nowEntity.id);
-		}
-	}
-
-	getOriField(fieldName) {
-		const oriEntity = this.getOriEntity();
-		if (oriEntity) {
-			return oriEntity.fieldAry.find(e => e.name === fieldName);
-		}
-	}
-
-	setEntity(entityId) {
-		const entity = this.domainModel.entityAry.find(e => e.id === entityId);
+	setEntity(entityId: string) {
+		const entity = this.domainModel.entityAry.find((e: T_Entity) => e.id === entityId);
 		const ent = entity.toJSON();
-		this.nowValue.entity = ent;
+		this.nowValue.entities = [ent];
 	}
 }
