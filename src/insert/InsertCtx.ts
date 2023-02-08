@@ -1,37 +1,37 @@
 import { DomainViewModel } from '../typing';
 
 export type T_Field = {
-  id,
-  isPrimaryKey,
-  name,
-  desc
+	id,
+	isPrimaryKey,
+	name,
+	desc
 }
 
 export type T_Entity = {
-  id,
-  name,
-  desc,
-  fieldAry: T_Field[]
+	id,
+	name,
+	desc,
+	fieldAry: T_Field[]
 }
 
 export default class InsertCtx {
 	domainModel: DomainViewModel;
 
 	value: {
-    get, set
-  };
+		get, set
+	};
 
 	paramSchema: {
-    type,
-    properties
-  };
+		type,
+		properties
+	};
 
 	nowValue: {
-    desc: string
-    script: string
+		desc: string
+		script: string
 		entities: T_Entity[],
-    conAry: { from: string, to: string }[]
-  };
+		conAry: { from: string, to: string }[]
+	};
 
 	close;
 
@@ -51,16 +51,17 @@ export default class InsertCtx {
 	}
 
 	save() {
+		// console.warn("save", JSON.parse(JSON.stringify(this.nowValue)));
 		const { entities } = this.nowValue;
 		let desc = '';
-		
+
 		if (entities.length && entities[0].fieldAry.length > 0) {
 			desc = `${entities[0].name}`;
 		}
-		
+
 		this.nowValue.desc = desc;
 		this.value.set(this.nowValue);
-		
+
 		this.close();
 	}
 
