@@ -1,10 +1,12 @@
 import { DomainViewModel } from '../typing';
+import { getQuoteByFieldType } from '../_utils/field';
 
 export type T_Field = {
-	id,
-	isPrimaryKey,
-	name,
-	desc
+  id,
+  isPrimaryKey,
+  name,
+  desc
+	dbType: string;
 }
 
 export type T_Entity = {
@@ -27,8 +29,8 @@ export default class InsertCtx {
 	};
 
 	nowValue: {
-		desc: string
-		script: string
+    desc: string
+    script?: string
 		entities: T_Entity[],
 		conAry: { from: string, to: string }[]
 	};
@@ -51,12 +53,38 @@ export default class InsertCtx {
 	}
 
 	save() {
-		// console.warn("save", JSON.parse(JSON.stringify(this.nowValue)));
-		const { entities } = this.nowValue;
+		const { entities, conAry } = this.nowValue;
 		let desc = '';
 
 		if (entities.length && entities[0].fieldAry.length > 0) {
 			desc = `${entities[0].name}`;
+			
+			const sql = `INSERT INTO ${entities[0].name} `;
+			
+			const fieldAry: string[] = [], valueAry: string[] = [];
+			entities[0].fieldAry.forEach(field => {
+				if (!field.isPrimaryKey) {
+					fieldAry.push(field.name);
+					
+					const con = conAry.find(con => con.to === `/${field.name}`);
+					if (con) {
+						const fromPropName = con.from.substring(con.from.indexOf('/') + 1);
+						const q = getQuoteByFieldType(field.dbType);
+						valueAry.push(`${q}\${params.${fromPropName}}${q}`);
+					} else {
+						valueAry.push('null');
+					}
+				}
+			});
+			
+			const script = `
+      (params)=>{
+        return \`${sql}(${fieldAry.join(',')}) VALUES (${valueAry.join(',')})\`
+      }
+      `;
+			this.nowValue.script = script;
+		} else {
+			this.nowValue.script = void 0;
 		}
 
 		this.nowValue.desc = desc;

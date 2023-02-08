@@ -1,9 +1,9 @@
 import React, { FC, useCallback, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { AnyType } from '../_types';
-import DeleteEditor from './delete-editor';
+import DeleteEditor from './DeleteEditor';
 
-import styles from '../delete/index.less';
+import css from '../delete/index.less';
 
 const Delete: FC = ({ editConfig: { value, options } }: AnyType, { domainModel, canvasEle }: AnyType) => {
 	const [popTrue, pop] = useState(false);
@@ -19,10 +19,9 @@ const Delete: FC = ({ editConfig: { value, options } }: AnyType, { domainModel, 
 	
 	return (
 		<>
-			<div className={styles.editor} onClick={openPop}>
+			<div className={css.editor} onClick={openPop}>
 				<span>规则:</span>
-				<span className={styles.tt}>{val?.desc ? `${val.desc}` : '[空] 点击编辑..'}</span>
-			
+				<span className={css.tt}>{val?.desc ? `${val.desc}` : '[空] 点击编辑..'}</span>
 			</div>
 			{
 				popTrue ? createPortal(

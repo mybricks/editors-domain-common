@@ -5,6 +5,7 @@
     "target": "es5",
     "lib": ["dom", "es6", "dom.iterable", "esnext"],
     "allowJs": true,
+    "noImplicitAny": false,
     "skipLibCheck": true,
     "esModuleInterop": true,
     "experimentalDecorators": true,

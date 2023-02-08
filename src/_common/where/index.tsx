@@ -5,7 +5,7 @@ import { AnyType } from '../../_types';
 import { getFieldConditionAry } from '../../_utils/field';
 import { Remove } from '../../_constants/icons';
 import { Condition, Entity, Field } from '../../_types/domain';
-import { FieldDBType, SQLWhereJoiner } from '../../_constants/field';
+import { FieldBizType, FieldDBType, SQLWhereJoiner } from '../../_constants/field';
 
 import styles from './index.less';
 
@@ -73,7 +73,7 @@ let whereContext: WhereContext;
 interface WhereProps {
 	nowValue: AnyType;
 	paramSchema: AnyType;
-	title?: string;
+	title?: ReactNode;
 	titleClassName?: string;
 	domainModal: AnyType;
 	addBlur(fn: () => void): void;
@@ -158,18 +158,41 @@ const Conditions: FC = () => {
 					.filter((oriEntity: Entity) => nowValue?.entities?.find(e => e.id === oriEntity.id))
 					.forEach((entity: Entity) => {
 						fieldSelectOptions.push(
-							...entity?.fieldAry.map((field) => {
-								return (
-									<option
-										key={`${entity.id}&&${field.id}`}
-										value={`${entity.id}&&${field.id}`}
-										disabled={conditionFieldIds.includes(field.id)}
-									>
-										{entity?.name}.{field.name}
-									</option>
-								);
-							}) || []
+							...entity?.fieldAry.filter((field: Field) => field.bizType !== FieldBizType.MAPPING)
+								.map((field) => {
+									return (
+										<option
+											key={`${entity.id}&&${field.id}`}
+											value={`${entity.id}&&${field.id}`}
+											disabled={conditionFieldIds.includes(field.id)}
+										>
+											{entity?.name}.{field.name}
+										</option>
+									);
+								}) || []
 						);
+					});
+				/** 映射字段 */
+				nowValue?.entities?.[0].fieldAry
+					.filter(field => field.bizType === FieldBizType.MAPPING)
+					.forEach(mappingField => {
+						const entity = whereContext.domainModal?.entityAry.find((entity: Entity) => entity.id === mappingField.mapping.entity.id);
+						
+						if (entity) {
+							fieldSelectOptions.push(
+								...entity?.fieldAry.map((field: Field) => {
+									return (
+										<option
+											key={`${entity.id}&&${field.id}`}
+											value={`${entity.id}&&${field.id}`}
+											disabled={conditionFieldIds.includes(field.id)}
+										>
+											{entity?.name}.{mappingField.name}.{field.name}
+										</option>
+									);
+								}) || []
+							);
+						}
 					});
 				
 				return condition.conditions ? (
@@ -197,10 +220,10 @@ const Conditions: FC = () => {
 									currentContext.showFieldGroupId === condition.fieldId ? (
 										<div className={styles.popMenu} style={{ left: '140px', top: '28px', width: '180px' }}>
 											<div className={styles.item} onClick={() => whereContext.addCondition?.({ isGroup: false, parentCondition: condition })}>
-												新增条件
+												条件
 											</div>
 											<div className={styles.item} onClick={() => whereContext.addCondition?.({ isGroup: true, parentCondition: condition })}>
-												新增条件组
+												条件组
 											</div>
 										</div>
 									) : null

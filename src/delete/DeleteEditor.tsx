@@ -6,7 +6,9 @@ import PopView from '../_common/pop-view';
 import Where from '../_common/where';
 import { SQLWhereJoiner } from '../_constants/field';
 import { formatEntitiesByOriginEntities } from '../_utils/entity';
-
+import { Entity } from '../_types/domain';
+import { spliceDeleteSQLByConditions } from "../_utils/sql";
+import { getParamsByConditions } from "../_utils/params";
 import styles from './index.less';
 
 class DeleteContext {
@@ -16,11 +18,11 @@ class DeleteContext {
 	value!: AnyType;
 	/** 失焦执行的方法 */
 	blurAry: Array<() => void> = [];
-	
+
 	addBlur(fn: () => void) {
 		this.blurAry.push(fn);
 	}
-	
+
 	blurAll() {
 		if (this.blurAry.length > 0) {
 			this.blurAry.forEach(fn => fn());
@@ -28,16 +30,32 @@ class DeleteContext {
 	}
 	close!: () => void;
 	save() {
-		const nowValue = this.nowValue;
+		const { entities, conditions } = this.nowValue;
 		let desc = '';
-		
-		if (nowValue.entities?.length && nowValue.entities[0].fieldAry.length > 0) {
-			desc = `${nowValue.entities[0].name}`;
+
+		if (entities?.length && entities[0].fieldAry.length > 0) {
+			desc = `${entities[0].name}`;
+
+			let params = getParamsByConditions(conditions.conditions);
+			let sql = spliceDeleteSQLByConditions({
+				params,
+				entities: entities,
+				conditions: conditions,
+			});
+
+			let script = `
+			(params)=>{ 
+				return \`${sql}\`;
+			}
+			`;
+			this.nowValue.script = script;
+		} else {
+			this.nowValue.script = void 0;
 		}
-		
+
 		this.nowValue.desc = desc;
 		this.value.set(this.nowValue);
-		
+
 		this.close();
 	}
 }
@@ -56,7 +74,7 @@ const DeleteEditor: FC<DeleteEditorProps> = props => {
 		let val;
 		if (oriVal) {
 			val = JSON.parse(JSON.stringify(oriVal));
-			
+
 			/** 实体信息可能存在变更，每次使用最新的实体信息 */
 			val.entities = formatEntitiesByOriginEntities(val.entities, domainModel.entityAry);
 		} else {
@@ -71,7 +89,7 @@ const DeleteEditor: FC<DeleteEditorProps> = props => {
 				},
 			};
 		}
-		
+
 		next({
 			domainModel,
 			paramSchema,
@@ -80,12 +98,34 @@ const DeleteEditor: FC<DeleteEditorProps> = props => {
 			close
 		});
 	});
-	
+
 	return (
 		<PopView close={close} save={deleteContext.save} clickView={evt(deleteContext.blurAll).stop}>
 			<Where
 				titleClassName={styles.whereTitle}
-				title="1. 删除符合以下条件的数据"
+				title={
+					<>
+						1. 删除
+						<select
+							className={styles.selectDom}
+							value={deleteContext.nowValue.entities[0]?.id}
+							onChange={e => {
+								const originEntity = deleteContext.domainModel.entityAry.find((entity: Entity) => entity.id === e.target.value);
+
+								if (originEntity) {
+									deleteContext.nowValue.entities = [originEntity.toJSON()];
+								}
+							}}
+						>
+							{
+								deleteContext.domainModel.entityAry.map((et: Entity) => {
+									return <option key={et.id} value={et.id}>{et.name}</option>;
+								})
+							}
+						</select>
+						中符合以下条件的数据
+					</>
+				}
 				nowValue={deleteContext.nowValue}
 				paramSchema={deleteContext.paramSchema}
 				addBlur={deleteContext.addBlur}

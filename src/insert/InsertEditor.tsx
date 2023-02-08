@@ -1,6 +1,6 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 // @ts-ignore
-import { evt, useObservable } from '@mybricks/rxui';
+import { evt, useComputed, useObservable } from '@mybricks/rxui';
 import InsertCtx from './InsertCtx';
 import FromTo from '../_common/from-to';
 import { AnyType } from '../_types';
@@ -41,7 +41,7 @@ const InsertEditor = ({ domainModel, paramSchema, value, close }: AnyType) => {
 	const nowValue = ctx.nowValue;
 	const entityAry = ctx.domainModel.entityAry;
 
-	const fieldSchema = useMemo(() => {
+	const fieldSchema = useComputed(() => {
 		const nowEntity = nowValue.entities[0];
 		if (nowEntity) {
 			const oriEntity = entityAry.find((et: { id: string }) => et.id === nowEntity.id);
@@ -58,7 +58,7 @@ const InsertEditor = ({ domainModel, paramSchema, value, close }: AnyType) => {
 			});
 			return rtn;
 		}
-	}, []);
+	});
 
 	return (
 		<PopView close={close} save={ctx.save} clickView={evt(ctx.blurAll).stop}>

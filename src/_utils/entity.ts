@@ -23,3 +23,4 @@ export const formatEntitiesByOriginEntities = (entities: Entity[], originEntitie
 		}
 	}).filter(Boolean);
 };
+
