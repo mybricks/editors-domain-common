@@ -85,16 +85,7 @@ export default class QueryCtx {
 
 	setEntity(entity: AnyType) {
 		const entities = [];
-		const nowEntity = entity.toJSON();
-		const relationFields = nowEntity.fieldAry.filter((field: Field) => field.bizType === FieldBizType.RELATION);
-		
 		entities.push(entity.toJSON());
-		entities.push(
-			...relationFields
-				.map((field: Field) => (this.domainModel.entityAry.find((entity: Entity) => entity.id === field.relationEntityId) as AnyType)?.toJSON())
-				.filter(Boolean)
-				.map((entity: Entity) => ({ ...entity, isRelationEntity: true, fieldAry: [] }))
-		);
 		
 		this.nowValue.entities = entities;
 	}
@@ -111,11 +102,6 @@ export default class QueryCtx {
 		
 		if (field) {
 			nowEntity.fieldAry = nowEntity.fieldAry.filter(f => f.id !== fieldId);
-			
-			/** 删除关联实体 */
-			if (field.bizType === FieldBizType.RELATION) {
-				this.nowValue.entities = this.nowValue.entities.filter(entity => field.relationEntityId !== entity.id);
-			}
 		} else {
 			nowEntity.fieldAry = oriEntity.fieldAry
 				.map((oriF: T_Field) => {
@@ -124,14 +110,6 @@ export default class QueryCtx {
 					if (field) {//exits
 						return field;
 					} else if (oriF.id === fieldId) {
-						/** 关联实体 */
-						if (oriF.bizType === FieldBizType.RELATION) {
-							this.nowValue.entities.push(
-								...this.domainModel.entityAry
-									.filter((entity: Entity) => oriF.relationEntityId === entity.id)
-									.map((entity: AnyType) => ({ ...entity.toJSON(), isRelationEntity: true, fieldAry: [] }))
-							);
-						}
 						return (oriF as AnyType).toJSON() as T_Field;
 					}
 				})

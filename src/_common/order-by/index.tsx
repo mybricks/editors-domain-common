@@ -2,7 +2,7 @@ import React, { FC, ReactNode } from 'react';
 // @ts-ignore
 import { evt, useComputed, useObservable } from '@mybricks/rxui';
 import { AnyType } from '../../_types';
-import { SQLOrder } from '../../_constants/field';
+import { FieldBizType, SQLOrder } from '../../_constants/field';
 import { Entity, Field } from '../../_types/domain';
 import { Remove } from '../../_constants/icons';
 
@@ -85,6 +85,30 @@ const OrderItem: FC<OrderItemProps> = props => {
 						);
 					}) || []
 				);
+			});
+		
+		
+		/** 映射字段 */
+		orderContext.nowValue?.entities?.[0].fieldAry
+			.filter((field: Field) => field.bizType === FieldBizType.MAPPING)
+			.forEach((mappingField: Field) => {
+				const entity = orderContext.domainModal?.entityAry.find((entity: Entity) => entity.id === mappingField.mapping.entity.id);
+			
+				if (entity) {
+					options.push(
+						...entity?.fieldAry.map((field: Field) => {
+							return (
+								<option
+									key={`${entity.id}&&${field.id}`}
+									value={`${entity.id}&&${field.id}`}
+									disabled={orderFieldIds.includes(field.id)}
+								>
+									{entity?.name}.{mappingField.name}.{field.name}
+								</option>
+							);
+						}) || []
+					);
+				}
 			});
 		
 		return options;

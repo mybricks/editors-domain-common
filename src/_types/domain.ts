@@ -1,4 +1,5 @@
-import {FieldBizType, FieldDBType, SQLWhereJoiner} from '../_constants/field';
+import { FieldBizType, FieldDBType, SQLWhereJoiner } from '../_constants/field';
+import { AnyType } from './index';
 
 export interface Entity {
 	/** 表 ID，在前端编辑页使用 */
@@ -26,6 +27,13 @@ export interface Field {
 	relationEntityId?: string;
 	/** 是否为主键 */
 	isPrimaryKey?: boolean;
+	mapping: {
+		condition: string;
+		fieldJoiner: string;
+		entity: Entity;
+		sql: string;
+		desc: string;
+	};
 }
 
 export interface Condition {

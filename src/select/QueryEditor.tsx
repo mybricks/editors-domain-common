@@ -5,7 +5,7 @@ import QueryCtx from './QueryCtx';
 import Where from '../_common/where';
 import PopView from '../_common/pop-view';
 import { AnyType } from '../_types';
-import { FieldBizType, SQLWhereJoiner } from '../_constants/field';
+import { SQLWhereJoiner } from '../_constants/field';
 import { Entity, Field } from '../_types/domain';
 import OrderBy from '../_common/order-by';
 import { formatEntitiesByOriginEntities } from '../_utils/entity';
@@ -87,7 +87,7 @@ function SelectFrom() {
 								const checked = Boolean(entity.fieldAry.find(f => f.id === field.id));
 								
 								return (
-									<div key={field.id} className={css.field} title={`${originEntity.name}.${field.name}(${field.desc})`}>
+									<div key={field.id} className={css.field} title={`${originEntity.name}.${field.name}(${field.desc ?? ''})`}>
 										<input type="checkbox" checked={checked} onChange={() => ctx.setField(entity as AnyType, field.id)} />
 										<span>{originEntity.name}.{field.name}</span>
 										<span>{field.desc}</span>
