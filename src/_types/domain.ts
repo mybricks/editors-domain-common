@@ -27,10 +27,10 @@ export interface Field {
 	relationEntityId?: string;
 	/** 是否为主键 */
 	isPrimaryKey?: boolean;
-	mapping: {
+	mapping?: {
 		condition: string;
 		fieldJoiner: string;
-		entity: Entity;
+		entity?: Omit<Entity, 'fieldAry'> & { field: Field };
 		sql: string;
 		desc: string;
 	};

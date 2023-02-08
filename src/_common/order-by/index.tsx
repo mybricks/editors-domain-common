@@ -92,21 +92,18 @@ const OrderItem: FC<OrderItemProps> = props => {
 		orderContext.nowValue?.entities?.[0].fieldAry
 			.filter((field: Field) => field.bizType === FieldBizType.MAPPING)
 			.forEach((mappingField: Field) => {
-				const entity = orderContext.domainModal?.entityAry.find((entity: Entity) => entity.id === mappingField.mapping.entity.id);
+				const entity = mappingField.mapping?.entity;
+				const originEntity = orderContext.domainModal?.entityAry.find((entity: Entity) => entity.id === entity?.id);
 			
-				if (entity) {
+				if (originEntity) {
 					options.push(
-						...entity?.fieldAry.map((field: Field) => {
-							return (
-								<option
-									key={`${entity.id}&&${field.id}`}
-									value={`${entity.id}&&${field.id}`}
-									disabled={orderFieldIds.includes(field.id)}
-								>
-									{entity?.name}.{mappingField.name}.{field.name}
-								</option>
-							);
-						}) || []
+						<option
+							key={`${entity?.id}&&${entity?.field.id}`}
+							value={`${entity?.id}&&${entity?.field.id}`}
+							disabled={orderFieldIds.includes(entity?.field.id ?? '')}
+						>
+							{entity?.name}.{mappingField.name}.{entity?.field.name}
+						</option>
 					);
 				}
 			});
