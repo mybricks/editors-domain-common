@@ -8,6 +8,7 @@ import { getFieldSchema } from '../_utils/field';
 import PopView from '../_common/pop-view';
 import { Entity } from '../_types/domain';
 import { formatEntitiesByOriginEntities } from '../_utils/entity';
+import { FieldBizType } from '../_constants/field';
 
 import styles from './InsertEditor.less';
 
@@ -51,8 +52,8 @@ const InsertEditor = ({ domainModel, paramSchema, value, close }: AnyType) => {
 				properties
 			};
 
-			oriEntity.fieldAry.forEach((field: { isPrimaryKey: boolean; name: string; dbType: string }) => {
-				if (!field.isPrimaryKey) {
+			oriEntity.fieldAry.forEach((field: { isPrimaryKey: boolean; name: string; dbType: string; bizType: FieldBizType }) => {
+				if (!field.isPrimaryKey && field.bizType !== FieldBizType.MAPPING) {
 					properties[field.name] = getFieldSchema(field.dbType);
 				}
 			});

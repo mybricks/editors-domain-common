@@ -4,11 +4,11 @@ import { evt, useComputed, useObservable } from '@mybricks/rxui';
 import InsertCtx from './InsertCtx';
 import FromTo from '../_common/from-to';
 import PopView from '../_common/pop-view';
-import { Entity, Field } from '../_types/domain';
+import { Entity } from '../_types/domain';
 import { getFieldSchema } from '../_utils/field';
 import { AnyType } from '../_types';
 import Where from '../_common/where';
-import { SQLWhereJoiner } from '../_constants/field';
+import { FieldBizType, SQLWhereJoiner } from '../_constants/field';
 import { formatEntitiesByOriginEntities } from '../_utils/entity';
 
 import css from './InsertEditor.less';
@@ -58,9 +58,9 @@ export default function InsertEditor({ domainModel, paramSchema, value, close }:
 				type: 'object',
 				properties
 			};
-
-			oriEntity.fieldAry.forEach((field: Field) => {
-				if (!field.isPrimaryKey) {
+			
+			oriEntity.fieldAry.forEach((field: { isPrimaryKey: boolean; name: string; dbType: string; bizType: FieldBizType }) => {
+				if (!field.isPrimaryKey && field.bizType !== FieldBizType.MAPPING) {
 					properties[field.name] = getFieldSchema(field.dbType);
 				}
 			});
