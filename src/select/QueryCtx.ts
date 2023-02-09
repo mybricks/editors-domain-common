@@ -1,8 +1,8 @@
 import { AnyType } from '../_types';
 import { FieldBizType, SQLOrder, SQLWhereJoiner } from '../_constants/field';
 import { Entity, Field } from '../_types/domain';
-import { spliceSelectSQLByConditions } from "./selectSql";
 import { getParamsByConditions } from "../_utils/params";
+import { spliceSelectSQLByConditions, spliceSelectCountSQLByConditions } from "../_utils/sql";
 
 
 export type T_Field = {
@@ -46,6 +46,8 @@ export default class QueryCtx {
 		set(value: AnyType): void;
 	};
 
+	showPager!: Boolean;
+
 	nowValue!: {
 		desc: string
 		sql: string
@@ -82,10 +84,28 @@ export default class QueryCtx {
 
 		if (entities?.length && entities[0].fieldAry.length > 0) {
 
+			// if (this.showPager) {
+
+			// 	let _spliceSelectCountSQLByConditions = spliceSelectCountSQLByConditions.toString().replace(/(\r|\n|\s\s)/g, "");
+			// 	//
+			// 	const countSql = spliceSelectCountSQLByConditions({
+			// 		conditions: conditions || [],
+			// 		entities,
+			// 		params: {},
+			// 		orders: orders || [],
+			// 		originEntities: originEntities,
+			// 	});
+
+			// 	//
+
+			// } else {
+
+			// }
+
 			let _spliceSelectSQLByConditions = spliceSelectSQLByConditions.toString().replace(/(\r|\n|\s\s)/g, "");
 
 			let script = `
-			(params)=>{ 
+			(params)=>{
 				const spliceSelectSQLByConditions = ${_spliceSelectSQLByConditions};
 
 				let sql = spliceSelectSQLByConditions({

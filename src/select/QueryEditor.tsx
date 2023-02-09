@@ -43,7 +43,8 @@ export default function QueryEditor({ domainModel, paramSchema, value, close, sh
 			paramSchema,
 			nowValue: val,
 			value,
-			close
+			close,
+			showPager
 		});
 	}, { to: 'children' });
 
