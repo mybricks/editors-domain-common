@@ -9,6 +9,7 @@ export type T_Field = {
   desc
 	dbType: string;
 	bizType: FieldBizType;
+	isPrivate: boolean;
 }
 
 export type T_Entity = {

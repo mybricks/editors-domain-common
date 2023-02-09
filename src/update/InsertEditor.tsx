@@ -59,8 +59,8 @@ export default function InsertEditor({ domainModel, paramSchema, value, close }:
 				properties
 			};
 			
-			oriEntity.fieldAry.forEach((field: { isPrimaryKey: boolean; name: string; dbType: string; bizType: FieldBizType }) => {
-				if (!field.isPrimaryKey && field.bizType !== FieldBizType.MAPPING) {
+			oriEntity.fieldAry.forEach((field: { isPrimaryKey: boolean; name: string; dbType: string; bizType: FieldBizType; isPrivate: boolean }) => {
+				if (!field.isPrimaryKey && field.bizType !== FieldBizType.MAPPING && !field.isPrivate) {
 					properties[field.name] = getFieldSchema(field.dbType);
 				}
 			});

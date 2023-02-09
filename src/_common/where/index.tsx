@@ -158,7 +158,8 @@ const Conditions: FC = () => {
 					.filter((oriEntity: Entity) => nowValue?.entities?.find(e => e.id === oriEntity.id))
 					.forEach((entity: Entity) => {
 						fieldSelectOptions.push(
-							...entity?.fieldAry.filter((field: Field) => field.bizType !== FieldBizType.MAPPING)
+							...entity?.fieldAry
+								.filter((field: Field) => !field.isPrivate && field.bizType !== FieldBizType.MAPPING)
 								.map((field) => {
 									return (
 										<option
@@ -177,7 +178,7 @@ const Conditions: FC = () => {
 					.filter(field => field.bizType === FieldBizType.MAPPING)
 					.forEach(mappingField => {
 						const entity = mappingField.mapping?.entity;
-						const originEntity = whereContext.domainModal?.entityAry.find((entity: Entity) => entity.id === entity?.id);
+						const originEntity = whereContext.domainModal?.entityAry.find((originEntity: Entity) => originEntity.id === entity?.id);
 						
 						if (originEntity) {
 							fieldSelectOptions.push(

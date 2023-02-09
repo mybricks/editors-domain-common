@@ -1,13 +1,13 @@
 import { AnyType } from '../_types';
-import { FieldBizType, SQLOrder, SQLWhereJoiner } from '../_constants/field';
-import { Entity, Field } from '../_types/domain';
-import { getParamsByConditions } from "../_utils/params";
-import { spliceSelectSQLByConditions, spliceSelectCountSQLByConditions } from "../_utils/sql";
+import { SQLOrder, SQLWhereJoiner } from '../_constants/field';
+import { spliceSelectSQLByConditions } from './selectSql';
 
 
 export type T_Field = {
 	id: string;
 	isPrimaryKey?: boolean;
+	/** 私有字段 */
+	isPrivate?: boolean;
 	name: string;
 	desc?: string;
 	bizType: string;
@@ -84,25 +84,7 @@ export default class QueryCtx {
 
 		if (entities?.length && entities[0].fieldAry.length > 0) {
 
-			// if (this.showPager) {
-
-			// 	let _spliceSelectCountSQLByConditions = spliceSelectCountSQLByConditions.toString().replace(/(\r|\n|\s\s)/g, "");
-			// 	//
-			// 	const countSql = spliceSelectCountSQLByConditions({
-			// 		conditions: conditions || [],
-			// 		entities,
-			// 		params: {},
-			// 		orders: orders || [],
-			// 		originEntities: originEntities,
-			// 	});
-
-			// 	//
-
-			// } else {
-
-			// }
-
-			let _spliceSelectSQLByConditions = spliceSelectSQLByConditions.toString().replace(/(\r|\n|\s\s)/g, "");
+			let _spliceSelectSQLByConditions = spliceSelectSQLByConditions.toString().replace(/(\r|\n|\s\s)/g, '');
 
 			let script = `
 			(params)=>{

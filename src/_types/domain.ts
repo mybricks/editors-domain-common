@@ -26,6 +26,8 @@ export interface Field {
 	relationEntityId?: string;
 	/** 是否为主键 */
 	isPrimaryKey?: boolean;
+	/** 私有字段 */
+	isPrivate?: boolean;
 	mapping?: {
 		condition: string;
 		fieldJoiner: string;
