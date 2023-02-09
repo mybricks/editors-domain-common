@@ -101,8 +101,6 @@ export default class QueryCtx {
 			}
 			`;
 
-			console.log(script);
-
 			this.nowValue.script = script;
 		} else {
 			this.nowValue.script = void 0;
