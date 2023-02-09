@@ -1,5 +1,4 @@
-import { FieldBizType, FieldDBType, SQLOrder, SQLWhereJoiner } from '../_constants/field';
-import { AnyType } from './index';
+import {FieldBizType, FieldDBType, SQLOrder, SQLWhereJoiner} from '../_constants/field';
 
 export interface Entity {
 	/** 表 ID，在前端编辑页使用 */
@@ -31,6 +30,7 @@ export interface Field {
 		condition: string;
 		fieldJoiner: string;
 		entity?: Omit<Entity, 'fieldAry'> & { field: Field };
+		type?: string;
 		sql: string;
 		desc: string;
 	};
@@ -47,6 +47,7 @@ export interface Condition {
 	operator?: string;
 	/** 条件语句值 */
 	value: string;
+	checkExist: boolean;
 	conditions: Condition[];
 	whereJoiner: SQLWhereJoiner;
 }

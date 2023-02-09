@@ -1,7 +1,7 @@
 import { AnyType } from '../_types';
 import { FieldBizType, SQLOrder, SQLWhereJoiner } from '../_constants/field';
 import { Entity, Field } from '../_types/domain';
-import { spliceSelectSQLByConditions } from "./sql";
+import { spliceSelectSQLByConditions } from "./selectSql";
 import { getParamsByConditions } from "../_utils/params";
 
 
@@ -82,16 +82,14 @@ export default class QueryCtx {
 
 		if (entities?.length && entities[0].fieldAry.length > 0) {
 
-			// let params = getParamsByConditions(conditions.conditions);
-
 			let _spliceSelectSQLByConditions = spliceSelectSQLByConditions.toString().replace(/(\r|\n|\s\s)/g, "");
 
 			let script = `
-			((params)=>{ 
+			(params)=>{ 
 				const spliceSelectSQLByConditions = ${_spliceSelectSQLByConditions};
 
 				let sql = spliceSelectSQLByConditions({
-					params: params,
+					params: params || {},
 					conditions: ${JSON.stringify(conditions)} || [],
 					entities: ${JSON.stringify(entities)},
 					limit: ${JSON.stringify(limit)},
@@ -100,7 +98,7 @@ export default class QueryCtx {
 				});
 
 				return sql;
-			})()
+			}
 			`;
 
 			console.log(script);
