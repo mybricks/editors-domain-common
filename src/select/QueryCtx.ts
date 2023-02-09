@@ -46,6 +46,8 @@ export default class QueryCtx {
 		set(value: AnyType): void;
 	};
 
+	showPager!: Boolean;
+
 	nowValue!: {
 		desc: string
 		sql: string
@@ -85,7 +87,7 @@ export default class QueryCtx {
 			let _spliceSelectSQLByConditions = spliceSelectSQLByConditions.toString().replace(/(\r|\n|\s\s)/g, '');
 
 			let script = `
-			(params)=>{ 
+			(params)=>{
 				const spliceSelectSQLByConditions = ${_spliceSelectSQLByConditions};
 
 				let sql = spliceSelectSQLByConditions({
