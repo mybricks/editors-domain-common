@@ -1,6 +1,6 @@
 import { DomainViewModel } from '../types';
-import { spliceUpdateSQLByConditions } from "../_utils/sql";
-import { getParamsByConditions } from "../_utils/params";
+import { spliceUpdateSQLByConditions } from '../_utils/sql';
+import { getParamsByConditions } from '../_utils/params';
 
 export type T_Field = {
 	id,
@@ -18,12 +18,12 @@ export type T_Entity = {
 
 const getTypeQuote = (type) => {
 	switch (type) {
-		case 'string': {
-			return '\'';
-		}
-		case 'number': {
-			return '';
-		}
+	case 'string': {
+		return '\'';
+	}
+	case 'number': {
+		return '';
+	}
 	}
 };
 
@@ -64,10 +64,10 @@ export default class InsertCtx {
 	}
 
 	save() {
-		const { conAry, entities, conditions } = this.nowValue;
+		const { conAry, entities, conditions, conAry } = this.nowValue;
 		let desc = '';
 
-		if (entities?.length && entities[0].fieldAry.length > 0) {
+		if (entities?.length && entities[0].fieldAry.length > 0 && conAry.length) {
 			desc = `${entities[0].name}`;
 
 			let params = getParamsByConditions(conditions.conditions);
@@ -76,7 +76,7 @@ export default class InsertCtx {
 				conditions: conditions,
 				connectors: conAry,
 				entities: entities,
-			})
+			});
 
 			console.error(sql);
 			

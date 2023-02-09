@@ -1,6 +1,6 @@
-import { DomainViewModel } from '../typing';
-import { getQuoteByFieldType } from '../_utils/field';
-import { FieldBizType } from '../_constants/field';
+import {DomainViewModel} from '../typing';
+import {getQuoteByFieldType} from '../_utils/field';
+import {FieldBizType} from '../_constants/field';
 
 export type T_Field = {
   id,
@@ -75,7 +75,13 @@ export default class InsertCtx {
 						const q = getQuoteByFieldType(field.dbType);
 						valueAry.push(`\${params.${fromPropName} === undefined ? null : \`${q}\${params.${fromPropName}}${q}\`}`);
 					} else {
-						valueAry.push('null');
+						if (field.name === '_status_deleted') {
+							valueAry.push('0');
+						} else if (field.bizType === FieldBizType.DATETIME) {
+							valueAry.push('${Date.now()}');
+						} else {
+							valueAry.push('null');
+						}
 					}
 				}
 			});
@@ -85,6 +91,7 @@ export default class InsertCtx {
         return \`${sql}(${fieldAry.join(',')}) VALUES (${valueAry.join(',')})\`
       }
       `;
+			console.log('script', script);
 			this.nowValue.script = script;
 		} else {
 			this.nowValue.script = void 0;

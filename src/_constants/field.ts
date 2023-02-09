@@ -2,6 +2,7 @@
 export enum FieldBizType {
 	STRING = 'string',
 	NUMBER = 'number',
+	DATETIME = 'datetime',
 	/** 外键，关联其他表 */
 	RELATION = 'relation',
 	/** 映射其他表 */
