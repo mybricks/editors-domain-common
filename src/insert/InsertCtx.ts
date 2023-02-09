@@ -1,5 +1,6 @@
 import { DomainViewModel } from '../typing';
 import { getQuoteByFieldType } from '../_utils/field';
+import { FieldBizType } from '../_constants/field';
 
 export type T_Field = {
   id,
@@ -7,6 +8,7 @@ export type T_Field = {
   name,
   desc
 	dbType: string;
+	bizType: FieldBizType;
 }
 
 export type T_Entity = {
@@ -63,14 +65,14 @@ export default class InsertCtx {
 			
 			const fieldAry: string[] = [], valueAry: string[] = [];
 			entities[0].fieldAry.forEach(field => {
-				if (!field.isPrimaryKey) {
+				if (!field.isPrimaryKey && field.bizType !== FieldBizType.MAPPING) {
 					fieldAry.push(field.name);
 					
 					const con = conAry.find(con => con.to === `/${field.name}`);
 					if (con) {
 						const fromPropName = con.from.substring(con.from.indexOf('/') + 1);
 						const q = getQuoteByFieldType(field.dbType);
-						valueAry.push(`${q}\${params.${fromPropName}}${q}`);
+						valueAry.push(`\${params.${fromPropName} === undefined ? null : \`${q}\${params.${fromPropName}}${q}\`}`);
 					} else {
 						valueAry.push('null');
 					}
