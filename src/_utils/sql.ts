@@ -437,7 +437,7 @@ export const spliceUpdateSQLByConditions = (fnParams: {
 		const sql: string[] = [];
 		
 		/** 前置 sql */
-		sql.push(`UPDATE ${entity.name} SET`);
+		sql.push(`UPDATE ${entity.name} SET _update_user_id = '', _update_time = \${Date.now()}, `);
 		sql.push(spliceUpdateSQLFragmentByConditions({
 			connectors,
 			entity,
@@ -467,7 +467,7 @@ export const spliceDeleteSQLByConditions = (fnParams: {
 		const sql: string[] = [];
 		
 		/** 前置 sql */
-		sql.push(`DELETE FROM ${entity.name}`);
+		sql.push(`UPDATE ${entity.name} SET _status_deleted = 0, _update_user_id = '', _update_time = \${Date.now()}`);
 		sql.push(spliceWhereSQLFragmentByConditions({
 			conditions: [conditions],
 			entities,
