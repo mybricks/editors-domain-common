@@ -77,13 +77,15 @@ const OrderItem: FC<OrderItemProps> = props => {
 			.filter((oriEntity: Entity) => orderContext.nowValue?.entities.find((e: Entity) => e.id === oriEntity.id))
 			.forEach((entity: Entity) => {
 				options.push(
-					...entity?.fieldAry.map((field) => {
-						return (
-							<option key={field.id} value={`${entity.id}&&${field.id}`} disabled={orderFieldIds.includes(field.id)}>
-								{entity?.name}.{field.name}
-							</option>
-						);
-					}) || []
+					...entity?.fieldAry
+						.filter((field: Field) => !field.isPrivate && field.bizType !== FieldBizType.MAPPING)
+						.map((field) => {
+							return (
+								<option key={field.id} value={`${entity.id}&&${field.id}`} disabled={orderFieldIds.includes(field.id)}>
+									{entity?.name}.{field.name}
+								</option>
+							);
+						}) || []
 				);
 			});
 		
@@ -93,7 +95,7 @@ const OrderItem: FC<OrderItemProps> = props => {
 			.filter((field: Field) => field.bizType === FieldBizType.MAPPING)
 			.forEach((mappingField: Field) => {
 				const entity = mappingField.mapping?.entity;
-				const originEntity = orderContext.domainModal?.entityAry.find((entity: Entity) => entity.id === entity?.id);
+				const originEntity = orderContext.domainModal?.entityAry.find((originEntity: Entity) => originEntity.id === entity?.id);
 			
 				if (originEntity) {
 					options.push(

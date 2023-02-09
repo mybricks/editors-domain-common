@@ -83,17 +83,23 @@ function SelectFrom() {
 					
 					if (originEntity) {
 						res.push(
-							...originEntity.fieldAry.map((field: Field) => {
-								const checked = Boolean(entity.fieldAry.find(f => f.id === field.id));
+							...originEntity.fieldAry
+								.filter(field => !field.isPrivate)
+								.map((field: Field) => {
+									const checked = Boolean(entity.fieldAry.find(f => f.id === field.id));
 								
-								return (
-									<div key={field.id} className={css.field} title={`${originEntity.name}.${field.name}(${field.desc ?? ''})`}>
-										<input type="checkbox" checked={checked} onChange={() => ctx.setField(entity as AnyType, field.id)} />
-										<span>{originEntity.name}.{field.name}</span>
-										<span>{field.desc}</span>
-									</div>
-								);
-							})
+									return (
+										<div
+											key={field.id}
+											className={css.field}
+											title={`${originEntity.name}.${field.name}(${field.desc ?? ''})`}
+										>
+											<input type="checkbox" checked={checked} onChange={() => ctx.setField(entity as AnyType, field.id)} />
+											<span onClick={() => ctx.setField(entity as AnyType, field.id)}>{originEntity.name}.{field.name}</span>
+											<span>{field.desc}</span>
+										</div>
+									);
+								})
 						);
 					}
 				});
