@@ -76,7 +76,7 @@ export default class InsertCtx {
 						valueAry.push(`\${params.${fromPropName} === undefined ? null : \`${q}\${params.${fromPropName}}${q}\`}`);
 					} else {
 						if (field.name === '_status_deleted') {
-							valueAry.push('1');
+							valueAry.push('0');
 						} else if (field.bizType === FieldBizType.DATETIME) {
 							valueAry.push('${Date.now()}');
 						} else {

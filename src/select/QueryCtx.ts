@@ -1,6 +1,6 @@
 import { AnyType } from '../_types';
 import { SQLOrder, SQLWhereJoiner } from '../_constants/field';
-import { spliceSelectSQLByConditions } from './selectSql';
+import { spliceSelectSQLByConditions } from '../_utils/sql';
 
 
 export type T_Field = {
