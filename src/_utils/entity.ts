@@ -5,22 +5,24 @@ import { AnyType } from '../_types';
  * 实体信息可能存在变更，每次使用最新的实体信息
  * 根据 domainModal 中实体列表刷新 editor 中的 entities（已选择实体列表） */
 export const formatEntitiesByOriginEntities = (entities: Entity[], originEntities: AnyType[]) => {
-	return entities.map((entity: Entity) => {
-		let originEntity = originEntities.find((e: Entity) => e.id === entity.id);
+	return originEntities.map((originEntity: Entity) => {
+		const entity = entities.find((e: Entity) => e.id === originEntity.id);
 		
-		if (originEntity) {
-			originEntity = originEntity.toJSON();
+		if (entity) {
+			const originEntityJSON = (originEntity as AnyType).toJSON();
 			
 			return {
-				...originEntity,
+				...originEntityJSON,
 				selected: entity.selected,
-				fieldAry: entity.fieldAry.map((field: Field) => {
-					const originField = originEntity.fieldAry.find((f: Field) => f.id === field.id);
+				fieldAry: originEntityJSON.fieldAry.map((originField: Field) => {
+					const field = entity.fieldAry.find((f: Field) => f.id === originField.id);
 					
-					return originField ? { ...originField, selected: field.selected } : undefined;
-				}).filter(Boolean),
+					return field ? { ...originField, selected: (field.name === originField.name) && field.selected } : originField;
+				}),
 			};
+		} else {
+			return (originEntity as AnyType).toJSON();
 		}
-	}).filter(Boolean);
+	});
 };
 

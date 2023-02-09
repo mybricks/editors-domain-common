@@ -12,7 +12,7 @@ export default function FromTo({ conAry, from, to, addBlurFn }) {
 			conAry: conAry || [],
 			addBlurFn
 		});
-	}, { to: 'children' });
+	}, { to: 'children' }, [conAry]);
 
 	useEffect(() => {
 		addBlurFn(() => {

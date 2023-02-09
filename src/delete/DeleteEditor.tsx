@@ -7,8 +7,9 @@ import Where from '../_common/where';
 import { SQLWhereJoiner } from '../_constants/field';
 import { formatEntitiesByOriginEntities } from '../_utils/entity';
 import { Entity } from '../_types/domain';
-import { spliceDeleteSQLByConditions } from "../_utils/sql";
-import { getParamsByConditions } from "../_utils/params";
+import { spliceDeleteSQLByConditions } from '../_utils/sql';
+import { getParamsByConditions } from '../_utils/params';
+
 import styles from './index.less';
 
 class DeleteContext {
@@ -48,6 +49,8 @@ class DeleteContext {
 				return \`${sql}\`;
 			}
 			`;
+			
+			console.log('DELETE SQL: ', script);
 			this.nowValue.script = script;
 		} else {
 			this.nowValue.script = void 0;
@@ -74,9 +77,11 @@ const DeleteEditor: FC<DeleteEditorProps> = props => {
 		let val;
 		if (oriVal) {
 			val = JSON.parse(JSON.stringify(oriVal));
-
+			
 			/** 实体信息可能存在变更，每次使用最新的实体信息 */
-			val.entities = formatEntitiesByOriginEntities(val.entities, domainModel.entityAry);
+			const format = formatEntitiesByOriginEntities(val.entities, domainModel.entityAry);
+			const currentEntity = format.find(e => e.selected) ?? format[0];
+			val.entities = currentEntity ? [currentEntity] : [];
 		} else {
 			const entity = domainModel.entityAry[0];
 			
@@ -115,7 +120,7 @@ const DeleteEditor: FC<DeleteEditorProps> = props => {
 								const originEntity = deleteContext.domainModel.entityAry.find((entity: Entity) => entity.id === e.target.value);
 
 								if (originEntity) {
-									deleteContext.nowValue.entities = [originEntity.toJSON()];
+									deleteContext.nowValue.entities = [{ ...originEntity.toJSON(), selected: true }];
 								}
 							}}
 						>

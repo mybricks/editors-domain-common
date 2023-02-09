@@ -29,7 +29,7 @@ export default function QueryEditor({ domainModel, paramSchema, value, close, sh
 					whereJoiner: SQLWhereJoiner.AND,
 					conditions: []
 				},
-				entities: [],
+				entities: domainModel.entityAry.map((entity: AnyType) => entity.toJSON()),
 				limit: 100
 			};
 		}
@@ -72,7 +72,9 @@ export default function QueryEditor({ domainModel, paramSchema, value, close, sh
 
 function SelectFrom() {
 	const nowValue = ctx.nowValue;
-	const originEntityAry = ctx.domainModel.entityAry as Entity[];
+	const currentEntity = useComputed(() => {
+		return nowValue.entities.find(e => e.selected);
+	});
 
 	const renderFieldsByEntities = useComputed(() => {
 		return (entities: Entity[]) => {
@@ -80,42 +82,30 @@ function SelectFrom() {
 			
 			if (entities.length) {
 				entities.map((entity) => {
-					const originEntity = (originEntityAry.find((et: Entity) => et.id === entity.id) as AnyType)?.toJSON();
-					
-					if (originEntity) {
-						res.push(
-							...originEntity.fieldAry
-								.filter(field => !field.isPrivate)
-								.map((field: Field) => {
-									const checked = Boolean(entity.fieldAry.find(f => f.id === field.id));
-								
-									return (
-										<div
-											key={field.id}
-											className={css.field}
-											title={`${originEntity.name}.${field.name}(${field.desc ?? ''})`}
-										>
-											<input type="checkbox" checked={checked} onChange={() => ctx.setField(entity as AnyType, field.id)} />
-											<span onClick={() => ctx.setField(entity as AnyType, field.id)}>{originEntity.name}.{field.name}</span>
-											<span>{field.desc}</span>
-										</div>
-									);
-								})
-						);
-					}
+					res.push(
+						...entity.fieldAry
+							.filter(field => !field.isPrivate)
+							.map((field: Field) => {
+								return (
+									<div
+										key={field.id}
+										className={css.field}
+										title={`${field.name}(${field.desc ?? ''})`}
+									>
+										<input type="checkbox" checked={field.selected} onChange={() => ctx.setField(entity as AnyType, field.id)} />
+										<span onClick={() => ctx.setField(entity as AnyType, field.id)}>{field.name}</span>
+										<span>{field.desc}</span>
+									</div>
+								);
+							})
+					);
 				});
 			}
 			
 			return res;
 		};
 	});
-	
-	const noRelationEntities = useComputed(() => {
-		return nowValue.entities?.filter(entity => !entity.isRelationEntity) ?? [];
-	});
-	const relationEntities = useComputed(() => {
-		return nowValue.entities?.filter(entity => entity.isRelationEntity) ?? [];
-	});
+
 
 	return (
 		<>
@@ -123,14 +113,12 @@ function SelectFrom() {
 			<div className={css.select}>
 				<div className={css.tables}>
 					{
-						originEntityAry.map((et: Entity) => {
-							const selected = Boolean(noRelationEntities.find(entity => entity.id === et.id));
-							
+						nowValue.entities.map(et => {
 							return (
 								<div
 									title={`${et.name}(${et.desc})`}
 									key={et.id}
-									className={`${css.table} ${selected ? css.selected : ''}`}
+									className={`${css.table} ${et.selected ? css.selected : ''}`}
 									onClick={() => ctx.setEntity(et)}
 								>
 									<span>{et.name}</span>
@@ -141,22 +129,8 @@ function SelectFrom() {
 					}
 				</div>
 				<div className={css.fields}>
-					{renderFieldsByEntities(noRelationEntities as Entity[])}
+					{currentEntity ? renderFieldsByEntities([currentEntity as Entity]) : []}
 				</div>
-				
-				{/* 关联实体 */}
-				{relationEntities.length ? (
-					<div className={`${css.fields} ${css.relationFields}`}>
-						{relationEntities.map(entity => {
-							return (
-								<div key={entity.id} className={css.entity}>
-									<div className={css.entityName}>关联实体：{entity.name}</div>
-									{renderFieldsByEntities([entity] as Entity[])}
-								</div>
-							);
-						})}
-					</div>
-				) : null}
 			</div>
 		</>
 	);

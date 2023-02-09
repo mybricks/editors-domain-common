@@ -66,6 +66,10 @@ interface OrderItemProps {
 const OrderItem: FC<OrderItemProps> = props => {
 	const { order, index } = props;
 	
+	const currentEntity = useComputed(() => {
+		return orderContext.nowValue.entities.find(e => e.selected);
+	});
+	
 	const orderFieldIds = useComputed(() => {
 		return orderContext.nowValue.orders.map((o: OrderType) => o.fieldId);
 	});
@@ -73,42 +77,39 @@ const OrderItem: FC<OrderItemProps> = props => {
 	/** 字段选择时下拉列表 */
 	const fieldSelectOptions = useComputed(() => {
 		const options: ReactNode[] = [];
-		orderContext.domainModal?.entityAry
-			.filter((oriEntity: Entity) => orderContext.nowValue?.entities.find((e: Entity) => e.id === oriEntity.id))
-			.forEach((entity: Entity) => {
-				options.push(
-					...entity?.fieldAry
-						.filter((field: Field) => !field.isPrivate && field.bizType !== FieldBizType.MAPPING)
-						.map((field) => {
-							return (
-								<option key={field.id} value={`${entity.id}&&${field.id}`} disabled={orderFieldIds.includes(field.id)}>
-									{entity?.name}.{field.name}
-								</option>
-							);
-						}) || []
-				);
-			});
-		
-		
-		/** 映射字段 */
-		orderContext.nowValue?.entities?.[0].fieldAry
-			.filter((field: Field) => field.bizType === FieldBizType.MAPPING)
-			.forEach((mappingField: Field) => {
-				const entity = mappingField.mapping?.entity;
-				const originEntity = orderContext.domainModal?.entityAry.find((originEntity: Entity) => originEntity.id === entity?.id);
+		if (currentEntity) {
+			options.push(
+				...currentEntity.fieldAry
+					.filter((field: Field) => !field.isPrivate && field.bizType !== FieldBizType.MAPPING)
+					.map((field) => {
+						return (
+							<option key={field.id} value={`${currentEntity.id}&&${field.id}`} disabled={orderFieldIds.includes(field.id)}>
+								{field.name}
+							</option>
+						);
+					}) || []
+			);
 			
-				if (originEntity) {
-					options.push(
-						<option
-							key={`${entity?.id}&&${entity?.field.id}`}
-							value={`${entity?.id}&&${entity?.field.id}`}
-							disabled={orderFieldIds.includes(entity?.field.id ?? '')}
-						>
-							{entity?.name}.{mappingField.name}.{entity?.field.name}
-						</option>
-					);
-				}
-			});
+			/** 映射字段 */
+			currentEntity.fieldAry
+				.filter((field: Field) => field.selected && field.bizType === FieldBizType.MAPPING)
+				.forEach((mappingField: Field) => {
+					const entity = mappingField.mapping?.entity;
+					const originEntity = orderContext.nowValue?.entities.find((origin: Entity) => origin.id === entity?.id);
+					
+					if (originEntity) {
+						options.push(
+							<option
+								key={`${entity?.id}&&${entity?.field.id}`}
+								value={`${entity?.id}&&${entity?.field.id}`}
+								disabled={orderFieldIds.includes(entity?.field.id ?? '')}
+							>
+								{mappingField.name}.{entity?.field.name}
+							</option>
+						);
+					}
+				});
+		}
 		
 		return options;
 	});
@@ -124,7 +125,7 @@ const OrderItem: FC<OrderItemProps> = props => {
 				/** 更新条件语句 */
 				onChange={(e) => {
 					const [entityId, fieldId] = e.target.value.split('&&');
-					const originEntity = orderContext.domainModal.entityAry.find((entity: Entity) => entity.id === entityId);
+					const originEntity = orderContext.nowValue.entities.find((entity: Entity) => entity.id === entityId);
 					
 					if (originEntity) {
 						const originField = originEntity.fieldAry.find((field: Field) => field.id === fieldId);

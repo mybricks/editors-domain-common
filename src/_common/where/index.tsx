@@ -10,13 +10,13 @@ import { FieldBizType, FieldDBType, SQLWhereJoiner } from '../../_constants/fiel
 import styles from './index.less';
 
 class WhereContext {
-	nowValue: {
+	nowValue!: {
 		desc: string;
 		sql: string;
 		entities: Entity[];
 		conditions: Condition;
 		limit: number;
-	} | undefined;
+	};
 	whereEle: HTMLElement | undefined;
 	
 	popEle: HTMLElement | undefined;
@@ -121,6 +121,8 @@ const Conditions: FC = () => {
 	}, []);
 	
 	const renderConditions = useComputed(() => {
+		const currentEntity = whereContext.nowValue.entities.find(e => e.selected);
+		
 		return (conditions: Condition[], parentCondition: Condition | null) => {
 			const conditionFieldIds = getConditionFieldIds(conditions);
 			
@@ -154,44 +156,42 @@ const Conditions: FC = () => {
 				
 				/** 字段选择时下拉列表 */
 				const fieldSelectOptions: ReactNode[] = [];
-				whereContext.domainModal?.entityAry
-					.filter((oriEntity: Entity) => nowValue?.entities?.find(e => e.id === oriEntity.id))
-					.forEach((entity: Entity) => {
-						fieldSelectOptions.push(
-							...entity?.fieldAry
-								.filter((field: Field) => !field.isPrivate && field.bizType !== FieldBizType.MAPPING)
-								.map((field) => {
-									return (
-										<option
-											key={`${entity.id}&&${field.id}`}
-											value={`${entity.id}&&${field.id}`}
-											disabled={conditionFieldIds.includes(field.id)}
-										>
-											{entity?.name}.{field.name}
-										</option>
-									);
-								}) || []
-						);
-					});
-				/** 映射字段 */
-				nowValue?.entities?.[0]?.fieldAry
-					.filter(field => field.bizType === FieldBizType.MAPPING)
-					.forEach(mappingField => {
-						const entity = mappingField.mapping?.entity;
-						const originEntity = whereContext.domainModal?.entityAry.find((originEntity: Entity) => originEntity.id === entity?.id);
+				if (currentEntity) {
+					fieldSelectOptions.push(
+						...currentEntity.fieldAry
+							.filter((field: Field) => !field.isPrivate && field.bizType !== FieldBizType.MAPPING)
+							.map((field) => {
+								return (
+									<option
+										key={`${currentEntity.id}&&${field.id}`}
+										value={`${currentEntity.id}&&${field.id}`}
+										disabled={conditionFieldIds.includes(field.id)}
+									>
+										{field.name}
+									</option>
+								);
+							}) || []
+					);
+					/** 映射字段 */
+					currentEntity.fieldAry
+						.filter(field => field.selected && field.bizType === FieldBizType.MAPPING)
+						.forEach(mappingField => {
+							const entity = mappingField.mapping?.entity as AnyType;
+							const originEntity = whereContext.nowValue.entities.find((originEntity: Entity) => originEntity.id === entity?.id);
 						
-						if (originEntity) {
-							fieldSelectOptions.push(
-								<option
-									key={`${entity?.id}&&${entity?.field.id}`}
-									value={`${entity?.id}&&${entity?.field.id}`}
-									disabled={conditionFieldIds.includes(entity?.field.id ?? '')}
-								>
-									{entity?.name}.{mappingField.name}.{entity?.field.name}
-								</option>
-							);
-						}
-					});
+							if (originEntity) {
+								fieldSelectOptions.push(
+									<option
+										key={`${entity.id}&&${entity.field.id}`}
+										value={`${entity.id}&&${entity.field.id}`}
+										disabled={conditionFieldIds.includes(entity.field.id ?? '')}
+									>
+										{mappingField.name}.{entity.field.name}
+									</option>
+								);
+							}
+						});
+				}
 				
 				return condition.conditions ? (
 					<div key={condition.fieldId} className={styles.conditionGroupContainer}>

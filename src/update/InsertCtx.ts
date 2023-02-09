@@ -1,6 +1,7 @@
 import { DomainViewModel } from '../types';
 import { spliceUpdateSQLByConditions } from '../_utils/sql';
 import { getParamsByConditions } from '../_utils/params';
+import { AnyType } from '../_types';
 
 export type T_Field = {
 	id,
@@ -13,7 +14,8 @@ export type T_Entity = {
 	id,
 	name,
 	desc,
-	fieldAry: T_Field[]
+	fieldAry: T_Field[];
+	selected: boolean;
 }
 
 const getTypeQuote = (type) => {
@@ -64,7 +66,8 @@ export default class InsertCtx {
 	}
 
 	save() {
-		const { conAry, entities, conditions, conAry } = this.nowValue;
+		let { conAry, entities, conditions, conAry } = this.nowValue;
+		entities = entities.filter(e => e.selected);
 		let desc = '';
 
 		if (entities?.length && entities[0].fieldAry.length > 0 && conAry.length) {
@@ -75,17 +78,16 @@ export default class InsertCtx {
 				params,
 				conditions: conditions,
 				connectors: conAry,
-				entities: entities,
+				entities: entities as AnyType[],
 			});
-
-			console.error(sql);
 			
 			let script = `
 			(params)=>{ 
 				return \`${sql}\`;
 			}
 			`;
-
+			
+			console.log('UPDATE SQL: ', script);
 			this.nowValue.script = script;
 		} else {
 			this.nowValue.script = void 0;
@@ -99,7 +101,10 @@ export default class InsertCtx {
 
 	setEntity(entityId) {
 		const entity = this.domainModel.entityAry.find(e => e.id === entityId);
-		const ent = entity.toJSON();
-		this.nowValue.entities = [ent];
+		
+		if (entity) {
+			this.nowValue.entities = [{ ...entity.toJSON(), selected: true }];
+			this.nowValue.conAry = [];
+		}
 	}
 }

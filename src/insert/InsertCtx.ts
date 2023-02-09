@@ -1,6 +1,6 @@
-import {DomainViewModel} from '../typing';
-import {getQuoteByFieldType} from '../_utils/field';
-import {FieldBizType} from '../_constants/field';
+import { DomainViewModel } from '../typing';
+import { getQuoteByFieldType } from '../_utils/field';
+import { FieldBizType } from '../_constants/field';
 
 export type T_Field = {
   id,
@@ -16,7 +16,8 @@ export type T_Entity = {
 	id,
 	name,
 	desc,
-	fieldAry: T_Field[]
+	fieldAry: T_Field[];
+	selected: boolean;
 }
 
 export default class InsertCtx {
@@ -91,7 +92,8 @@ export default class InsertCtx {
         return \`${sql}(${fieldAry.join(',')}) VALUES (${valueAry.join(',')})\`
       }
       `;
-			console.log('script', script);
+			
+			console.log('INSERT SQL: ', script);
 			this.nowValue.script = script;
 		} else {
 			this.nowValue.script = void 0;
@@ -104,8 +106,11 @@ export default class InsertCtx {
 	}
 
 	setEntity(entityId: string) {
-		const entity = this.domainModel.entityAry.find((e: T_Entity) => e.id === entityId);
-		const ent = entity.toJSON();
-		this.nowValue.entities = [ent];
+		const entity = this.domainModel.entityAry.find(e => e.id === entityId);
+		
+		if (entity) {
+			this.nowValue.entities = [{ ...entity.toJSON(), selected: true }];
+			this.nowValue.conAry = [];
+		}
 	}
 }

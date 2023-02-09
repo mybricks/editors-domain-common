@@ -13,13 +13,14 @@ export type T_Field = {
 	bizType: string;
 	/** 关联的实体表 ID */
 	relationEntityId?: string;
+	selected?: boolean;
 }
 
 export type T_Entity = {
 	id: string;
 	name: string;
 	desc?: string;
-	isRelationEntity?: boolean;
+	selected?: boolean;
 	fieldAry: T_Field[];
 }
 
@@ -78,8 +79,8 @@ export default class QueryCtx {
 		const { entities, conditions, originEntities, orders, limit } = this.nowValue;
 		let desc = '';
 
-		entities.filter(entity => entity.fieldAry.length).forEach((entity) => {
-			desc = `${desc ? `${desc};\n` : ''}${entity.name} 的 ${entity.fieldAry.map(field => field.name).join(', ')}`;
+		entities.filter(entity => entity.fieldAry.length && entity.selected).forEach((entity) => {
+			desc = `${desc ? `${desc};\n` : ''}${entity.name} 的 ${entity.fieldAry.filter(f => f.selected).map(field => field.name).join(', ')}`;
 		}, []);
 
 		if (entities?.length && entities[0].fieldAry.length > 0) {
@@ -138,11 +139,18 @@ export default class QueryCtx {
 
 			if (!this.showPager) {
 				this.nowValue.script = selectScript;
+				
+				console.log('SELECT SQL: ', selectScript);
 			} else {
 				this.nowValue.script = {
 					list: selectScript,
 					total: countScript
 				};
+				
+				console.log('SELECT SQL: ', {
+					list: selectScript,
+					total: countScript
+				});
 			}
 		} else {
 			this.nowValue.script = void 0;
@@ -155,36 +163,19 @@ export default class QueryCtx {
 	}
 
 	setEntity(entity: AnyType) {
-		const entities = [];
-		entities.push(entity.toJSON());
-
-		this.nowValue.entities = entities;
+		this.nowValue.entities.forEach(en => {
+			en.selected = false;
+			en.fieldAry.forEach((f) => f.selected = false);
+		});
+		entity.selected = true;
+		entity.fieldAry[0].selected = true;
 	}
 
 	setField(entity: T_Entity, fieldId: string) {
-		const oriEntity = this.domainModel.entityAry.find((e: T_Entity) => e.id === entity.id);
-		const nowEntity = this.nowValue.entities.find(e => e.id === entity.id);
-
-		if (!nowEntity) {
-			return;
-		}
-
-		const field = nowEntity.fieldAry.find(f => f.id === fieldId);
+		const field = entity.fieldAry.find(f => f.id === fieldId);
 
 		if (field) {
-			nowEntity.fieldAry = nowEntity.fieldAry.filter(f => f.id !== fieldId);
-		} else {
-			nowEntity.fieldAry = oriEntity.fieldAry
-				.map((oriF: T_Field) => {
-					let field = nowEntity.fieldAry.find(f => f.id === oriF.id);
-
-					if (field) {//exits
-						return field;
-					} else if (oriF.id === fieldId) {
-						return (oriF as AnyType).toJSON() as T_Field;
-					}
-				})
-				.filter(Boolean);
+			field.selected = !field.selected;
 		}
 
 	}

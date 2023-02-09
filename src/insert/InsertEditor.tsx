@@ -6,7 +6,6 @@ import FromTo from '../_common/from-to';
 import { AnyType } from '../_types';
 import { getFieldSchema } from '../_utils/field';
 import PopView from '../_common/pop-view';
-import { Entity } from '../_types/domain';
 import { formatEntitiesByOriginEntities } from '../_utils/entity';
 import { FieldBizType } from '../_constants/field';
 
@@ -22,7 +21,9 @@ const InsertEditor = ({ domainModel, paramSchema, value, close }: AnyType) => {
 			val = JSON.parse(JSON.stringify(oriVal));
 			
 			/** 实体信息可能存在变更，每次使用最新的实体信息 */
-			val.entities = formatEntitiesByOriginEntities(val.entities ?? [], domainModel.entityAry);
+			const format = formatEntitiesByOriginEntities(val.entities, domainModel.entityAry);
+			const currentEntity = format.find(e => e.selected) ?? format[0];
+			val.entities = currentEntity ? [currentEntity] : [];
 		} else {
 			const entity = domainModel.entityAry[0];
 			
@@ -42,19 +43,17 @@ const InsertEditor = ({ domainModel, paramSchema, value, close }: AnyType) => {
 	}, { to: 'children' });
 
 	const nowValue = ctx.nowValue;
-	const entityAry = ctx.domainModel.entityAry;
-
+	
 	const fieldSchema = useComputed(() => {
 		const nowEntity = nowValue.entities[0];
 		if (nowEntity) {
-			const oriEntity = entityAry.find((et: { id: string }) => et.id === nowEntity.id);
 			const properties: Record<string, unknown> = {};
 			const rtn = {
 				type: 'object',
 				properties
 			};
-
-			oriEntity.fieldAry.forEach((field: { isPrimaryKey: boolean; name: string; dbType: string; bizType: FieldBizType; isPrivate: boolean }) => {
+			
+			nowEntity.fieldAry.forEach((field: { isPrimaryKey: boolean; name: string; dbType: string; bizType: FieldBizType; isPrivate: boolean }) => {
 				if (!field.isPrimaryKey && field.bizType !== FieldBizType.MAPPING && !field.isPrivate) {
 					properties[field.name] = getFieldSchema(field.dbType);
 				}
@@ -73,7 +72,7 @@ const InsertEditor = ({ domainModel, paramSchema, value, close }: AnyType) => {
 	        onChange={e => ctx.setEntity(e.target.value)}
 				>
 					{
-						entityAry.map((et: Entity) => {
+						ctx.domainModel.entityAry.map((et) => {
 							return <option key={et.id} value={et.id}>{et.name}</option>;
 						})
 					}
