@@ -1,6 +1,6 @@
 import { AnyType } from '../_types';
 import { SQLOrder, SQLWhereJoiner } from '../_constants/field';
-import { spliceSelectSQLByConditions } from './selectSql';
+import { FieldBizType, FieldDBType, SQLOperator, spliceWhereSQLFragmentByConditions, getValueByOperatorAndFieldType, getValueByFieldType, spliceSelectSQLByConditions, spliceSelectCountSQLByConditions } from '../_utils/sql';
 
 
 export type T_Field = {
@@ -84,12 +84,20 @@ export default class QueryCtx {
 
 		if (entities?.length && entities[0].fieldAry.length > 0) {
 
-			let _spliceSelectSQLByConditions = spliceSelectSQLByConditions.toString().replace(/(\r|\n|\s\s)/g, '');
+			let selectScript = "";
+			let countScript = "";
 
-			let script = `
+			selectScript = `
 			(params)=>{
-				const spliceSelectSQLByConditions = ${_spliceSelectSQLByConditions};
 
+				const FieldDBType = ${JSON.stringify(FieldDBType)};
+				const SQLOperator = ${JSON.stringify(SQLOperator)};
+				const FieldBizType = ${JSON.stringify(FieldBizType)};
+				const spliceWhereSQLFragmentByConditions = ${spliceWhereSQLFragmentByConditions.toString()};
+				const getValueByOperatorAndFieldType = ${getValueByOperatorAndFieldType.toString()};
+				const getValueByFieldType = ${getValueByFieldType.toString()};
+				const spliceSelectSQLByConditions = ${spliceSelectSQLByConditions.toString()};
+				
 				let sql = spliceSelectSQLByConditions({
 					params: params || {},
 					conditions: ${JSON.stringify(conditions)} || [],
@@ -103,7 +111,39 @@ export default class QueryCtx {
 			}
 			`;
 
-			this.nowValue.script = script;
+			if (this.showPager) {
+				countScript = `
+				(params)=>{
+
+					const FieldDBType = ${JSON.stringify(FieldDBType)};
+					const SQLOperator = ${JSON.stringify(SQLOperator)};
+					const FieldBizType = ${JSON.stringify(FieldBizType)};
+					const spliceWhereSQLFragmentByConditions = ${spliceWhereSQLFragmentByConditions.toString()};
+					const getValueByOperatorAndFieldType = ${getValueByOperatorAndFieldType.toString()};
+					const getValueByFieldType = ${getValueByFieldType.toString()};
+					const spliceSelectCountSQLByConditions = ${spliceSelectCountSQLByConditions.toString()};
+					
+					let sql = spliceSelectCountSQLByConditions({
+						params: params || {},
+						conditions: ${JSON.stringify(conditions)} || [],
+						entities: ${JSON.stringify(entities)},
+						orders: ${JSON.stringify(orders)},
+						originEntities: ${JSON.stringify(originEntities)},
+					});
+	
+					return sql;
+				}
+				`;
+			}
+
+			if (!this.showPager) {
+				this.nowValue.script = selectScript;
+			} else {
+				this.nowValue.script = {
+					list: selectScript,
+					total: countScript
+				};
+			}
 		} else {
 			this.nowValue.script = void 0;
 		}
