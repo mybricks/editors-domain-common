@@ -1,4 +1,4 @@
-import {FieldBizType, FieldDBType, SQLOrder, SQLWhereJoiner} from '../_constants/field';
+import { FieldBizType, FieldDBType, SQLOrder, SQLWhereJoiner } from '../_constants/field';
 
 export interface Entity {
 	/** 表 ID，在前端编辑页使用 */
@@ -8,8 +8,8 @@ export interface Entity {
 	/** 表备注 */
 	desc: string;
 	fieldAry: Field[];
-	/** 关联表，在 editor 中使用 */
-	isRelationEntity?: boolean;
+	/** 是否被选中 */
+	selected?: boolean;
 }
 
 export interface Field {
@@ -28,6 +28,8 @@ export interface Field {
 	isPrimaryKey?: boolean;
 	/** 私有字段 */
 	isPrivate?: boolean;
+	/** 是否被选中 */
+	selected?: boolean;
 	mapping?: {
 		condition: string;
 		fieldJoiner: string;

@@ -174,7 +174,7 @@ const Conditions: FC = () => {
 						);
 					});
 				/** 映射字段 */
-				nowValue?.entities?.[0].fieldAry
+				nowValue?.entities?.[0]?.fieldAry
 					.filter(field => field.bizType === FieldBizType.MAPPING)
 					.forEach(mappingField => {
 						const entity = mappingField.mapping?.entity;

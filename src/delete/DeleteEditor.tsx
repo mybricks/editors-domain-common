@@ -78,9 +78,11 @@ const DeleteEditor: FC<DeleteEditorProps> = props => {
 			/** 实体信息可能存在变更，每次使用最新的实体信息 */
 			val.entities = formatEntitiesByOriginEntities(val.entities, domainModel.entityAry);
 		} else {
+			const entity = domainModel.entityAry[0];
+			
 			val = {
 				conAry: [],
-				entities: [domainModel.entityAry[0]?.toJSON()] ?? [],
+				entities: entity ? [{ ...entity.toJSON(), selected: true }] : [],
 				conditions: {
 					fieldId: Date.now(),
 					whereJoiner: SQLWhereJoiner.AND,

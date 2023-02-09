@@ -13,11 +13,11 @@ export const formatEntitiesByOriginEntities = (entities: Entity[], originEntitie
 			
 			return {
 				...originEntity,
-				isRelationEntity: entity.isRelationEntity,
+				selected: entity.selected,
 				fieldAry: entity.fieldAry.map((field: Field) => {
 					const originField = originEntity.fieldAry.find((f: Field) => f.id === field.id);
 					
-					return originField ? { ...originField } : undefined;
+					return originField ? { ...originField, selected: field.selected } : undefined;
 				}).filter(Boolean),
 			};
 		}
