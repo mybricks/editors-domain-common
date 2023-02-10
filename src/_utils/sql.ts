@@ -171,9 +171,17 @@ export const spliceWhereSQLFragmentByConditions = (fnParams: {
 				curEntity,
 			}, templateMode);
 		} else {
-			const field = entityMap[condition.entityId]?.fieldAry.find(f => f.id === condition.fieldId);
-
+			const entityMapElement = entityMap[condition.entityId];
+			const field = entityMapElement?.fieldAry.find(f => f.id === condition.fieldId);
+			
 			if (field) {
+				let fieldName = `${curEntity.name}.${field.name}`;
+				
+				/** mapping 字段映射的实体 */
+				if (entityMapElement.id !== curEntity.id) {
+					const mappingField = curEntity.fieldAry.find(f => f.bizType === FieldBizType.MAPPING && f.mapping?.entity?.id === condition.entityId);
+					fieldName = `MAPPING_${mappingField?.name || entityMapElement.name}` + '.' + (mappingField?.mapping?.entity?.fieldAry.find(f => f.id === condition.fieldId)?.name || field.name);
+				}
 				let value = condition.value || '';
 				let isEntityField = false;
 				/** 支持直接使用数据库字段，如 文件表.id = 用户表.文件id */
@@ -193,7 +201,7 @@ export const spliceWhereSQLFragmentByConditions = (fnParams: {
 					}
 				}
 
-				curSQL = `${field.name} ${condition.operator} ${isEntityField ? value : getValueByOperatorAndFieldType(field.dbType, condition.operator!, value)}`;
+				curSQL = `${fieldName} ${condition.operator} ${isEntityField ? value : getValueByOperatorAndFieldType(field.dbType, condition.operator!, value)}`;
 			}
 		}
 
