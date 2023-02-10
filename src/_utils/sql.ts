@@ -220,7 +220,7 @@ export const spliceWhereSQLFragmentByConditions = (fnParams: {
 	if (!whereJoiner) {
 		/** 当 condition 存在或者映射字段存在时 */
 		if (sql || mappingFields.length) {
-			prefix = 'WHERE _status_deleted = 0 AND ';
+			prefix = 'WHERE _STATUS_DELETED = 0 AND ';
 
 			mappingFields.forEach((mappingField, index) => {
 				/** 被关联 */
@@ -240,7 +240,7 @@ export const spliceWhereSQLFragmentByConditions = (fnParams: {
 				}
 			});
 		} else {
-			prefix = 'WHERE _status_deleted = 0';
+			prefix = 'WHERE _STATUS_DELETED = 0';
 		}
 	}
 
@@ -364,16 +364,16 @@ export const spliceSelectSQLByConditions = (fnParams: {
 			/** 被关联 */
 			if (type === 'primary') {
 				if (condition === '-1') {
-					entityName = `(SELECT id AS MAPPING_${mappingField.name}_id, ${entity.fieldAry.filter(f => !f.isPrimaryKey).map(f => f.name).join(', ')} FROM ${originEntity.name} WHERE _status_deleted = 0) AS MAPPING_${mappingField.name}`;
+					entityName = `(SELECT id AS MAPPING_${mappingField.name}_id, ${entity.fieldAry.filter(f => !f.isPrimaryKey).map(f => f.name).join(', ')} FROM ${originEntity.name} WHERE _STATUS_DELETED = 0) AS MAPPING_${mappingField.name}`;
 				}
 			} else {
 				/** 关联 */
 				if (condition === '-1') {
-					entityName = `(SELECT id AS MAPPING_${mappingField.name}_id, ${relationField.name}, ${entity.fieldAry.filter(f => !f.isPrimaryKey && f.name !== relationField?.name).map(f => `GROUP_CONCAT(${f.name} SEPARATOR '${fieldJoiner}') ${f.name}`)} FROM ${originEntity.name} WHERE _status_deleted = 0 GROUP BY ${relationField.name}) AS MAPPING_${mappingField.name}`;
+					entityName = `(SELECT id AS MAPPING_${mappingField.name}_id, ${relationField.name}, ${entity.fieldAry.filter(f => !f.isPrimaryKey && f.name !== relationField?.name).map(f => `GROUP_CONCAT(${f.name} SEPARATOR '${fieldJoiner}') ${f.name}`)} FROM ${originEntity.name} WHERE _STATUS_DELETED = 0 GROUP BY ${relationField.name}) AS MAPPING_${mappingField.name}`;
 				} else if (isMaxCondition) {
 					const filedName = condition.substr(4, condition.length - 5);
 
-					entityName = `(SELECT id AS MAPPING_${mappingField.name}_id, ${relationField.name}, ${entity.fieldAry.filter(f => !f.isPrimaryKey && f.name !== relationField?.name).map(f => f.name)} FROM ${originEntity.name} WHERE _status_deleted = 0 AND ${filedName} IN (SELECT max(${filedName}) FROM ${originEntity.name} WHERE _status_deleted = 0 GROUP BY ${relationField.name})) AS MAPPING_${mappingField.name}`;
+					entityName = `(SELECT id AS MAPPING_${mappingField.name}_id, ${relationField.name}, ${entity.fieldAry.filter(f => !f.isPrimaryKey && f.name !== relationField?.name).map(f => f.name)} FROM ${originEntity.name} WHERE _STATUS_DELETED = 0 AND ${filedName} IN (SELECT max(${filedName}) FROM ${originEntity.name} WHERE _STATUS_DELETED = 0 GROUP BY ${relationField.name})) AS MAPPING_${mappingField.name}`;
 				}
 			}
 
@@ -493,16 +493,16 @@ export const spliceSelectCountSQLByConditions = (fnParams: {
 			/** 被关联 */
 			if (type === 'primary') {
 				if (condition === '-1') {
-					entityName = `(SELECT id AS MAPPING_${mappingField.name}_id, ${entity.fieldAry.filter(f => !f.isPrimaryKey).map(f => f.name).join(', ')} FROM ${originEntity.name} WHERE _status_deleted = 0) AS MAPPING_${mappingField.name}`; entityName = `(SELECT id AS MAPPING_${mappingField.name}_id, ${entity.fieldAry.filter(f => !f.isPrimaryKey).map(f => f.name).join(', ')} FROM ${originEntity.name} WHERE _status_deleted = 0) AS MAPPING_${mappingField.name}`;
+					entityName = `(SELECT id AS MAPPING_${mappingField.name}_id, ${entity.fieldAry.filter(f => !f.isPrimaryKey).map(f => f.name).join(', ')} FROM ${originEntity.name} WHERE _STATUS_DELETED = 0) AS MAPPING_${mappingField.name}`; entityName = `(SELECT id AS MAPPING_${mappingField.name}_id, ${entity.fieldAry.filter(f => !f.isPrimaryKey).map(f => f.name).join(', ')} FROM ${originEntity.name} WHERE _STATUS_DELETED = 0) AS MAPPING_${mappingField.name}`;
 				}
 			} else {
 				/** 关联 */
 				if (condition === '-1') {
-					entityName = `(SELECT id AS MAPPING_${mappingField.name}_id, ${relationField.name}, ${entity.fieldAry.filter(f => !f.isPrimaryKey && f.name !== relationField?.name).map(f => `GROUP_CONCAT(${f.name} SEPARATOR '${fieldJoiner}') ${f.name}`)} FROM ${originEntity.name} WHERE _status_deleted = 0 GROUP BY ${relationField.name}) AS MAPPING_${mappingField.name}`;
+					entityName = `(SELECT id AS MAPPING_${mappingField.name}_id, ${relationField.name}, ${entity.fieldAry.filter(f => !f.isPrimaryKey && f.name !== relationField?.name).map(f => `GROUP_CONCAT(${f.name} SEPARATOR '${fieldJoiner}') ${f.name}`)} FROM ${originEntity.name} WHERE _STATUS_DELETED = 0 GROUP BY ${relationField.name}) AS MAPPING_${mappingField.name}`;
 				} else if (isMaxCondition) {
 					const filedName = condition.substr(4, condition.length - 5);
 
-					entityName = `(SELECT id AS MAPPING_${mappingField.name}_id, ${relationField.name}, ${entity.fieldAry.filter(f => !f.isPrimaryKey && f.name !== relationField?.name).map(f => f.name)} FROM ${originEntity.name} WHERE _status_deleted = 0 AND ${filedName} IN (SELECT max(${filedName}) FROM ${originEntity.name} WHERE _status_deleted = 0 GROUP BY ${relationField.name})) AS MAPPING_${mappingField.name}`;
+					entityName = `(SELECT id AS MAPPING_${mappingField.name}_id, ${relationField.name}, ${entity.fieldAry.filter(f => !f.isPrimaryKey && f.name !== relationField?.name).map(f => f.name)} FROM ${originEntity.name} WHERE _STATUS_DELETED = 0 AND ${filedName} IN (SELECT max(${filedName}) FROM ${originEntity.name} WHERE _STATUS_DELETED = 0 GROUP BY ${relationField.name})) AS MAPPING_${mappingField.name}`;
 				}
 			}
 
@@ -539,7 +539,7 @@ export const spliceUpdateSQLByConditions = (fnParams: {
 		const sql: string[] = [];
 
 		/** 前置 sql */
-		sql.push(`UPDATE ${curEntity.name} SET _update_user_id = '', _update_time = \${Date.now()},`);
+		sql.push(`UPDATE ${curEntity.name} SET _UPDATE_USER_ID = '', _UPDATE_TIME = \${Date.now()},`);
 		sql.push(spliceUpdateSQLFragmentByConditions({
 			connectors,
 			entity: curEntity,
@@ -571,7 +571,7 @@ export const spliceDeleteSQLByConditions = (fnParams: {
 		const sql: string[] = [];
 
 		/** 前置 sql */
-		sql.push(`UPDATE ${curEntity.name} SET _status_deleted = 1, _update_user_id = '', _update_time = \${Date.now()}`);
+		sql.push(`UPDATE ${curEntity.name} SET _STATUS_DELETED = 1, _UPDATE_USER_ID = '', _UPDATE_TIME = \${Date.now()}`);
 		sql.push(spliceWhereSQLFragmentByConditions({
 			conditions: [conditions],
 			entities,
