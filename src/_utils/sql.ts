@@ -328,7 +328,7 @@ export const spliceSelectSQLByConditions = (fnParams: {
 
 		/** mapping 字段，存在映射且实体存在 */
 		const mappingFields = curEntity.fieldAry.filter(field => {
-			return field.bizType === FieldBizType.MAPPING && field.mapping?.entity && field.mapping?.entity?.fieldAry.length && entityMap[field.mapping.entity.id];
+			return field.bizType === FieldBizType.MAPPING && field.mapping?.entity && field.mapping?.entity?.fieldAry?.length && entityMap[field.mapping.entity.id];
 		});
 
 		mappingFields.forEach(mappingField => {
@@ -458,7 +458,7 @@ export const spliceSelectCountSQLByConditions = (fnParams: {
 
 		/** mapping 字段，存在映射且实体存在 */
 		const mappingFields = curEntity.fieldAry.filter(field => {
-			return field.bizType === FieldBizType.MAPPING && field.mapping?.entity && field.mapping?.entity?.fieldAry.length && entityMap[field.mapping.entity.id];
+			return field.bizType === FieldBizType.MAPPING && field.mapping?.entity && field.mapping?.entity?.fieldAry?.length && entityMap[field.mapping.entity.id];
 		});
 		mappingFields.forEach(mappingField => {
 			const entity = mappingField.mapping!.entity!;
