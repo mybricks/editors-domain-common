@@ -1,6 +1,6 @@
 import { AnyType } from '../_types';
-import { SQLOrder, SQLWhereJoiner, SQLOperator, FieldDBType, FieldBizType } from '../_constants/field';
-import { spliceWhereSQLFragmentByConditions, getValueByOperatorAndFieldType, getValueByFieldType, spliceSelectSQLByConditions, spliceSelectCountSQLByConditions } from '../_utils/sql';
+import { FieldBizType, SQLOrder, SQLWhereJoiner } from '../_constants/field';
+import { spliceSelectCountSQLByConditions, spliceSelectSQLByConditions } from '../_utils/selectSQL';
 
 
 export type T_Field = {
@@ -118,12 +118,6 @@ export default class QueryCtx {
 
 			const selectScript = `
 			(params)=>{
-				const FieldDBType = ${JSON.stringify(FieldDBType)};
-				const SQLOperator = ${JSON.stringify(SQLOperator)};
-				const FieldBizType = ${JSON.stringify(FieldBizType)};
-				const spliceWhereSQLFragmentByConditions = ${spliceWhereSQLFragmentByConditions.toString()};
-				const getValueByOperatorAndFieldType = ${getValueByOperatorAndFieldType.toString()};
-				const getValueByFieldType = ${getValueByFieldType.toString()};
 				const spliceSelectSQLByConditions = ${spliceSelectSQLByConditions.toString()};
 				
 				let sql = spliceSelectSQLByConditions({
@@ -142,12 +136,6 @@ export default class QueryCtx {
 			if (this.showPager) {
 				countScript = `
 				(params)=>{
-					const FieldDBType = ${JSON.stringify(FieldDBType)};
-					const SQLOperator = ${JSON.stringify(SQLOperator)};
-					const FieldBizType = ${JSON.stringify(FieldBizType)};
-					const spliceWhereSQLFragmentByConditions = ${spliceWhereSQLFragmentByConditions.toString()};
-					const getValueByOperatorAndFieldType = ${getValueByOperatorAndFieldType.toString()};
-					const getValueByFieldType = ${getValueByFieldType.toString()};
 					const spliceSelectCountSQLByConditions = ${spliceSelectCountSQLByConditions.toString()};
 					
 					let sql = spliceSelectCountSQLByConditions({

@@ -1,106 +1,8 @@
-/** 字段类型 */
-enum FieldBizType {
-	STRING = 'string',
-	NUMBER = 'number',
-	/** 外键，关联其他表 */
-	RELATION = 'relation',
-	/** 映射其他表 */
-	MAPPING = 'mapping',
-}
-
-/** 数据库字段类型 */
-enum FieldDBType {
-	VARCHAR = 'varchar',
-	BIGINT = 'bigint',
-	MEDIUMTEXT = 'mediumtext',
-}
-
-enum SQLWhereJoiner {
-	AND = 'AND',
-	OR = 'OR',
-}
-
-enum SQLOperator {
-	/** 等于 */
-	EQUAL = '=',
-	/** 不等于 */
-	NOT_EQUAL = '<>',
-	/** 匹配 */
-	LIKE = 'like',
-	/** 不匹配 */
-	NOT_LIKE = 'not like',
-	/** 包含 */
-	IN = 'in',
-	/** 不包含 */
-	NOT_IN = 'not in',
-	/** 大于等于 */
-	GE = '>=',
-	/** 小于等于 */
-	LE = '<=',
-}
-
-/** sql 排序规则 */
-enum SQLOrder {
-	ASC = 'ASC',
-	DESC = 'DESC',
-}
-interface Entity {
-	/** 表 ID，在前端编辑页使用 */
-	id: string;
-	/** 表名 */
-	name: string;
-	/** 表备注 */
-	desc: string;
-	fieldAry: Field[];
-	selected?: boolean;
-}
-
-interface Field {
-	/** 表字段 ID，真实数据库字段 */
-	id: string;
-	/** 字段名 */
-	name: string;
-	/** 字段类型 */
-	bizType: FieldBizType;
-	dbType: FieldDBType;
-	typeLabel: string;
-	desc?: string;
-	/** 关联的实体表 ID */
-	relationEntityId?: string;
-	selected?: string;
-	/** 是否为主键 */
-	isPrimaryKey?: boolean;
-	mapping?: {
-		condition: string;
-		fieldJoiner: string;
-		entity?: Entity;
-		type?: string;
-		sql: string;
-		desc: string;
-	};
-}
-
-interface Condition {
-	/** 字段 ID */
-	fieldId: string;
-	/** 实体ID */
-	entityId: string;
-	/** 字段名 */
-	fieldName: string;
-	/** 操作符 */
-	operator?: string;
-	/** 条件语句值 */
-	value: string;
-	checkExist: boolean;
-	conditions: Condition[];
-	whereJoiner: SQLWhereJoiner;
-}
-
-type Order = { fieldId: string; fieldName: string; order: SQLOrder; entityId: string };
-
+import { Condition, Entity, Field, Order } from '../_types/domain';
+import { FieldBizType, FieldDBType, SQLOperator, SQLWhereJoiner } from '../_constants/field';
 
 /** 根据字段类型返回拼接 sql 的具体指 */
-export const getValueByFieldType = (dbType: string, val: string) => {
+const getValueByFieldType = (dbType: string, val: string) => {
 	switch (dbType) {
 	case FieldDBType.VARCHAR: return `'${val}'`;
 	case FieldDBType.BIGINT: return val;
@@ -110,7 +12,7 @@ export const getValueByFieldType = (dbType: string, val: string) => {
 };
 
 /** 根据字段类型以及操作符号返回拼接 sql 的具体指 */
-export const getValueByOperatorAndFieldType = (dbType: string, operator: string, val: string) => {
+const getValueByOperatorAndFieldType = (dbType: string, operator: string, val: string) => {
 	if (operator === SQLOperator.LIKE || operator === SQLOperator.NOT_LIKE) {
 		return `%${getValueByFieldType(dbType, val)}%`;
 	} else if (operator === SQLOperator.IN || operator === SQLOperator.NOT_IN) {
@@ -119,8 +21,6 @@ export const getValueByOperatorAndFieldType = (dbType: string, operator: string,
 
 	return getValueByFieldType(dbType, val);
 };
-
-type AnyType = any;
 
 /** 根据条件拼接 where sql */
 export const spliceWhereSQLFragmentByConditions = (fnParams: {
@@ -245,47 +145,6 @@ export const spliceWhereSQLFragmentByConditions = (fnParams: {
 	}
 
 	return prefix + sql;
-};
-
-/** 获取 select 查询条件中的实体表 ID 列表 */
-const getEntityIdsByConditions = (conditions: Condition[]) => {
-	const preEntityIds: string[] = [];
-
-	conditions
-		.forEach(condition => {
-			if (condition.conditions) {
-				preEntityIds.push(...getEntityIdsByConditions(condition.conditions));
-			} else {
-				preEntityIds.push(condition.entityId);
-			}
-		});
-
-	return preEntityIds;
-};
-/** 获取 select 查询条件中的字段 ID 列表 */
-const getFieldIdIdsByConditionsAndEntityIds = (conditions: Condition[], entityIds: string[]) => {
-	const preFieldIds: string[] = [];
-
-	conditions
-		.forEach(condition => {
-			if (condition.conditions) {
-				preFieldIds.push(...getFieldIdIdsByConditionsAndEntityIds(condition.conditions, entityIds));
-			} else if (entityIds.includes(condition.entityId)) {
-				preFieldIds.push(condition.fieldId);
-			}
-		});
-
-	return preFieldIds;
-};
-
-/** 获取 select 排序中的字段 ID 列表 */
-const getFieldIdsByOrdersAndEntityIds = (orders: Order[], entityIds: string[]) => {
-	return orders.filter(order => entityIds.includes(order.entityId)).map(order => order.fieldId);
-};
-
-/** 获取 select 排序中的实体表 ID 列表 */
-const getEntityIdsByOrders = (orders: Order[]) => {
-	return orders.filter(order => order.fieldId).map(order => order.entityId);
 };
 
 /** 拼接 update 语句设置值的 sql */
@@ -581,38 +440,5 @@ export const spliceDeleteSQLByConditions = (fnParams: {
 		}, templateMode));
 
 		return sql.join(' ');
-	}
-};
-
-/** 根据规则以及实体拼接 insert 语句 */
-export const spliceInsertSQLByConditions = (fnParams: {
-	connectors: Array<{ from: string; to: string }>;
-	entities: Entity[];
-	params: Record<string, unknown>;
-}) => {
-	const { entities, params, connectors } = fnParams;
-	const entity = entities[0];
-
-	if (entity) {
-		const fieldNames: string[] = [];
-		const values: string[] = [];
-
-		connectors
-			.forEach(connector => {
-				const { from, to } = connector;
-				const toFieldName = to.replace('/', '');
-				const field = entity.fieldAry.find(f => f.name === toFieldName);
-
-				if (field) {
-					const fromNames = from.split('/').filter(Boolean);
-					let value = params;
-
-					fromNames.forEach(key => value = value[key] as AnyType);
-					fieldNames.push('`' + toFieldName + '`');
-					values.push(getValueByFieldType(field.dbType, value as unknown as string));
-				}
-			});
-
-		return `INSERT INTO ${entity.name} (${fieldNames.join(', ')}) VALUES (${values.join(', ')})`;
 	}
 };
