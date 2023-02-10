@@ -102,10 +102,10 @@ export type Order = { fieldId: string; fieldName: string; order: SQLOrder; entit
 /** 根据字段类型返回拼接 sql 的具体指 */
 export const getValueByFieldType = (dbType: string, val: string) => {
 	switch (dbType) {
-		case FieldDBType.VARCHAR: return `'${val}'`;
-		case FieldDBType.BIGINT: return val;
-		case FieldDBType.MEDIUMTEXT: return `'${val}'`;
-		default: return val;
+	case FieldDBType.VARCHAR: return `'${val}'`;
+	case FieldDBType.BIGINT: return val;
+	case FieldDBType.MEDIUMTEXT: return `'${val}'`;
+	default: return val;
 	}
 };
 
@@ -120,7 +120,7 @@ export const getValueByOperatorAndFieldType = (dbType: string, operator: string,
 	return getValueByFieldType(dbType, val);
 };
 
-export type AnyType = any;
+type AnyType = any;
 
 /** 根据条件拼接 where sql */
 export const spliceWhereSQLFragmentByConditions = (fnParams: {
@@ -212,7 +212,7 @@ export const spliceWhereSQLFragmentByConditions = (fnParams: {
 	let sql = `${conditionSqlList.length > 1 ? '(' : ''}${conditionSqlList.join(` ${whereJoiner} `)}${conditionSqlList.length > 1 ? ')' : ''}`;
 	let prefix = '';
 	/** mapping 字段，存在映射且实体存在 */
-	const mappingFields = entities[0].fieldAry.filter(field => {
+	const mappingFields = curEntity.fieldAry.filter(field => {
 		return field.bizType === FieldBizType.MAPPING && field.mapping?.entity && entityMap[field.mapping.entity?.id];
 	});
 
