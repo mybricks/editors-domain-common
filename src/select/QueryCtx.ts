@@ -89,7 +89,7 @@ export default class QueryCtx {
 			let countScript = '';
 
 			selectScript = `
-			(params)=>{
+			((params)=>{
 
 				const FieldDBType = ${JSON.stringify(FieldDBType)};
 				const SQLOperator = ${JSON.stringify(SQLOperator)};
@@ -108,8 +108,10 @@ export default class QueryCtx {
 					pageIndex: ${JSON.stringify(pageIndex)},
 				});
 
+				console.error("aaaaa", sql)
+
 				return sql;
-			}
+			})({name: "zhangshan"})
 			`;
 
 			if (this.showPager) {

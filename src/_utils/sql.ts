@@ -102,10 +102,10 @@ export type Order = { fieldId: string; fieldName: string; order: SQLOrder; entit
 /** 根据字段类型返回拼接 sql 的具体指 */
 export const getValueByFieldType = (dbType: string, val: string) => {
 	switch (dbType) {
-	case FieldDBType.VARCHAR: return `'${val}'`;
-	case FieldDBType.BIGINT: return val;
-	case FieldDBType.MEDIUMTEXT: return `'${val}'`;
-	default: return val;
+		case FieldDBType.VARCHAR: return `'${val}'`;
+		case FieldDBType.BIGINT: return val;
+		case FieldDBType.MEDIUMTEXT: return `'${val}'`;
+		default: return val;
 	}
 };
 
@@ -131,7 +131,7 @@ export const spliceWhereSQLFragmentByConditions = (fnParams: {
 	curEntity: Entity;
 	params: Record<string, unknown>;
 	whereJoiner?: SQLWhereJoiner;
-}) => {
+}, templateMode?) => {
 	const { conditions, entities, params, whereJoiner, entityMap, curEntity } = fnParams;
 	const curConditions = conditions
 		.filter(condition => condition.fieldId)
@@ -169,7 +169,7 @@ export const spliceWhereSQLFragmentByConditions = (fnParams: {
 				params,
 				entityMap,
 				curEntity,
-			});
+			}, templateMode);
 		} else {
 			const field = entityMap[condition.entityId]?.fieldAry.find(f => f.id === condition.fieldId);
 
@@ -184,9 +184,12 @@ export const spliceWhereSQLFragmentByConditions = (fnParams: {
 						value = curValue;
 						isEntityField = true;
 					} else {
-						// value = params[curValue.substring(curValue.indexOf('.')+1)] as string;
-						let key = curValue.substring(curValue.indexOf('.') + 1);
-						value = `\${params.${key}}`;
+						if (templateMode) {
+							let key = curValue.substring(curValue.indexOf('.') + 1);
+							value = `\${params.${key}}`;
+						} else {
+							value = params[curValue.substring(curValue.indexOf('.') + 1)] as string;
+						}
 					}
 				}
 
@@ -210,19 +213,19 @@ export const spliceWhereSQLFragmentByConditions = (fnParams: {
 		/** 当 condition 存在或者映射字段存在时 */
 		if (sql || mappingFields.length) {
 			prefix = 'WHERE _status_deleted = 0 AND ';
-			
+
 			mappingFields.forEach((mappingField, index) => {
 				/** 被关联 */
 				if (mappingField.mapping?.type === 'primary') {
 					const relationField = curEntity.fieldAry.find(f => f.bizType === FieldBizType.RELATION && f.relationEntityId === mappingField.mapping?.entity?.id);
-					
+
 					if (relationField) {
 						prefix += `MAPPING_${mappingField.name}.MAPPING_${mappingField.name}_id = ${curEntity.name}.${relationField.name} ${(sql || index < mappingFields.length - 1) ? 'AND ' : ''}`;
 					}
 				} else {
 					/** 与主实体存在关联关系的外键字段 */
 					const relationField = entityMap[mappingField.mapping!.entity!.id]?.fieldAry.find(f => f.bizType === FieldBizType.RELATION && f.relationEntityId === curEntity.id);
-					
+
 					if (relationField) {
 						prefix += `MAPPING_${mappingField.name}.${relationField.name} = ${curEntity.name}.id ${(sql || index < mappingFields.length - 1) ? 'AND ' : ''}`;
 					}
@@ -310,7 +313,7 @@ export const spliceSelectSQLByConditions = (fnParams: {
 	params: Record<string, unknown>;
 	limit: number;
 	pageIndex?: string;
-}) => {
+}, templateMode?) => {
 	let { conditions, entities, params, limit, orders, pageIndex } = fnParams;
 	const entityMap = {};
 	entities.forEach(e => entityMap[e.id] = e);
@@ -398,16 +401,16 @@ export const spliceSelectSQLByConditions = (fnParams: {
 			params,
 			entityMap,
 			curEntity,
-		}));
+		}, templateMode));
 
 		if (orders.length) {
 			const orderList: string[] = [];
 			orders.forEach(order => {
 				const mappingField = mappingFields.find(m => m.mapping?.entity?.id === order.entityId);
-				
+
 				if (mappingField) {
 					const currentField = mappingField.mapping?.entity?.fieldAry.find(f => f.id === order.fieldId);
-					
+
 					currentField && orderList.push(`MAPPING_${mappingField.name}.${currentField.name} ${order.order}`);
 				} else {
 					const field = curEntity.fieldAry.find(f => f.id === order.fieldId);
@@ -443,16 +446,16 @@ export const spliceSelectCountSQLByConditions = (fnParams: {
 	conditions: Condition;
 	entities: Entity[];
 	params: Record<string, unknown>;
-}) => {
+}, templateMode?) => {
 	let { conditions, entities, params } = fnParams;
 	const entityMap = {};
 	entities.forEach(e => entityMap[e.id] = e);
 	const curEntity = entities.find(e => e.selected);
-	
+
 	if (curEntity && curEntity.fieldAry.length) {
 		const sql: string[] = [];
 		const entityNames: string[] = [curEntity.name];
-		
+
 		/** mapping 字段，存在映射且实体存在 */
 		const mappingFields = curEntity.fieldAry.filter(field => {
 			return field.bizType === FieldBizType.MAPPING && field.mapping?.entity && field.mapping?.entity?.fieldAry.length && entityMap[field.mapping.entity.id];
@@ -464,7 +467,7 @@ export const spliceSelectCountSQLByConditions = (fnParams: {
 			const fieldJoiner = mappingField.mapping!.fieldJoiner!;
 			/** 源实体，即实体面板中存在的实体 */
 			const originEntity = entityMap[entity.id];
-			
+
 			/** 与主实体存在关联关系的外键字段 */
 			let relationField: Field | null = null;
 			if (type === 'primary') {
@@ -472,17 +475,17 @@ export const spliceSelectCountSQLByConditions = (fnParams: {
 			} else {
 				relationField = originEntity.fieldAry.find(f => f.bizType === FieldBizType.RELATION && f.relationEntityId === curEntity.id) ?? null;
 			}
-			
+
 			if (!relationField) {
 				return;
 			}
-			
+
 			const isMaxCondition = condition.startsWith('max(') && condition.endsWith(')');
 			let entityName = '';
 			/** 被关联 */
 			if (type === 'primary') {
 				if (condition === '-1') {
-					entityName = `(SELECT id AS MAPPING_${mappingField.name}_id, ${entity.fieldAry.filter(f => !f.isPrimaryKey).map(f => f.name).join(', ')} FROM ${originEntity.name} WHERE _status_deleted = 0) AS MAPPING_${mappingField.name}`;entityName = `(SELECT id AS MAPPING_${mappingField.name}_id, ${entity.fieldAry.filter(f => !f.isPrimaryKey).map(f => f.name).join(', ')} FROM ${originEntity.name} WHERE _status_deleted = 0) AS MAPPING_${mappingField.name}`;
+					entityName = `(SELECT id AS MAPPING_${mappingField.name}_id, ${entity.fieldAry.filter(f => !f.isPrimaryKey).map(f => f.name).join(', ')} FROM ${originEntity.name} WHERE _status_deleted = 0) AS MAPPING_${mappingField.name}`; entityName = `(SELECT id AS MAPPING_${mappingField.name}_id, ${entity.fieldAry.filter(f => !f.isPrimaryKey).map(f => f.name).join(', ')} FROM ${originEntity.name} WHERE _status_deleted = 0) AS MAPPING_${mappingField.name}`;
 				}
 			} else {
 				/** 关联 */
@@ -490,14 +493,14 @@ export const spliceSelectCountSQLByConditions = (fnParams: {
 					entityName = `(SELECT id AS MAPPING_${mappingField.name}_id, ${relationField.name}, ${entity.fieldAry.filter(f => !f.isPrimaryKey && f.name !== relationField?.name).map(f => `GROUP_CONCAT(${f.name} SEPARATOR '${fieldJoiner}') ${f.name}`)} FROM ${originEntity.name} WHERE _status_deleted = 0 GROUP BY ${relationField.name}) AS MAPPING_${mappingField.name}`;
 				} else if (isMaxCondition) {
 					const filedName = condition.substr(4, condition.length - 5);
-					
+
 					entityName = `(SELECT id AS MAPPING_${mappingField.name}_id, ${relationField.name}, ${entity.fieldAry.filter(f => !f.isPrimaryKey && f.name !== relationField?.name).map(f => f.name)} FROM ${originEntity.name} WHERE _status_deleted = 0 AND ${filedName} IN (SELECT max(${filedName}) FROM ${originEntity.name} WHERE _status_deleted = 0 GROUP BY ${relationField.name})) AS MAPPING_${mappingField.name}`;
 				}
 			}
-			
+
 			entityNames.push(entityName);
 		});
-		
+
 		/** 前置 sql */
 		sql.push(`SELECT count(*) as total FROM ${entityNames.join(', ')}`);
 		sql.push(spliceWhereSQLFragmentByConditions({
@@ -506,8 +509,8 @@ export const spliceSelectCountSQLByConditions = (fnParams: {
 			params,
 			entityMap,
 			curEntity,
-		}));
-		
+		}, templateMode));
+
 		return sql.join(' ');
 	}
 };
@@ -518,7 +521,7 @@ export const spliceUpdateSQLByConditions = (fnParams: {
 	connectors: Array<{ from: string; to: string }>;
 	entities: Entity[];
 	params: Record<string, unknown>;
-}) => {
+}, templateMode?) => {
 	const { conditions, entities, params, connectors } = fnParams;
 	const entityMap = {};
 	entities.forEach(e => entityMap[e.id] = e);
@@ -539,7 +542,7 @@ export const spliceUpdateSQLByConditions = (fnParams: {
 			params,
 			curEntity,
 			entityMap,
-		}));
+		}, templateMode));
 
 		return sql.join(' ');
 	}
@@ -550,7 +553,7 @@ export const spliceDeleteSQLByConditions = (fnParams: {
 	conditions: Condition;
 	entities: Entity[];
 	params: Record<string, unknown>;
-}) => {
+}, templateMode?) => {
 	const { conditions, entities, params } = fnParams;
 	const entityMap = {};
 	entities.forEach(e => entityMap[e.id] = e);
@@ -567,7 +570,7 @@ export const spliceDeleteSQLByConditions = (fnParams: {
 			params,
 			curEntity,
 			entityMap,
-		}));
+		}, templateMode));
 
 		return sql.join(' ');
 	}
