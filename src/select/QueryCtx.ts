@@ -47,7 +47,7 @@ export default class QueryCtx {
 		set(value: AnyType): void;
 	};
 
-	showPager!: Boolean;
+	showPager!: boolean;
 
 	nowValue!: {
 		desc: string
@@ -76,7 +76,7 @@ export default class QueryCtx {
 	}
 
 	save() {
-		const { entities, conditions, originEntities, orders, limit } = this.nowValue;
+		const { entities, conditions, orders, limit } = this.nowValue;
 		let desc = '';
 
 		entities.filter(entity => entity.fieldAry.length && entity.selected).forEach((entity) => {
@@ -85,8 +85,8 @@ export default class QueryCtx {
 
 		if (entities?.length && entities[0].fieldAry.length > 0) {
 
-			let selectScript = "";
-			let countScript = "";
+			let selectScript = '';
+			let countScript = '';
 
 			selectScript = `
 			(params)=>{
@@ -105,7 +105,6 @@ export default class QueryCtx {
 					entities: ${JSON.stringify(entities)},
 					limit: ${JSON.stringify(limit)},
 					orders: ${JSON.stringify(orders)},
-					originEntities: ${JSON.stringify(originEntities)},
 				});
 
 				return sql;
@@ -128,8 +127,6 @@ export default class QueryCtx {
 						params: params || {},
 						conditions: ${JSON.stringify(conditions)} || [],
 						entities: ${JSON.stringify(entities)},
-						orders: ${JSON.stringify(orders)},
-						originEntities: ${JSON.stringify(originEntities)},
 					});
 	
 					return sql;
