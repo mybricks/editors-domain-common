@@ -1,5 +1,6 @@
-import { FieldBizType, spliceUpdateSQLByConditions } from '../_utils/sql';
+import { spliceUpdateSQLByConditions } from '../_utils/sql';
 import { getParamsByConditions } from '../_utils/params';
+import { FieldBizType } from '../_constants/field';
 import { AnyType } from '../_types';
 import { Condition } from '../_types/domain';
 

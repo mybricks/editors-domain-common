@@ -4,10 +4,10 @@ import { evt, useObservable } from '@mybricks/rxui';
 import { AnyType } from '../_types';
 import PopView from '../_common/pop-view';
 import Where from '../_common/where';
-import { SQLWhereJoiner } from '../_constants/field';
+import { FieldBizType, SQLWhereJoiner } from '../_constants/field';
 import { formatEntitiesByOriginEntities } from '../_utils/entity';
 import { Condition, Entity } from '../_types/domain';
-import { FieldBizType, spliceDeleteSQLByConditions } from '../_utils/sql';
+import { spliceDeleteSQLByConditions } from '../_utils/sql';
 import { getParamsByConditions } from '../_utils/params';
 
 import styles from './index.less';

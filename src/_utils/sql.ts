@@ -1,5 +1,5 @@
 /** 字段类型 */
-export enum FieldBizType {
+enum FieldBizType {
 	STRING = 'string',
 	NUMBER = 'number',
 	/** 外键，关联其他表 */
@@ -9,18 +9,18 @@ export enum FieldBizType {
 }
 
 /** 数据库字段类型 */
-export enum FieldDBType {
+enum FieldDBType {
 	VARCHAR = 'varchar',
 	BIGINT = 'bigint',
 	MEDIUMTEXT = 'mediumtext',
 }
 
-export enum SQLWhereJoiner {
+enum SQLWhereJoiner {
 	AND = 'AND',
 	OR = 'OR',
 }
 
-export enum SQLOperator {
+enum SQLOperator {
 	/** 等于 */
 	EQUAL = '=',
 	/** 不等于 */
@@ -40,11 +40,11 @@ export enum SQLOperator {
 }
 
 /** sql 排序规则 */
-export enum SQLOrder {
+enum SQLOrder {
 	ASC = 'ASC',
 	DESC = 'DESC',
 }
-export interface Entity {
+interface Entity {
 	/** 表 ID，在前端编辑页使用 */
 	id: string;
 	/** 表名 */
@@ -55,7 +55,7 @@ export interface Entity {
 	selected?: boolean;
 }
 
-export interface Field {
+interface Field {
 	/** 表字段 ID，真实数据库字段 */
 	id: string;
 	/** 字段名 */
@@ -80,7 +80,7 @@ export interface Field {
 	};
 }
 
-export interface Condition {
+interface Condition {
 	/** 字段 ID */
 	fieldId: string;
 	/** 实体ID */
@@ -96,7 +96,7 @@ export interface Condition {
 	whereJoiner: SQLWhereJoiner;
 }
 
-export type Order = { fieldId: string; fieldName: string; order: SQLOrder; entityId: string };
+type Order = { fieldId: string; fieldName: string; order: SQLOrder; entityId: string };
 
 
 /** 根据字段类型返回拼接 sql 的具体指 */
