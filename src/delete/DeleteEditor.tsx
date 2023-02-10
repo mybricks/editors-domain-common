@@ -6,8 +6,8 @@ import PopView from '../_common/pop-view';
 import Where from '../_common/where';
 import { SQLWhereJoiner } from '../_constants/field';
 import { formatEntitiesByOriginEntities } from '../_utils/entity';
-import { Entity } from '../_types/domain';
-import { spliceDeleteSQLByConditions } from '../_utils/sql';
+import { Condition, Entity } from '../_types/domain';
+import { FieldBizType, spliceDeleteSQLByConditions } from '../_utils/sql';
 import { getParamsByConditions } from '../_utils/params';
 
 import styles from './index.less';
@@ -30,12 +30,36 @@ class DeleteContext {
 		}
 	}
 	close!: () => void;
+	filterConditionByEffectFieldIds(conditions: Condition[], allowUseFields: string[]) {
+		conditions.forEach(con => {
+			if (con.conditions) {
+				this.filterConditionByEffectFieldIds(con.conditions, allowUseFields);
+			} else {
+				if (!allowUseFields.includes(con.fieldId)) {
+					con.fieldId = '';
+					con.fieldName = '';
+					con.entityId = '';
+				}
+			}
+		});
+	}
 	save() {
 		const { entities, conditions } = this.nowValue;
 		let desc = '';
+		const currentEntity = entities.find(entity => entity.fieldAry.length && entity.selected);
 
-		if (entities?.length && entities[0].fieldAry.length > 0) {
-			desc = `${entities[0].name}`;
+		if (currentEntity && currentEntity.fieldAry.length > 0) {
+			desc = `${currentEntity.name}`;
+			/** 统计所有允许使用的 field id */
+			const allowUseFields: string[] = [];
+			currentEntity.fieldAry.forEach(field => {
+				if (field.bizType === FieldBizType.MAPPING) {
+					field.mapping?.entity?.fieldAry?.forEach(f => allowUseFields.push(f.id));
+				} else {
+					allowUseFields.push(field.id);
+				}
+			});
+			this.filterConditionByEffectFieldIds([conditions], allowUseFields);
 
 			let params = getParamsByConditions(conditions.conditions);
 			let sql = spliceDeleteSQLByConditions({

@@ -528,7 +528,7 @@ export const spliceUpdateSQLByConditions = (fnParams: {
 		const sql: string[] = [];
 
 		/** 前置 sql */
-		sql.push(`UPDATE ${curEntity.name} SET _update_user_id = '', _update_time = \${Date.now()}, `);
+		sql.push(`UPDATE ${curEntity.name} SET _update_user_id = '', _update_time = \${Date.now()},`);
 		sql.push(spliceUpdateSQLFragmentByConditions({
 			connectors,
 			entity: curEntity,

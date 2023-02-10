@@ -1,13 +1,22 @@
-import { DomainViewModel } from '../types';
-import { spliceUpdateSQLByConditions } from '../_utils/sql';
+import { FieldBizType, spliceUpdateSQLByConditions } from '../_utils/sql';
 import { getParamsByConditions } from '../_utils/params';
 import { AnyType } from '../_types';
+import { Condition } from '../_types/domain';
 
 export type T_Field = {
 	id,
 	isPrimaryKey,
 	name,
 	desc
+	bizType: string;
+	mapping?: {
+		condition: string;
+		fieldJoiner: string;
+		entity?: T_Entity;
+		type?: string;
+		sql: string;
+		desc: string;
+	};
 }
 
 export type T_Entity = {
@@ -18,44 +27,34 @@ export type T_Entity = {
 	selected: boolean;
 }
 
-const getTypeQuote = (type) => {
-	switch (type) {
-	case 'string': {
-		return '\'';
-	}
-	case 'number': {
-		return '';
-	}
-	}
-};
-
 export default class InsertCtx {
-	domainModel: DomainViewModel;
+	domainModel: AnyType;
 
-	value: {
+	value!: {
 		get, set
 	};
 
-	paramSchema: {
+	paramSchema!: {
 		type,
 		properties
 	};
 
-	nowValue: {
+	nowValue!: {
 		desc: string
-		script: string
+		script?: string
 		entities: T_Entity[],
-		conAry: { from: string, to: string }[]
+		conAry: { from: string, to: string }[];
+		conditions: Condition;
 	};
 
 	close;
 
-	blurAry = [];
+	blurAry: Array<() => void> = [];
 
 
 	//------------------------------------------------------------
 
-	addBlur(fn) {
+	addBlur(fn: () => void) {
 		this.blurAry.push(fn);
 	}
 
@@ -64,14 +63,38 @@ export default class InsertCtx {
 			this.blurAry.forEach(fn => fn());
 		}
 	}
+	
+	filterConditionByEffectFieldIds(conditions: Condition[], allowUseFields: string[]) {
+		conditions.forEach(con => {
+			if (con.conditions) {
+				this.filterConditionByEffectFieldIds(con.conditions, allowUseFields);
+			} else {
+				if (!allowUseFields.includes(con.fieldId)) {
+					con.fieldId = '';
+					con.fieldName = '';
+					con.entityId = '';
+				}
+			}
+		});
+	}
 
 	save() {
-		let { conAry, entities, conditions, conAry } = this.nowValue;
-		entities = entities.filter(e => e.selected);
+		let { conAry, entities, conditions } = this.nowValue;
+		const currentEntity = entities.find(entity => entity.fieldAry.length && entity.selected);
 		let desc = '';
 
-		if (entities?.length && entities[0].fieldAry.length > 0 && conAry.length) {
-			desc = `${entities[0].name}`;
+		if (currentEntity && currentEntity.fieldAry.length > 0 && conAry.length) {
+			desc = `${currentEntity.name}`;
+			/** 统计所有允许使用的 field id */
+			const allowUseFields: string[] = [];
+			currentEntity.fieldAry.forEach(field => {
+				if (field.bizType === FieldBizType.MAPPING) {
+					field.mapping?.entity?.fieldAry?.forEach(f => allowUseFields.push(f.id));
+				} else {
+					allowUseFields.push(field.id);
+				}
+			});
+			this.filterConditionByEffectFieldIds([conditions], allowUseFields);
 
 			let params = getParamsByConditions(conditions.conditions);
 			const sql = spliceUpdateSQLByConditions({

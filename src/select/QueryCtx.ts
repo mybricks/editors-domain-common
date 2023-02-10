@@ -14,6 +14,14 @@ export type T_Field = {
 	/** 关联的实体表 ID */
 	relationEntityId?: string;
 	selected?: boolean;
+	mapping?: {
+		condition: string;
+		fieldJoiner: string;
+		entity?: T_Entity;
+		type?: string;
+		sql: string;
+		desc: string;
+	};
 }
 
 export type T_Entity = {
@@ -51,7 +59,7 @@ export default class QueryCtx {
 
 	nowValue!: {
 		desc: string
-		sql: string
+		script?: string | Record<string, string>;
 		entities: T_Entity[],
 		conditions: T_Condition,
 		limit: number | string;
@@ -61,9 +69,9 @@ export default class QueryCtx {
 
 	close!: () => void;
 
-	blurAry = [];
+	blurAry: Array<() => void> = [];
 
-	addBlur(fn) {
+	addBlur(fn: () => void) {
 		this.blurAry.push(fn);
 	}
 
@@ -74,23 +82,42 @@ export default class QueryCtx {
 			this.blurAry = [];
 		}
 	}
+	
+	filterConditionByEffectFieldIds(conditions: T_Condition[], allowUseFields: string[]) {
+		conditions.forEach(con => {
+			if (con.conditions) {
+				this.filterConditionByEffectFieldIds(con.conditions, allowUseFields);
+			} else {
+				if (!allowUseFields.includes(con.fieldId)) {
+					con.fieldId = '';
+					con.fieldName = '';
+					con.entityId = '';
+				}
+			}
+		});
+	}
 
 	save() {
 		const { entities, conditions, orders, limit, pageIndex } = this.nowValue;
 		let desc = '';
+		const currentEntity = entities.find(entity => entity.fieldAry.length && entity.selected);
 
-		entities.filter(entity => entity.fieldAry.length && entity.selected).forEach((entity) => {
-			desc = `${desc ? `${desc};\n` : ''}${entity.name} 的 ${entity.fieldAry.filter(f => f.selected).map(field => field.name).join(', ')}`;
-		}, []);
-
-		if (entities?.length && entities[0].fieldAry.length > 0) {
-
-			let selectScript = '';
+		if (currentEntity && currentEntity.fieldAry.length > 0) {
+			desc = `${currentEntity.name} 的 ${currentEntity.fieldAry.filter(f => f.selected).map(field => field.name).join(', ')}`;
+			/** 统计所有允许使用的 field id */
+			const allowUseFields: string[] = [];
+			currentEntity.fieldAry.forEach(field => {
+				if (field.bizType === FieldBizType.MAPPING) {
+					field.mapping?.entity?.fieldAry?.forEach(f => allowUseFields.push(f.id));
+				} else {
+					allowUseFields.push(field.id);
+				}
+			});
+			this.filterConditionByEffectFieldIds([conditions], allowUseFields);
 			let countScript = '';
 
-			selectScript = `
+			const selectScript = `
 			(params)=>{
-
 				const FieldDBType = ${JSON.stringify(FieldDBType)};
 				const SQLOperator = ${JSON.stringify(SQLOperator)};
 				const FieldBizType = ${JSON.stringify(FieldBizType)};
@@ -115,7 +142,6 @@ export default class QueryCtx {
 			if (this.showPager) {
 				countScript = `
 				(params)=>{
-
 					const FieldDBType = ${JSON.stringify(FieldDBType)};
 					const SQLOperator = ${JSON.stringify(SQLOperator)};
 					const FieldBizType = ${JSON.stringify(FieldBizType)};
