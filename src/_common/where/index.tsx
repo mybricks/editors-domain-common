@@ -178,16 +178,20 @@ const Conditions: FC = () => {
 						.forEach(mappingField => {
 							const entity = mappingField.mapping?.entity as AnyType;
 							const originEntity = whereContext.nowValue.entities.find((originEntity: Entity) => originEntity.id === entity?.id);
-						
-							if (originEntity) {
+							
+							if (originEntity && entity?.fieldAry.length) {
 								fieldSelectOptions.push(
-									<option
-										key={`${entity.id}&&${entity.field.id}`}
-										value={`${entity.id}&&${entity.field.id}`}
-										disabled={conditionFieldIds.includes(entity.field.id ?? '')}
-									>
-										{mappingField.name}.{entity.field.name}
-									</option>
+									...entity?.fieldAry.map(field => {
+										return (
+											<option
+												key={`${entity?.id}&&${field.id}`}
+												value={`${entity?.id}&&${field.id}`}
+												disabled={conditionFieldIds.includes(field.id ?? '')}
+											>
+												{mappingField.name}.{field.name}
+											</option>
+										);
+									}) || []
 								);
 							}
 						});

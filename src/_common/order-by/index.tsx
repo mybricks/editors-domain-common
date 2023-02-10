@@ -97,15 +97,19 @@ const OrderItem: FC<OrderItemProps> = props => {
 					const entity = mappingField.mapping?.entity;
 					const originEntity = orderContext.nowValue?.entities.find((origin: Entity) => origin.id === entity?.id);
 					
-					if (originEntity) {
+					if (originEntity && entity?.fieldAry.length) {
 						options.push(
-							<option
-								key={`${entity?.id}&&${entity?.field.id}`}
-								value={`${entity?.id}&&${entity?.field.id}`}
-								disabled={orderFieldIds.includes(entity?.field.id ?? '')}
-							>
-								{mappingField.name}.{entity?.field.name}
-							</option>
+							...entity?.fieldAry.map(field => {
+								return (
+									<option
+										key={`${entity?.id}&&${field.id}`}
+										value={`${entity?.id}&&${field.id}`}
+										disabled={orderFieldIds.includes(field.id ?? '')}
+									>
+										{mappingField.name}.{field.name}
+									</option>
+								);
+							}) || []
 						);
 					}
 				});

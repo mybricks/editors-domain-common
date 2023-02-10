@@ -76,7 +76,7 @@ export default class QueryCtx {
 	}
 
 	save() {
-		const { entities, conditions, orders, limit } = this.nowValue;
+		const { entities, conditions, orders, limit, pageIndex } = this.nowValue;
 		let desc = '';
 
 		entities.filter(entity => entity.fieldAry.length && entity.selected).forEach((entity) => {
@@ -105,6 +105,7 @@ export default class QueryCtx {
 					entities: ${JSON.stringify(entities)},
 					limit: ${JSON.stringify(limit)},
 					orders: ${JSON.stringify(orders)},
+					pageIndex: ${JSON.stringify(pageIndex)},
 				});
 
 				return sql;

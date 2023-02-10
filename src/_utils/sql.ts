@@ -382,7 +382,7 @@ export const spliceSelectSQLByConditions = (fnParams: {
 			fieldList.push(
 				...entity.fieldAry.map(f => {
 					if (f.isPrimaryKey) {
-						return `MAPPING_${field.name}.MAPPING_${f.name}_id AS '${field.name}.${f.name}'`;
+						return `MAPPING_${field.name}.MAPPING_${field.name}_id AS '${field.name}.${f.name}'`;
 					} else {
 						return `MAPPING_${field.name}.${f.name} AS '${field.name}.${f.name}'`;
 					}
