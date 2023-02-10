@@ -102,7 +102,7 @@ export default class InsertCtx {
 				conditions: conditions,
 				connectors: conAry,
 				entities: entities as AnyType[],
-			});
+			}, true);
 			
 			let script = `
 			(params)=>{ 
