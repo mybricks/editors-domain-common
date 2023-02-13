@@ -1,6 +1,7 @@
 import { AnyType } from '../_types';
 import { FieldBizType, SQLOrder, SQLWhereJoiner } from '../_constants/field';
 import { spliceSelectCountSQLByConditions, spliceSelectSQLByConditions } from '../_utils/selectSQL';
+import { safeEncodeURIComponent } from '../_utils/util';
 
 
 export type T_Field = {
@@ -150,13 +151,13 @@ export default class QueryCtx {
 			}
 
 			if (!this.showPager) {
-				this.nowValue.script = selectScript;
+				this.nowValue.script = safeEncodeURIComponent(selectScript);
 				
 				console.log('SELECT SQL: ', selectScript);
 			} else {
 				this.nowValue.script = {
-					list: selectScript,
-					total: countScript
+					list: safeEncodeURIComponent(selectScript),
+					total: safeEncodeURIComponent(countScript)
 				};
 				
 				console.log('SELECT SQL: ', {
