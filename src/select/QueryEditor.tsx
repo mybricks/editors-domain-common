@@ -140,7 +140,7 @@ function SelectFrom() {
 
 function Limit() {
 	const nowValue = ctx.nowValue;
-	const [showInput, setShowInput] = useState(nowValue.limit?.type === SQLLimitType.CUSTOM);
+	const [showInput, setShowInput] = useState(ctx.showPager && nowValue.limit?.type === SQLLimitType.CUSTOM);
 	const [showPop, setShowPop] = useState(false);
 	const containerEle = useRef(null);
 	const popEle = useRef<AnyType>(null);
@@ -148,7 +148,7 @@ function Limit() {
 	const value = useComputed(() => {
 		if (nowValue.limit?.type === SQLLimitType.ENUM) {
 			return nowValue.limit.value;
-		} else {
+		} else if (ctx.showPager) {
 			return -1;
 		}
 	});
@@ -192,7 +192,7 @@ function Limit() {
 					value={value}
 					onChange={e => {
 						const parseValue = Number(e.target.value);
-						if (parseValue === -1) {
+						if (parseValue === -1 && ctx.showPager) {
 							nowValue.limit = { type: SQLLimitType.CUSTOM, value: '' };
 							setShowInput(true);
 						} else {
@@ -206,10 +206,10 @@ function Limit() {
 					<option value={100}>100条数据</option>
 					<option value={500}>500条数据</option>
 					<option value={1000}>1000条数据</option>
-					<option value={-1}>自定义</option>
+					{ctx.showPager ? <option value={-1}>自定义</option> : null}
 				</select>
 				
-				{showInput ? (
+				{showInput && ctx.showPager ? (
 					<input
 						className={css.pageInput}
 						type="text"
