@@ -174,7 +174,7 @@ const Conditions: FC = () => {
 					);
 					/** 映射字段 */
 					currentEntity.fieldAry
-						.filter(field => field.selected && field.bizType === FieldBizType.MAPPING)
+						.filter(field => field.selected && field.mapping?.entity)
 						.forEach(mappingField => {
 							const entity = mappingField.mapping?.entity as AnyType;
 							const originEntity = whereContext.nowValue.entities.find((originEntity: Entity) => originEntity.id === entity?.id);

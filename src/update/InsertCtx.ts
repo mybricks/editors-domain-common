@@ -1,6 +1,5 @@
 import { spliceUpdateSQLByConditions } from '../_utils/sql';
 import { getParamsByConditions } from '../_utils/params';
-import { FieldBizType } from '../_constants/field';
 import { AnyType } from '../_types';
 import { Condition } from '../_types/domain';
 
@@ -10,6 +9,7 @@ export type T_Field = {
 	name,
 	desc
 	bizType: string;
+	selected: boolean;
 	mapping?: {
 		condition: string;
 		fieldJoiner: string;
@@ -89,7 +89,7 @@ export default class InsertCtx {
 			/** 统计所有允许使用的 field id */
 			const allowUseFields: string[] = [];
 			currentEntity.fieldAry.forEach(field => {
-				if (field.bizType === FieldBizType.MAPPING) {
+				if (field.mapping?.entity && field.selected) {
 					field.mapping?.entity?.fieldAry?.forEach(f => allowUseFields.push(f.id));
 				} else {
 					allowUseFields.push(field.id);

@@ -4,7 +4,7 @@ import { evt, useObservable } from '@mybricks/rxui';
 import { AnyType } from '../_types';
 import PopView from '../_common/pop-view';
 import Where from '../_common/where';
-import { FieldBizType, SQLWhereJoiner } from '../_constants/field';
+import { SQLWhereJoiner } from '../_constants/field';
 import { formatEntitiesByOriginEntities } from '../_utils/entity';
 import { Condition, Entity } from '../_types/domain';
 import { spliceDeleteSQLByConditions } from '../_utils/sql';
@@ -53,7 +53,7 @@ class DeleteContext {
 			/** 统计所有允许使用的 field id */
 			const allowUseFields: string[] = [];
 			currentEntity.fieldAry.forEach(field => {
-				if (field.bizType === FieldBizType.MAPPING) {
+				if (field.mapping?.entity && field.selected) {
 					field.mapping?.entity?.fieldAry?.forEach(f => allowUseFields.push(f.id));
 				} else {
 					allowUseFields.push(field.id);

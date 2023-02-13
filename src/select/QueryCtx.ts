@@ -1,5 +1,5 @@
 import { AnyType } from '../_types';
-import { FieldBizType, SQLOrder, SQLWhereJoiner } from '../_constants/field';
+import { SQLOrder, SQLWhereJoiner } from '../_constants/field';
 import { spliceSelectCountSQLByConditions, spliceSelectSQLByConditions } from '../_utils/selectSQL';
 import { safeEncodeURIComponent } from '../_utils/util';
 
@@ -45,8 +45,6 @@ export type T_Condition = {
 }
 
 export default class QueryCtx {
-	editorEle!: HTMLElement;
-
 	paramSchema!: Record<string, unknown>;
 
 	domainModel: AnyType;
@@ -108,7 +106,7 @@ export default class QueryCtx {
 			/** 统计所有允许使用的 field id */
 			const allowUseFields: string[] = [];
 			currentEntity.fieldAry.forEach(field => {
-				if (field.bizType === FieldBizType.MAPPING) {
+				if (field.mapping?.entity && field.selected) {
 					field.mapping?.entity?.fieldAry?.forEach(f => allowUseFields.push(f.id));
 				} else {
 					allowUseFields.push(field.id);

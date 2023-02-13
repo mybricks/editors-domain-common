@@ -92,7 +92,7 @@ const OrderItem: FC<OrderItemProps> = props => {
 			
 			/** 映射字段 */
 			currentEntity.fieldAry
-				.filter((field: Field) => field.selected && field.bizType === FieldBizType.MAPPING)
+				.filter((field: Field) => field.selected && field.mapping?.entity)
 				.forEach((mappingField: Field) => {
 					const entity = mappingField.mapping?.entity;
 					const originEntity = orderContext.nowValue?.entities.find((origin: Entity) => origin.id === entity?.id);

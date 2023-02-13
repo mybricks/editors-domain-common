@@ -175,7 +175,7 @@ export const spliceSelectSQLByConditions = (fnParams: {
 		let prefix = '';
 		/** mapping 字段，存在映射且实体存在 */
 		const mappingFields = curEntity.fieldAry.filter(field => {
-			return field.selected && field.bizType === 'mapping' && field.mapping?.entity?.fieldAry?.length && entityMap[field.mapping.entity.id];
+			return field.selected && field.mapping?.entity?.fieldAry?.length && entityMap[field.mapping.entity.id];
 		});
 		
 		/** whereJoiner 不存在表示最外层 SQL */
@@ -223,7 +223,7 @@ export const spliceSelectSQLByConditions = (fnParams: {
 		
 		/** mapping 字段，存在映射且实体存在 */
 		const mappingFields = curEntity.fieldAry.filter(field => {
-			return field.selected && field.bizType === 'mapping' && field.mapping?.entity?.fieldAry?.length && entityMap[field.mapping.entity.id];
+			return field.selected && field.mapping?.entity?.fieldAry?.length && entityMap[field.mapping.entity.id];
 		});
 		
 		mappingFields.forEach(mappingField => {
@@ -420,7 +420,7 @@ export const spliceSelectCountSQLByConditions = (fnParams: {
 					
 					/** mapping 字段映射的实体 */
 					if (entityMapElement.id !== curEntity.id) {
-						const mappingField = curEntity.fieldAry.find(f => f.bizType === 'mapping' && f.mapping?.entity?.id === condition.entityId);
+						const mappingField = curEntity.fieldAry.find(f => f.mapping?.entity?.id === condition.entityId);
 						fieldName = `MAPPING_${mappingField?.name || entityMapElement.name}` + '.' + (mappingField?.mapping?.entity?.fieldAry.find(f => f.id === condition.fieldId)?.name || field.name);
 					}
 					let value = condition.value || '';
@@ -454,7 +454,7 @@ export const spliceSelectCountSQLByConditions = (fnParams: {
 		let prefix = '';
 		/** mapping 字段，存在映射且实体存在 */
 		const mappingFields = curEntity.fieldAry.filter(field => {
-			return field.selected && field.bizType === 'mapping' && field.mapping?.entity?.fieldAry?.length && entityMap[field.mapping.entity.id];
+			return field.selected && field.mapping?.entity?.fieldAry?.length && entityMap[field.mapping.entity.id];
 		});
 		
 		/** whereJoiner 不存在表示最外层 SQL */
@@ -499,7 +499,7 @@ export const spliceSelectCountSQLByConditions = (fnParams: {
 		
 		/** mapping 字段，存在映射且实体存在 */
 		const mappingFields = curEntity.fieldAry.filter(field => {
-			return field.selected && field.bizType === 'mapping' && field.mapping?.entity?.fieldAry?.length && entityMap[field.mapping.entity.id];
+			return field.selected && field.mapping?.entity?.fieldAry?.length && entityMap[field.mapping.entity.id];
 		});
 		mappingFields.forEach(mappingField => {
 			const entity = mappingField.mapping!.entity!;
