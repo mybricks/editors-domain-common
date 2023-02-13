@@ -113,7 +113,7 @@ export const spliceWhereSQLFragmentByConditions = (fnParams: {
 	let prefix = '';
 	/** mapping 字段，存在映射且实体存在 */
 	const mappingFields = curEntity.fieldAry.filter(field => {
-		return field.bizType === FieldBizType.MAPPING && field.mapping?.entity && entityMap[field.mapping.entity?.id];
+		return field.selected && field.bizType === FieldBizType.MAPPING && field.mapping?.entity?.fieldAry?.length && entityMap[field.mapping.entity?.id];
 	});
 
 	/** whereJoiner 不存在表示最外层 SQL */
@@ -195,7 +195,7 @@ export const spliceSelectSQLByConditions = (fnParams: {
 
 		/** mapping 字段，存在映射且实体存在 */
 		const mappingFields = curEntity.fieldAry.filter(field => {
-			return field.bizType === FieldBizType.MAPPING && field.mapping?.entity && field.mapping?.entity?.fieldAry?.length && entityMap[field.mapping.entity.id];
+			return field.selected && field.bizType === FieldBizType.MAPPING && field.mapping?.entity?.fieldAry?.length && entityMap[field.mapping.entity?.id];
 		});
 
 		mappingFields.forEach(mappingField => {
@@ -325,7 +325,7 @@ export const spliceSelectCountSQLByConditions = (fnParams: {
 
 		/** mapping 字段，存在映射且实体存在 */
 		const mappingFields = curEntity.fieldAry.filter(field => {
-			return field.bizType === FieldBizType.MAPPING && field.mapping?.entity && field.mapping?.entity?.fieldAry?.length && entityMap[field.mapping.entity.id];
+			return field.selected && field.bizType === FieldBizType.MAPPING && field.mapping?.entity?.fieldAry?.length && entityMap[field.mapping.entity?.id];
 		});
 		mappingFields.forEach(mappingField => {
 			const entity = mappingField.mapping!.entity!;
