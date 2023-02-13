@@ -27,13 +27,13 @@ export enum SQLOperator {
 	/** 不等于 */
 	NOT_EQUAL = '<>',
 	/** 匹配 */
-	LIKE = 'like',
+	LIKE = 'LIKE',
 	/** 不匹配 */
-	NOT_LIKE = 'not like',
+	NOT_LIKE = 'NOT LIKE',
 	/** 包含 */
-	IN = 'in',
+	IN = 'IN',
 	/** 不包含 */
-	NOT_IN = 'not in',
+	NOT_IN = 'NOT IN',
 	/** 大于等于 */
 	GE = '>=',
 	/** 小于等于 */
@@ -44,4 +44,12 @@ export enum SQLOperator {
 export enum SQLOrder {
 	ASC = 'ASC',
 	DESC = 'DESC',
+}
+
+/** select 查询 limit 设置值类型 */
+export enum SQLLimitType {
+	/** 枚举值，20、50、100 等 */
+	ENUM = 'ENUM',
+	/** 自定义 */
+	CUSTOM = 'CUSTOM',
 }

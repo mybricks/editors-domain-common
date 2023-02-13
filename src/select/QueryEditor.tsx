@@ -5,7 +5,7 @@ import QueryCtx from './QueryCtx';
 import Where from '../_common/where';
 import PopView from '../_common/pop-view';
 import { AnyType } from '../_types';
-import { SQLWhereJoiner } from '../_constants/field';
+import { SQLLimitType, SQLWhereJoiner } from '../_constants/field';
 import { Entity, Field } from '../_types/domain';
 import OrderBy from '../_common/order-by';
 import { formatEntitiesByOriginEntities } from '../_utils/entity';
@@ -30,7 +30,10 @@ export default function QueryEditor({ domainModel, paramSchema, value, close, sh
 					conditions: []
 				},
 				entities: domainModel.entityAry.map((entity: AnyType) => entity.toJSON()),
-				limit: 100
+				limit: {
+					type: SQLLimitType.ENUM,
+					value: 100
+				}
 			};
 		}
 		
@@ -137,20 +140,90 @@ function SelectFrom() {
 
 function Limit() {
 	const nowValue = ctx.nowValue;
-
+	const [showInput, setShowInput] = useState(nowValue.limit?.type === SQLLimitType.CUSTOM);
+	const [showPop, setShowPop] = useState(false);
+	const containerEle = useRef(null);
+	const popEle = useRef<AnyType>(null);
+	
+	const value = useComputed(() => {
+		if (nowValue.limit?.type === SQLLimitType.ENUM) {
+			return nowValue.limit.value;
+		} else {
+			return -1;
+		}
+	});
+	
+	const addExpression = useCallback(param => {
+		nowValue.limit.value = param;
+	}, []);
+	
+	const popParamValues = useMemo(() => {
+		if (showPop) {
+			const params = ctx.paramSchema?.properties;
+			const po = getPosition(popEle.current, containerEle.current);
+			
+			// @ts-ignore
+			const style = { left: po.x, top: po.y + popEle.current.offsetHeight };
+			
+			return (
+				<div className={css.popMenu} style={style}>
+					{
+						Object.keys((params || {}) as object).map(param => {
+							return (
+								<div key={param} className={`${css.item}`} onClick={() => addExpression(`{params.${param}}`)}>
+									params.{param}
+								</div>
+							);
+						})
+					}
+				</div>
+			);
+		}
+		
+		return null;
+	}, [showPop]);
+	
+	
 	return (
-		<div style={{ marginBottom: '12px' }}>
+		<div style={{ marginBottom: '12px', position: 'relative' }} ref={containerEle}>
 			<div className={css.segTitle}>
         4. 限制数量
 				<select className={css.selectDom}
-					value={nowValue.limit}
-					onChange={e => nowValue.limit = e.target.value}>
+					value={value}
+					onChange={e => {
+						const parseValue = Number(e.target.value);
+						if (parseValue === -1) {
+							nowValue.limit = { type: SQLLimitType.CUSTOM, value: '' };
+							setShowInput(true);
+						} else {
+							nowValue.limit = { type: SQLLimitType.ENUM, value: parseValue };
+							setShowInput(false);
+						}
+					}}>
 					<option value={10}>10条数据</option>
+					<option value={20}>20条数据</option>
+					<option value={50}>50条数据</option>
 					<option value={100}>100条数据</option>
 					<option value={500}>500条数据</option>
 					<option value={1000}>1000条数据</option>
+					<option value={-1}>自定义</option>
 				</select>
+				
+				{showInput ? (
+					<input
+						className={css.pageInput}
+						type="text"
+						value={nowValue.limit.value}
+						onChange={e => nowValue.limit.value = e.target.value}
+						onClick={evt((e: Event) => {
+							popEle.current = e.target;
+							setShowPop(true);
+							ctx.addBlur(() => setShowPop(false));
+						}).stop}
+					/>
+				) : null}
 			</div>
+			{popParamValues}
 		</div>
 	);
 }
@@ -200,6 +273,7 @@ const Offset = () => {
 			<div className={css.content}>
 				分页数值（页码）为
 				<input
+					style={{ marginLeft: '10px' }}
 					className={css.pageInput}
 					type="text"
 					value={nowValue.pageIndex}
@@ -208,7 +282,8 @@ const Offset = () => {
 						popEle.current = e.target;
 						setShowPop(true);
 						ctx.addBlur(() => setShowPop(false));
-					}).stop}/>
+					}).stop}
+				/>
 			</div>
 			{popParamValues}
 		</div>

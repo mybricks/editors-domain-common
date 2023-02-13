@@ -1,26 +1,7 @@
 import { Condition, Entity, Field, Order } from '../_types/domain';
-import { FieldBizType, FieldDBType, SQLOperator, SQLWhereJoiner } from '../_constants/field';
+import { FieldBizType, SQLWhereJoiner } from '../_constants/field';
+import { getValueByFieldType, getValueByOperatorAndFieldType } from './field';
 
-/** 根据字段类型返回拼接 sql 的具体指 */
-const getValueByFieldType = (dbType: string, val: string) => {
-	switch (dbType) {
-	case FieldDBType.VARCHAR: return `'${val}'`;
-	case FieldDBType.BIGINT: return val;
-	case FieldDBType.MEDIUMTEXT: return `'${val}'`;
-	default: return val;
-	}
-};
-
-/** 根据字段类型以及操作符号返回拼接 sql 的具体指 */
-const getValueByOperatorAndFieldType = (dbType: string, operator: string, val: string) => {
-	if (operator === SQLOperator.LIKE || operator === SQLOperator.NOT_LIKE) {
-		return `%${getValueByFieldType(dbType, val)}%`;
-	} else if (operator === SQLOperator.IN || operator === SQLOperator.NOT_IN) {
-		return `(${val.split(',').map(item => getValueByFieldType(dbType, item)).join(',')})`;
-	}
-
-	return getValueByFieldType(dbType, val);
-};
 
 /** 根据条件拼接 where sql */
 export const spliceWhereSQLFragmentByConditions = (fnParams: {

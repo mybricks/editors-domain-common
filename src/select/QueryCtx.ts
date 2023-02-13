@@ -1,5 +1,5 @@
 import { AnyType } from '../_types';
-import { SQLOrder, SQLWhereJoiner } from '../_constants/field';
+import { SQLLimitType, SQLOrder, SQLWhereJoiner } from '../_constants/field';
 import { spliceSelectCountSQLByConditions, spliceSelectSQLByConditions } from '../_utils/selectSQL';
 import { safeEncodeURIComponent } from '../_utils/util';
 
@@ -61,7 +61,7 @@ export default class QueryCtx {
 		script?: string | Record<string, string>;
 		entities: T_Entity[],
 		conditions: T_Condition,
-		limit: number | string;
+		limit: { type: SQLLimitType; value: number | string };
 		pageIndex?: string;
 		orders: Array<{ fieldId: string; fieldName: string; order: SQLOrder; entityId: string }>;
 	};

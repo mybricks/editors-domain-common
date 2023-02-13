@@ -60,7 +60,7 @@ export const spliceSelectSQLByConditions = (fnParams: {
 	conditions: Condition;
 	entities: Entity[];
 	params: Record<string, unknown>;
-	limit: number;
+	limit: { type: string; value: number | string };
 	pageIndex?: string;
 }, templateMode?) => {
 	/** 根据字段类型返回拼接 sql 的具体指 */
@@ -75,9 +75,9 @@ export const spliceSelectSQLByConditions = (fnParams: {
 	
 	/** 根据字段类型以及操作符号返回拼接 sql 的具体指 */
 	const getValueByOperatorAndFieldType = (dbType: string, operator: string, val: string) => {
-		if (operator === 'like' || operator === 'not like') {
+		if (operator === 'LIKE' || operator === 'NOT LIKE') {
 			return `%${getValueByFieldType(dbType, val)}%`;
-		} else if (operator === 'in' || operator === 'not in') {
+		} else if (operator === 'IN' || operator === 'NOT IN') {
 			return `(${val.split(',').map(item => getValueByFieldType(dbType, item)).join(',')})`;
 		}
 		
@@ -318,17 +318,28 @@ export const spliceSelectSQLByConditions = (fnParams: {
 			orderList.length && sql.push(`ORDER BY ${orderList.join(', ')}`);
 		}
 		
-		sql.push(`LIMIT ${limit}`);
+		let limitValue: AnyType = limit.value ? String(limit.value) :'';
+		if (limitValue) {
+			if (limitValue.startsWith('{') && limitValue.endsWith('}')) {
+				limitValue = params[limitValue.slice(limitValue.indexOf('.') + 1, -1)];
+				
+				if (limitValue) {
+					sql.push(`LIMIT ${limitValue}`);
+				}
+			} else {
+				sql.push(`LIMIT ${limitValue}`);
+			}
+		}
 		
 		if (pageIndex) {
 			if (pageIndex.startsWith('{') && pageIndex.endsWith('}')) {
 				const curValue = params[pageIndex.slice(pageIndex.indexOf('.') + 1, -1)];
 				
 				if (curValue) {
-					sql.push(`OFFSET ${(Number(curValue) - 1) * Number(limit)}`);
+					sql.push(`OFFSET ${(Number(curValue) - 1) * Number(limitValue)}`);
 				}
 			} else if (!Number.isNaN(Number(pageIndex))) {
-				sql.push(`OFFSET ${(Number(pageIndex) - 1) * Number(limit)}`);
+				sql.push(`OFFSET ${(Number(pageIndex) - 1) * Number(limitValue)}`);
 			}
 		}
 		
@@ -354,9 +365,9 @@ export const spliceSelectCountSQLByConditions = (fnParams: {
 	
 	/** 根据字段类型以及操作符号返回拼接 sql 的具体指 */
 	const getValueByOperatorAndFieldType = (dbType: string, operator: string, val: string) => {
-		if (operator === 'like' || operator === 'not like') {
+		if (operator === 'LIKE' || operator === 'NOT LIKE') {
 			return `%${getValueByFieldType(dbType, val)}%`;
-		} else if (operator === 'in' || operator === 'not in') {
+		} else if (operator === 'IN' || operator === 'NOT IN') {
 			return `(${val.split(',').map(item => getValueByFieldType(dbType, item)).join(',')})`;
 		}
 		
