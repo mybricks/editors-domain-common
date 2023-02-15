@@ -7,6 +7,8 @@ export enum FieldBizType {
 	RELATION = 'relation',
 	/** 映射其他表 */
 	MAPPING = 'mapping',
+	/** 系统表 */
+	SYS_USER = 'SYS_USER',
 }
 
 /** 数据库字段类型 */

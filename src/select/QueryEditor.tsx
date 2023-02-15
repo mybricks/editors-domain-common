@@ -31,9 +31,10 @@ export default function QueryEditor({ domainModel, paramSchema, value, close, sh
 				},
 				entities: domainModel.entityAry.map((entity: AnyType) => entity.toJSON()),
 				limit: {
-					type: SQLLimitType.ENUM,
-					value: 100
-				}
+					type: showPager ? SQLLimitType.CUSTOM : SQLLimitType.ENUM,
+					value: showPager ? '{params.pageSize}' : 100
+				},
+				pageIndex: showPager ? '{params.pageIndex}' : '',
 			};
 		}
 		
@@ -63,8 +64,8 @@ export default function QueryEditor({ domainModel, paramSchema, value, close, sh
 						  domainModal={ctx.domainModel}
 					  />
 					  <OrderBy nowValue={ctx.nowValue} domainModal={ctx.domainModel} />
-					  <Limit/>
-					  {showPager ? <Offset /> : null}
+					  {showPager ? null : <Limit/>}
+					  {/*{showPager ? <Offset /> : null}*/}
 				  </>
 			  ) : null
 		  }
@@ -140,18 +141,9 @@ function SelectFrom() {
 
 function Limit() {
 	const nowValue = ctx.nowValue;
-	const [showInput, setShowInput] = useState(ctx.showPager && nowValue.limit?.type === SQLLimitType.CUSTOM);
 	const [showPop, setShowPop] = useState(false);
 	const containerEle = useRef(null);
 	const popEle = useRef<AnyType>(null);
-	
-	const value = useComputed(() => {
-		if (nowValue.limit?.type === SQLLimitType.ENUM) {
-			return nowValue.limit.value;
-		} else if (ctx.showPager) {
-			return -1;
-		}
-	});
 	
 	const addExpression = useCallback(param => {
 		nowValue.limit.value = param;
@@ -183,33 +175,28 @@ function Limit() {
 		return null;
 	}, [showPop]);
 	
-	
 	return (
 		<div style={{ marginBottom: '12px', position: 'relative' }} ref={containerEle}>
 			<div className={css.segTitle}>
         4. 限制数量
-				<select className={css.selectDom}
-					value={value}
-					onChange={e => {
-						const parseValue = Number(e.target.value);
-						if (parseValue === -1 && ctx.showPager) {
-							nowValue.limit = { type: SQLLimitType.CUSTOM, value: '' };
-							setShowInput(true);
-						} else {
-							nowValue.limit = { type: SQLLimitType.ENUM, value: parseValue };
-							setShowInput(false);
-						}
-					}}>
-					<option value={10}>10条数据</option>
-					<option value={20}>20条数据</option>
-					<option value={50}>50条数据</option>
-					<option value={100}>100条数据</option>
-					<option value={500}>500条数据</option>
-					<option value={1000}>1000条数据</option>
-					{ctx.showPager ? <option value={-1}>自定义</option> : null}
-				</select>
+				{!ctx.showPager ? (
+					<select
+						className={css.selectDom}
+		        value={nowValue.limit.value}
+		        onChange={e => {
+			        nowValue.limit = { type: SQLLimitType.ENUM, value: Number(e.target.value) };
+		        }}
+					>
+						<option value={10}>10条数据</option>
+						<option value={20}>20条数据</option>
+						<option value={50}>50条数据</option>
+						<option value={100}>100条数据</option>
+						<option value={500}>500条数据</option>
+						<option value={1000}>1000条数据</option>
+					</select>
+				) : null}
 				
-				{showInput && ctx.showPager ? (
+				{ctx.showPager ? (
 					<input
 						className={css.pageInput}
 						type="text"
@@ -273,7 +260,6 @@ const Offset = () => {
 			<div className={css.content}>
 				分页数值（页码）为
 				<input
-					style={{ marginLeft: '10px' }}
 					className={css.pageInput}
 					type="text"
 					value={nowValue.pageIndex}

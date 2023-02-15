@@ -187,7 +187,7 @@ export const spliceSelectSQLByConditions = (fnParams: {
 				mappingFields.forEach((mappingField, index) => {
 					/** 被关联 */
 					if (mappingField.mapping?.type === 'primary') {
-						const relationField = curEntity.fieldAry.find(f => f.bizType === 'relation' && f.relationEntityId === mappingField.mapping?.entity?.id);
+						const relationField = curEntity.fieldAry.find(f => ['relation', 'SYS_USER'].includes(f.bizType) && f.relationEntityId === mappingField.mapping?.entity?.id);
 						
 						if (relationField) {
 							prefix += `MAPPING_${mappingField.name}.MAPPING_${mappingField.name}_id = ${curEntity.name}.${relationField.name} ${(sql || index < mappingFields.length - 1) ? 'AND ' : ''}`;
@@ -228,7 +228,7 @@ export const spliceSelectSQLByConditions = (fnParams: {
 		
 		mappingFields.forEach(mappingField => {
 			const entity = mappingField.mapping!.entity!;
-			const condition = mappingField.mapping!.condition!;
+			const condition = String(mappingField.mapping!.condition!);
 			const type = mappingField.mapping!.type!;
 			const fieldJoiner = mappingField.mapping!.fieldJoiner!;
 			/** 源实体，即实体面板中存在的实体 */
@@ -251,16 +251,21 @@ export const spliceSelectSQLByConditions = (fnParams: {
 			/** 被关联 */
 			if (type === 'primary') {
 				if (condition === '-1') {
-					entityName = `(SELECT id AS MAPPING_${mappingField.name}_id, ${entity.fieldAry.filter(f => !f.isPrimaryKey).map(f => f.name).join(', ')} FROM ${originEntity.name} WHERE _STATUS_DELETED = 0) AS MAPPING_${mappingField.name}`;
+					const extraFieldName = entity.fieldAry.filter(f => !f.isPrimaryKey).map(f => f.name).join(', ');
+					
+					entityName = `(SELECT id AS MAPPING_${mappingField.name}_id${extraFieldName ? `, ${extraFieldName}` : ''} FROM ${originEntity.name} WHERE _STATUS_DELETED = 0) AS MAPPING_${mappingField.name}`;
 				}
 			} else {
 				/** 关联 */
 				if (condition === '-1') {
-					entityName = `(SELECT id AS MAPPING_${mappingField.name}_id, ${relationField.name}, ${entity.fieldAry.filter(f => !f.isPrimaryKey && f.name !== relationField?.name).map(f => `GROUP_CONCAT(${f.name} SEPARATOR '${fieldJoiner}') ${f.name}`)} FROM ${originEntity.name} WHERE _STATUS_DELETED = 0 GROUP BY ${relationField.name}) AS MAPPING_${mappingField.name}`;
+					const extraFieldName = entity.fieldAry.filter(f => !f.isPrimaryKey && f.name !== relationField?.name).map(f => `GROUP_CONCAT(${f.name} SEPARATOR '${fieldJoiner}') ${f.name}`).join(', ');
+					console.log('extraFieldName', extraFieldName);
+					entityName = `(SELECT id AS MAPPING_${mappingField.name}_id, ${relationField.name}${extraFieldName ? `, ${extraFieldName}` : ''} FROM ${originEntity.name} WHERE _STATUS_DELETED = 0 GROUP BY ${relationField.name}) AS MAPPING_${mappingField.name}`;
 				} else if (isMaxCondition) {
 					const filedName = condition.substr(4, condition.length - 5);
+					const extraFieldName = entity.fieldAry.filter(f => !f.isPrimaryKey && f.name !== relationField?.name).map(f => f.name).join(', ');
 					
-					entityName = `(SELECT id AS MAPPING_${mappingField.name}_id, ${relationField.name}, ${entity.fieldAry.filter(f => !f.isPrimaryKey && f.name !== relationField?.name).map(f => f.name)} FROM ${originEntity.name} WHERE _STATUS_DELETED = 0 AND ${filedName} IN (SELECT max(${filedName}) FROM ${originEntity.name} WHERE _STATUS_DELETED = 0 GROUP BY ${relationField.name})) AS MAPPING_${mappingField.name}`;
+					entityName = `(SELECT id AS MAPPING_${mappingField.name}_id, ${relationField.name}${extraFieldName ? `, ${extraFieldName}` : ''} FROM ${originEntity.name} WHERE _STATUS_DELETED = 0 AND ${filedName} IN (SELECT max(${filedName}) FROM ${originEntity.name} WHERE _STATUS_DELETED = 0 GROUP BY ${relationField.name})) AS MAPPING_${mappingField.name}`;
 				}
 			}
 			
@@ -514,7 +519,7 @@ export const spliceSelectCountSQLByConditions = (fnParams: {
 		});
 		mappingFields.forEach(mappingField => {
 			const entity = mappingField.mapping!.entity!;
-			const condition = mappingField.mapping!.condition!;
+			const condition = String(mappingField.mapping!.condition!);
 			const type = mappingField.mapping!.type!;
 			const fieldJoiner = mappingField.mapping!.fieldJoiner!;
 			/** 源实体，即实体面板中存在的实体 */
@@ -537,16 +542,21 @@ export const spliceSelectCountSQLByConditions = (fnParams: {
 			/** 被关联 */
 			if (type === 'primary') {
 				if (condition === '-1') {
-					entityName = `(SELECT id AS MAPPING_${mappingField.name}_id, ${entity.fieldAry.filter(f => !f.isPrimaryKey).map(f => f.name).join(', ')} FROM ${originEntity.name} WHERE _STATUS_DELETED = 0) AS MAPPING_${mappingField.name}`; entityName = `(SELECT id AS MAPPING_${mappingField.name}_id, ${entity.fieldAry.filter(f => !f.isPrimaryKey).map(f => f.name).join(', ')} FROM ${originEntity.name} WHERE _STATUS_DELETED = 0) AS MAPPING_${mappingField.name}`;
+					const extraFieldName = entity.fieldAry.filter(f => !f.isPrimaryKey).map(f => f.name).join(', ');
+					
+					entityName = `(SELECT id AS MAPPING_${mappingField.name}_id${extraFieldName ? `, ${extraFieldName}` : ''} FROM ${originEntity.name} WHERE _STATUS_DELETED = 0) AS MAPPING_${mappingField.name}`;
 				}
 			} else {
 				/** 关联 */
 				if (condition === '-1') {
-					entityName = `(SELECT id AS MAPPING_${mappingField.name}_id, ${relationField.name}, ${entity.fieldAry.filter(f => !f.isPrimaryKey && f.name !== relationField?.name).map(f => `GROUP_CONCAT(${f.name} SEPARATOR '${fieldJoiner}') ${f.name}`)} FROM ${originEntity.name} WHERE _STATUS_DELETED = 0 GROUP BY ${relationField.name}) AS MAPPING_${mappingField.name}`;
+					const extraFieldName = entity.fieldAry.filter(f => !f.isPrimaryKey && f.name !== relationField?.name).map(f => `GROUP_CONCAT(${f.name} SEPARATOR '${fieldJoiner}') ${f.name}`).join(', ');
+					
+					entityName = `(SELECT id AS MAPPING_${mappingField.name}_id, ${relationField.name}${extraFieldName ? `, ${extraFieldName}` : ''} FROM ${originEntity.name} WHERE _STATUS_DELETED = 0 GROUP BY ${relationField.name}) AS MAPPING_${mappingField.name}`;
 				} else if (isMaxCondition) {
 					const filedName = condition.substr(4, condition.length - 5);
+					const extraFieldName = entity.fieldAry.filter(f => !f.isPrimaryKey && f.name !== relationField?.name).map(f => f.name).join(', ');
 					
-					entityName = `(SELECT id AS MAPPING_${mappingField.name}_id, ${relationField.name}, ${entity.fieldAry.filter(f => !f.isPrimaryKey && f.name !== relationField?.name).map(f => f.name)} FROM ${originEntity.name} WHERE _STATUS_DELETED = 0 AND ${filedName} IN (SELECT max(${filedName}) FROM ${originEntity.name} WHERE _STATUS_DELETED = 0 GROUP BY ${relationField.name})) AS MAPPING_${mappingField.name}`;
+					entityName = `(SELECT id AS MAPPING_${mappingField.name}_id, ${relationField.name}${extraFieldName ? `, ${extraFieldName}` : ''} FROM ${originEntity.name} WHERE _STATUS_DELETED = 0 AND ${filedName} IN (SELECT max(${filedName}) FROM ${originEntity.name} WHERE _STATUS_DELETED = 0 GROUP BY ${relationField.name})) AS MAPPING_${mappingField.name}`;
 				}
 			}
 			
