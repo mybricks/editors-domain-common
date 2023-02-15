@@ -73,10 +73,10 @@ export const spliceSelectSQLByConditions = (fnParams: {
 		}
 	};
 	
-	/** 根据字段类型以及操作符号返回拼接 sql 的具体指 */
+	/** 根据字段类型以及操作符号返回拼接 sql 的具体值 */
 	const getValueByOperatorAndFieldType = (dbType: string, operator: string, val: string) => {
 		if (operator === 'LIKE' || operator === 'NOT LIKE') {
-			return `%${getValueByFieldType(dbType, val)}%`;
+			return `'%${val}%'`;
 		} else if (operator === 'IN' || operator === 'NOT IN') {
 			return `(${val.split(',').map(item => getValueByFieldType(dbType, item)).join(',')})`;
 		}
@@ -368,10 +368,10 @@ export const spliceSelectCountSQLByConditions = (fnParams: {
 		}
 	};
 	
-	/** 根据字段类型以及操作符号返回拼接 sql 的具体指 */
+	/** 根据字段类型以及操作符号返回拼接 sql 的具体值 */
 	const getValueByOperatorAndFieldType = (dbType: string, operator: string, val: string) => {
 		if (operator === 'LIKE' || operator === 'NOT LIKE') {
-			return `%${getValueByFieldType(dbType, val)}%`;
+			return `'%${val}%'`;
 		} else if (operator === 'IN' || operator === 'NOT IN') {
 			return `(${val.split(',').map(item => getValueByFieldType(dbType, item)).join(',')})`;
 		}

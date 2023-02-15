@@ -84,10 +84,10 @@ export const getValueByFieldType = (dbType: string, val: string) => {
 	}
 };
 
-/** 根据字段类型以及操作符号返回拼接 sql 的具体指 */
+/** 根据字段类型以及操作符号返回拼接 sql 的具体值 */
 export const getValueByOperatorAndFieldType = (dbType: string, operator: string, val: string) => {
 	if (operator === SQLOperator.LIKE || operator === SQLOperator.NOT_LIKE) {
-		return `%${getValueByFieldType(dbType, val)}%`;
+		return `'%${val}%'`;
 	} else if (operator === SQLOperator.IN || operator === SQLOperator.NOT_IN) {
 		return `(${val.split(',').map(item => getValueByFieldType(dbType, item)).join(',')})`;
 	}

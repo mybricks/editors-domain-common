@@ -1,7 +1,7 @@
 import { Condition, Entity, Field, Order } from '../_types/domain';
 import { FieldBizType, SQLWhereJoiner } from '../_constants/field';
 import { getValueByFieldType, getValueByOperatorAndFieldType } from './field';
-import {AnyType} from "../_types";
+import { AnyType } from '../_types';
 
 
 /** 根据条件拼接 where sql */
