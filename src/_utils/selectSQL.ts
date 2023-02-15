@@ -259,7 +259,7 @@ export const spliceSelectSQLByConditions = (fnParams: {
 				/** 关联 */
 				if (condition === '-1') {
 					const extraFieldName = entity.fieldAry.filter(f => !f.isPrimaryKey && f.name !== relationField?.name).map(f => `GROUP_CONCAT(${f.name} SEPARATOR '${fieldJoiner}') ${f.name}`).join(', ');
-					console.log('extraFieldName', extraFieldName);
+					
 					entityName = `(SELECT id AS MAPPING_${mappingField.name}_id, ${relationField.name}${extraFieldName ? `, ${extraFieldName}` : ''} FROM ${originEntity.name} WHERE _STATUS_DELETED = 0 GROUP BY ${relationField.name}) AS MAPPING_${mappingField.name}`;
 				} else if (isMaxCondition) {
 					const filedName = condition.substr(4, condition.length - 5);
