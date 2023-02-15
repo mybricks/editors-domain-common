@@ -9,6 +9,7 @@ import { formatEntitiesByOriginEntities } from '../_utils/entity';
 import { Condition, Entity } from '../_types/domain';
 import { spliceDeleteSQLByConditions } from '../_utils/sql';
 import { getParamsByConditions } from '../_utils/params';
+import { safeEncodeURIComponent } from '../_utils/util';
 
 import styles from './index.less';
 
@@ -74,8 +75,7 @@ class DeleteContext {
 			}
 			`;
 			
-			console.log('DELETE SQL: ', script);
-			this.nowValue.script = script;
+			this.nowValue.script = safeEncodeURIComponent(script);
 		} else {
 			this.nowValue.script = void 0;
 		}
@@ -107,7 +107,7 @@ const DeleteEditor: FC<DeleteEditorProps> = props => {
 			const currentEntity = format.find(e => e.selected) ?? format[0];
 			val.entities = currentEntity ? [currentEntity] : [];
 		} else {
-			const entity = domainModel.entityAry[0];
+			const entity = domainModel.entityAry.filter(e => !e.isSystem)[0];
 			
 			val = {
 				conAry: [],
@@ -149,7 +149,7 @@ const DeleteEditor: FC<DeleteEditorProps> = props => {
 							}}
 						>
 							{
-								deleteContext.domainModel.entityAry.map((et: Entity) => {
+								deleteContext.domainModel.entityAry.filter(e => !e.isSystem).map((et: Entity) => {
 									return <option key={et.id} value={et.id}>{et.name}</option>;
 								})
 							}

@@ -2,6 +2,7 @@ import { spliceUpdateSQLByConditions } from '../_utils/sql';
 import { getParamsByConditions } from '../_utils/params';
 import { AnyType } from '../_types';
 import { Condition } from '../_types/domain';
+import { safeEncodeURIComponent } from '../_utils/util';
 
 export type T_Field = {
 	id,
@@ -111,8 +112,7 @@ export default class InsertCtx {
 			}
 			`;
 			
-			console.log('UPDATE SQL: ', script);
-			this.nowValue.script = script;
+			this.nowValue.script = safeEncodeURIComponent(script);
 		} else {
 			this.nowValue.script = void 0;
 		}

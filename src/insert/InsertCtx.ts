@@ -1,6 +1,7 @@
 import { DomainViewModel } from '../typing';
 import { getQuoteByFieldType } from '../_utils/field';
 import { FieldBizType } from '../_constants/field';
+import { safeEncodeURIComponent } from '../_utils/util';
 
 export type T_Field = {
   id,
@@ -93,8 +94,7 @@ export default class InsertCtx {
       }
       `;
 			
-			console.log('INSERT SQL: ', script);
-			this.nowValue.script = script;
+			this.nowValue.script = safeEncodeURIComponent(script);
 		} else {
 			this.nowValue.script = void 0;
 		}

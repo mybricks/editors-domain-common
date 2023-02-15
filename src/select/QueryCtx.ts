@@ -30,6 +30,7 @@ export type T_Entity = {
 	name: string;
 	desc?: string;
 	selected?: boolean;
+	isSystem?: boolean;
 	fieldAry: T_Field[];
 }
 
@@ -150,18 +151,11 @@ export default class QueryCtx {
 
 			if (!this.showPager) {
 				this.nowValue.script = safeEncodeURIComponent(selectScript);
-				
-				console.log('SELECT SQL: ', selectScript);
 			} else {
 				this.nowValue.script = {
 					list: safeEncodeURIComponent(selectScript),
 					total: safeEncodeURIComponent(countScript)
 				};
-				
-				console.log('SELECT SQL: ', {
-					list: selectScript,
-					total: countScript
-				});
 			}
 		} else {
 			this.nowValue.script = void 0;

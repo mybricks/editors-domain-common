@@ -116,7 +116,7 @@ function SelectFrom() {
 			<div className={css.select}>
 				<div className={css.tables}>
 					{
-						nowValue.entities.map(et => {
+						nowValue.entities.filter(e => !e.isSystem).map(et => {
 							return (
 								<div
 									title={`${et.name}(${et.desc})`}

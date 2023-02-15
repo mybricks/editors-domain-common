@@ -26,7 +26,7 @@ export default function InsertEditor({ domainModel, paramSchema, value, close }:
 			const currentEntity = format.find(e => e.selected) ?? format[0];
 			val.entities = currentEntity ? [currentEntity] : [];
 		} else {
-			const entity = domainModel.entityAry[0];
+			const entity = domainModel.entityAry.filter(e => !e.isSystem)[0];
 			
 			val = {
 				conAry: [],
@@ -78,7 +78,7 @@ export default function InsertEditor({ domainModel, paramSchema, value, close }:
 					onChange={e => ctx.setEntity(e.target.value)}
 				>
 					{
-						ctx.domainModel.entityAry.map((et) => {
+						ctx.domainModel.entityAry.filter(e => !e.isSystem).map((et) => {
 							return (
 								<option key={et.id} value={et.id}>
 									{et.name}
