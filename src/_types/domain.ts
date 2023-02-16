@@ -1,4 +1,4 @@
-import { FieldBizType, FieldDBType, SQLOrder, SQLWhereJoiner } from '../_constants/field';
+import { DefaultValueWhenCreate, FieldBizType, FieldDBType, SQLOrder, SQLWhereJoiner } from '../_constants/field';
 
 export interface Entity {
 	/** 表 ID，在前端编辑页使用 */
@@ -30,6 +30,7 @@ export interface Field {
 	isPrivate?: boolean;
 	/** 是否被选中 */
 	selected?: boolean;
+	/** 映射 */
 	mapping?: {
 		condition: string;
 		fieldJoiner: string;
@@ -38,6 +39,8 @@ export interface Field {
 		sql: string;
 		desc: string;
 	};
+	/** 默认值 */
+	defaultValueWhenCreate?: DefaultValueWhenCreate;
 }
 
 export interface Condition {

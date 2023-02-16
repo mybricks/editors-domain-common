@@ -1,6 +1,6 @@
 import { DomainViewModel } from '../typing';
 import { getQuoteByFieldType } from '../_utils/field';
-import { FieldBizType } from '../_constants/field';
+import { DefaultValueWhenCreate, FieldBizType } from '../_constants/field';
 import { safeEncodeURIComponent } from '../_utils/util';
 
 export type T_Field = {
@@ -11,6 +11,7 @@ export type T_Field = {
 	dbType: string;
 	bizType: FieldBizType;
 	isPrivate: boolean;
+	defaultValueWhenCreate?: string;
 }
 
 export type T_Entity = {
@@ -79,7 +80,7 @@ export default class InsertCtx {
 					} else {
 						if (field.name === '_STATUS_DELETED') {
 							valueAry.push('0');
-						} else if (field.bizType === FieldBizType.DATETIME) {
+						} else if (['_UPDATE_TIME', '_CREATE_TIME'].includes(field.name) || field.defaultValueWhenCreate === DefaultValueWhenCreate.CURRENT_TIME) {
 							valueAry.push('${Date.now()}');
 						} else {
 							valueAry.push('null');

@@ -55,3 +55,9 @@ export enum SQLLimitType {
 	/** 自定义 */
 	CUSTOM = 'CUSTOM',
 }
+
+/** 默认值 */
+export enum DefaultValueWhenCreate {
+	/** 当前时间 */
+	CURRENT_TIME = '$currentTime'
+}

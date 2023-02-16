@@ -7,7 +7,7 @@ import { AnyType } from '../_types';
 import { getFieldSchema } from '../_utils/field';
 import PopView from '../_common/pop-view';
 import { formatConAryByEntity, formatEntitiesByOriginEntities } from '../_utils/entity';
-import { FieldBizType } from '../_constants/field';
+import { DefaultValueWhenCreate, FieldBizType } from '../_constants/field';
 
 import styles from './InsertEditor.less';
 
@@ -54,8 +54,13 @@ const InsertEditor = ({ domainModel, paramSchema, value, close }: AnyType) => {
 				properties
 			};
 			
-			nowEntity.fieldAry.forEach((field: { isPrimaryKey: boolean; name: string; dbType: string; bizType: FieldBizType; isPrivate: boolean }) => {
-				if (!field.isPrimaryKey && field.bizType !== FieldBizType.MAPPING && !field.isPrivate) {
+			nowEntity.fieldAry.forEach((field: AnyType) => {
+				if (
+					!field.isPrimaryKey
+					&& field.bizType !== FieldBizType.MAPPING
+					&& !field.isPrivate
+					&& field.defaultValueWhenCreate !== DefaultValueWhenCreate.CURRENT_TIME
+				) {
 					properties[field.name] = getFieldSchema(field.dbType);
 				}
 			});
