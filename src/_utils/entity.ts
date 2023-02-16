@@ -1,5 +1,6 @@
 import { Entity, Field } from '../_types/domain';
 import { AnyType } from '../_types';
+import { FieldBizType } from '../_constants/field';
 
 /**
  * 实体信息可能存在变更，每次使用最新的实体信息
@@ -24,5 +25,15 @@ export const formatEntitiesByOriginEntities = (entities: Entity[], originEntitie
 			return (originEntity as AnyType).toJSON();
 		}
 	});
+};
+
+/** 格式化无效的连接 */
+export const formatConAryByEntity = (conAry: Array<{ from: string; to: string }>, entity: Entity | null) => {
+	return entity?.fieldAry.map(field => {
+		/** 业务设置的字段 */
+		if (!field.isPrimaryKey && !field.isPrivate && field.bizType !== FieldBizType.MAPPING) {
+			return conAry.find(con => con.to === `/${field.name}`);
+		}
+	}).filter(Boolean) || [];
 };
 

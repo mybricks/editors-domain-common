@@ -6,7 +6,7 @@ import FromTo from '../_common/from-to';
 import { AnyType } from '../_types';
 import { getFieldSchema } from '../_utils/field';
 import PopView from '../_common/pop-view';
-import { formatEntitiesByOriginEntities } from '../_utils/entity';
+import { formatConAryByEntity, formatEntitiesByOriginEntities } from '../_utils/entity';
 import { FieldBizType } from '../_constants/field';
 
 import styles from './InsertEditor.less';
@@ -24,6 +24,7 @@ const InsertEditor = ({ domainModel, paramSchema, value, close }: AnyType) => {
 			const format = formatEntitiesByOriginEntities(val.entities, domainModel.entityAry);
 			const currentEntity = format.find(e => e.selected) ?? format[0];
 			val.entities = currentEntity ? [currentEntity] : [];
+			val.conAry = formatConAryByEntity(val.conAry, currentEntity);
 		} else {
 			const entity = domainModel.entityAry.filter(e => !e.isSystem)[0];
 			

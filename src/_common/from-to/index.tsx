@@ -1,10 +1,12 @@
-import React, { useCallback, useEffect } from 'react';
-import css from './index.less';
+import React, { useCallback, useEffect, useMemo } from 'react';
+// @ts-ignore
 import { getPosition, observe, useComputed, useObservable } from '@mybricks/rxui';
 import FromRender from './FromRender';
 import ToRender from './ToRender';
 import Ctx from './Ctx';
 import Con from './Con';
+
+import css from './index.less';
 
 export default function FromTo({ conAry, from, to, addBlurFn }) {
 	const ctx = useObservable(Ctx, next => {
@@ -65,20 +67,18 @@ function Cons() {
 	});
 
 	useEffect(() => {
-		{
-			const ary = [];
-			ctx.conAry.forEach((con, idx) => {//判断刷新
-				const fromEle = ctx.fromEle.querySelector(`[data-xpath='${con.from}']`) as HTMLElement;
-				const toEle = ctx.toEle.querySelector(`[data-xpath='${con.to}']`) as HTMLElement;
-
-				if (fromEle && toEle) {
-					ary.push(con);
-				}
-			});
-
-			if (ary.length !== ctx.conAry.length) {
-				ctx.conAry = ary;
+		const ary: Array<{ from: string; to: string }> = [];
+		ctx.conAry.forEach(con => {//判断刷新
+			const fromEle = ctx.fromEle.querySelector(`[data-xpath='${con.from}']`) as HTMLElement;
+			const toEle = ctx.toEle.querySelector(`[data-xpath='${con.to}']`) as HTMLElement;
+			
+			if (fromEle && toEle) {
+				ary.push(con);
 			}
+		});
+		
+		if (ary.length !== ctx.conAry.length) {
+			ctx.conAry = ary;
 		}
 	}, []);
 

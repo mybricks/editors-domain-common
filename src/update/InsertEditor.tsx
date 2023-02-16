@@ -8,7 +8,7 @@ import { getFieldSchema } from '../_utils/field';
 import { AnyType } from '../_types';
 import Where from '../_common/where';
 import { FieldBizType, SQLWhereJoiner } from '../_constants/field';
-import { formatEntitiesByOriginEntities } from '../_utils/entity';
+import { formatConAryByEntity, formatEntitiesByOriginEntities } from '../_utils/entity';
 
 import css from './InsertEditor.less';
 
@@ -25,6 +25,7 @@ export default function InsertEditor({ domainModel, paramSchema, value, close }:
 			const format = formatEntitiesByOriginEntities(val.entities, domainModel.entityAry);
 			const currentEntity = format.find(e => e.selected) ?? format[0];
 			val.entities = currentEntity ? [currentEntity] : [];
+			val.conAry = formatConAryByEntity(val.conAry, currentEntity);
 		} else {
 			const entity = domainModel.entityAry.filter(e => !e.isSystem)[0];
 			
