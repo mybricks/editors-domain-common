@@ -2,6 +2,8 @@ import { AnyType } from '../_types';
 import { SQLLimitType, SQLOrder, SQLWhereJoiner } from '../_constants/field';
 import { spliceSelectCountSQLByConditions, spliceSelectSQLByConditions } from '../_utils/selectSQL';
 import { safeEncodeURIComponent } from '../_utils/util';
+import { formatTime, spliceDataFormatString } from '../_utils/format';
+import { Entity } from '../_types/domain';
 
 
 export type T_Field = {
@@ -117,10 +119,13 @@ export default class QueryCtx {
 			let countScript = '';
 
 			const selectScript = `
-			(params)=>{
+			async (params, executeSql)=>{
+				const FORMAT_MAP = {
+					formatTime: ${formatTime.toString()},
+				};
 				const spliceSelectSQLByConditions = ${spliceSelectSQLByConditions.toString()};
 				
-				let sql = spliceSelectSQLByConditions({
+				const sql = spliceSelectSQLByConditions({
 					params: params || {},
 					conditions: ${JSON.stringify(conditions)} || [],
 					entities: ${JSON.stringify(entities)},
@@ -128,17 +133,21 @@ export default class QueryCtx {
 					orders: ${JSON.stringify(orders)},
 					pageIndex: ${JSON.stringify(pageIndex)},
 				});
-
-				return sql;
+				
+				let { rows } = await executeSql(sql);
+				
+				${spliceDataFormatString(currentEntity as Entity, entities as Entity[])}
+				
+				return rows;
 			}
 			`;
 
 			if (this.showPager) {
 				countScript = `
-				(params)=>{
+				async (params, executeSql)=>{
 					const spliceSelectCountSQLByConditions = ${spliceSelectCountSQLByConditions.toString()};
 					
-					let sql = spliceSelectCountSQLByConditions({
+					const sql = spliceSelectCountSQLByConditions({
 						params: params || {},
 						conditions: ${JSON.stringify(conditions)} || [],
 						entities: ${JSON.stringify(entities)},

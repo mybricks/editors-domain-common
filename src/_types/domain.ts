@@ -41,6 +41,8 @@ export interface Field {
 	};
 	/** 默认值 */
 	defaultValueWhenCreate?: DefaultValueWhenCreate;
+	/** 查询数据时格式化类型 */
+	showFormat: string;
 }
 
 export interface Condition {

@@ -97,7 +97,7 @@ export const spliceWhereSQLFragmentByConditions = (fnParams: {
 	/** whereJoiner 不存在表示最外层 SQL */
 	if (!whereJoiner) {
 		/** 当 condition 存在时 */
-		prefix = `WHERE _STATUS_DELETED = 0${sql ? ' AND' : ''}`;
+		prefix = `WHERE _STATUS_DELETED = 0${sql ? ' AND ' : ''}`;
 	}
 
 	return prefix + sql;
