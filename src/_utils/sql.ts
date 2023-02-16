@@ -111,7 +111,6 @@ export const spliceUpdateSQLFragmentByConditions = (fnParams: {
 	const { connectors, entity } = fnParams;
 	return connectors
 		.map(connector => {
-			// TODO 判断字段是否存在
 			const { from, to } = connector;
 			const toFieldName = to.replace('/', '');
 			const field = entity.fieldAry.find(f => f.name === toFieldName);
