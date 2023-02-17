@@ -153,7 +153,9 @@ export default class QueryCtx {
 						entities: ${JSON.stringify(entities)},
 					});
 	
-					return sql;
+					const { rows } = await executeSql(sql);
+					
+					return rows;
 				}
 				`;
 			}

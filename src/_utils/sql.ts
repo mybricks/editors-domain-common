@@ -62,7 +62,9 @@ export const spliceWhereSQLFragmentByConditions = (fnParams: {
 				/** mapping 字段映射的实体 */
 				if (entityMapElement.id !== curEntity.id) {
 					const mappingField = curEntity.fieldAry.find(f => f.mapping?.entity?.id === condition.entityId);
-					fieldName = `MAPPING_${mappingField?.name || entityMapElement.name}` + '.' + (mappingField?.mapping?.entity?.fieldAry.find(f => f.id === condition.fieldId)?.name || field.name);
+					const curField = mappingField?.mapping?.entity?.fieldAry.find(f => f.id === condition.fieldId);
+					
+					fieldName = `MAPPING_${mappingField?.name || entityMapElement.name}` + (curField?.isPrimaryKey ? `.MAPPING_${mappingField?.name || entityMapElement.name}_` : '.') + (curField?.name || field.name);
 				}
 				let value = condition.value || '';
 				let isEntityField = false;
@@ -240,7 +242,7 @@ export const spliceSelectSQLByConditions = (fnParams: {
 				if (mappingField) {
 					const currentField = mappingField.mapping?.entity?.fieldAry.find(f => f.id === order.fieldId);
 
-					currentField && orderList.push(`MAPPING_${mappingField.name}.${currentField.name} ${order.order}`);
+					currentField && orderList.push(`MAPPING_${mappingField.name}.${currentField.isPrimaryKey ? `MAPPING_${mappingField.name}_` : ''}${currentField.name} ${order.order}`);
 				} else {
 					const field = curEntity.fieldAry.find(f => f.id === order.fieldId);
 
