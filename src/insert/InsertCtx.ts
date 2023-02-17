@@ -69,7 +69,7 @@ export default class InsertCtx {
 			
 			const fieldAry: string[] = [], valueAry: string[] = [];
 			entities[0].fieldAry.forEach(field => {
-				if (!field.isPrimaryKey && field.bizType !== FieldBizType.MAPPING) {
+				if (field.bizType !== FieldBizType.MAPPING) {
 					fieldAry.push(field.name);
 					
 					const con = conAry.find(con => con.to === `/${field.name}`);
@@ -78,7 +78,9 @@ export default class InsertCtx {
 						const q = getQuoteByFieldType(field.dbType);
 						valueAry.push(`\${params.${fromPropName} === undefined ? null : \`${q}\${params.${fromPropName}}${q}\`}`);
 					} else {
-						if (field.name === '_STATUS_DELETED') {
+						if (field.isPrimaryKey) {
+							valueAry.push('${Util.genUniqueId()}');
+						} else if (field.name === '_STATUS_DELETED') {
 							valueAry.push('0');
 						} else if (['_UPDATE_TIME', '_CREATE_TIME'].includes(field.name) || field.defaultValueWhenCreate === DefaultValueWhenCreate.CURRENT_TIME) {
 							valueAry.push('${Date.now()}');
