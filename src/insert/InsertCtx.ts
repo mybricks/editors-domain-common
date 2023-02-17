@@ -79,7 +79,7 @@ export default class InsertCtx {
 						valueAry.push(`\${params.${fromPropName} === undefined ? null : \`${q}\${params.${fromPropName}}${q}\`}`);
 					} else {
 						if (field.isPrimaryKey) {
-							valueAry.push('${Util.genUniqueId()}');
+							valueAry.push('${genUniqueId()}');
 						} else if (field.name === '_STATUS_DELETED') {
 							valueAry.push('0');
 						} else if (['_UPDATE_TIME', '_CREATE_TIME'].includes(field.name) || field.defaultValueWhenCreate === DefaultValueWhenCreate.CURRENT_TIME) {
@@ -92,7 +92,8 @@ export default class InsertCtx {
 			});
 			
 			const script = `
-      (params)=>{
+      (params, context)=>{
+        const { genUniqueId } = context;
         return \`${sql}(${fieldAry.join(',')}) VALUES (${valueAry.join(',')})\`
       }
       `;
