@@ -9,6 +9,10 @@ export enum FieldBizType {
 	MAPPING = 'mapping',
 	/** 系统表 */
 	SYS_USER = 'SYS_USER',
+	/** 系统表 */
+	SYS_USER_CREATOR = 'SYS_USER.CREATOR',
+	/** 系统表 */
+	SYS_USER_UPDATER = 'SYS_USER.UPDATER',
 }
 
 /** 数据库字段类型 */

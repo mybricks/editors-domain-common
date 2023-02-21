@@ -181,7 +181,7 @@ export const spliceSelectSQLByConditions = (fnParams: {
 			/** 被关联 */
 			if (type === 'primary') {
 				if (condition === '-1') {
-					const relationField = curEntity.fieldAry.find(f => [FieldBizType.RELATION, FieldBizType.SYS_USER].includes(f.bizType) && f.relationEntityId === originEntity.id);
+					const relationField = curEntity.fieldAry.find(f => [FieldBizType.RELATION, FieldBizType.SYS_USER, FieldBizType.SYS_USER_CREATOR, FieldBizType.SYS_USER_UPDATER].includes(f.bizType) && f.relationEntityId === originEntity.id);
 					const extraFieldName = entity.fieldAry.filter(f => !f.isPrimaryKey).map(f => f.name).join(', ');
 					
 					entityName = `LEFT JOIN (SELECT id AS MAPPING_${mappingField.name}_id${extraFieldName ? `, ${extraFieldName}` : ''} FROM ${originEntity.name} WHERE _STATUS_DELETED = 0) MAPPING_${mappingField.name} ON MAPPING_${mappingField.name}.MAPPING_${mappingField.name}_id = ${curEntity.name}.${relationField?.name}`;
@@ -327,7 +327,7 @@ export const spliceSelectCountSQLByConditions = (fnParams: {
 			/** 被关联 */
 			if (type === 'primary') {
 				if (condition === '-1') {
-					const relationField = curEntity.fieldAry.find(f => [FieldBizType.RELATION, FieldBizType.SYS_USER].includes(f.bizType) && f.relationEntityId === originEntity.id);
+					const relationField = curEntity.fieldAry.find(f => [FieldBizType.RELATION, FieldBizType.SYS_USER, FieldBizType.SYS_USER_CREATOR, FieldBizType.SYS_USER_UPDATER].includes(f.bizType) && f.relationEntityId === originEntity.id);
 					const extraFieldName = entity.fieldAry.filter(f => !f.isPrimaryKey).map(f => f.name).join(', ');
 					
 					entityName = `LEFT JOIN (SELECT id AS MAPPING_${mappingField.name}_id${extraFieldName ? `, ${extraFieldName}` : ''} FROM ${originEntity.name} WHERE _STATUS_DELETED = 0) MAPPING_${mappingField.name} ON MAPPING_${mappingField.name}.MAPPING_${mappingField.name}_id = ${curEntity.name}.${relationField?.name}`;
