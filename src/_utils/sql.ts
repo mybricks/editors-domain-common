@@ -1,6 +1,6 @@
 import { Condition, Entity, Field, Order } from '../_types/domain';
 import { FieldBizType, SQLWhereJoiner } from '../_constants/field';
-import { getValueByFieldType, getValueByOperatorAndFieldType } from './field';
+import { getQuoteByFieldType, getValueByFieldType, getValueByOperatorAndFieldType } from './field';
 import { AnyType } from '../_types';
 
 
@@ -122,9 +122,9 @@ export const spliceUpdateSQLFragmentByConditions = (fnParams: {
 			fromNames.forEach(key => {
 				value += `.${key}`;
 			});
-			value = `\${${value}}`;
-
-			return field ? `${toFieldName} = ${getValueByFieldType(field.dbType, value as unknown as string)}` : undefined;
+			
+			const q = getQuoteByFieldType(field?.dbType as string);
+			return field ? `${toFieldName} = \${${value} === undefined ? null : \`${q}\${${value}}${q}\`}` : undefined;
 		})
 		.filter(Boolean)
 		.join(', ');
