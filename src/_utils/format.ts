@@ -49,7 +49,7 @@ export const spliceDataFormatString = (entity: Entity, entities: Entity[]) => {
 		.filter(field => field.bizType !== FieldBizType.MAPPING && field.selected)
 		.forEach(filed => {
 			if (filed.bizType === FieldBizType.DATETIME && filed.showFormat) {
-				ifString += `;if (key === '${filed.name}') { item['_' + key] = item[key]; item[key] = FORMAT_MAP.formatTime(new Date(item[key]), '${filed.showFormat}') }\n`;
+				ifString += `;if (key === '${filed.name}') { item['_' + key] = item[key]; item[key] = item[key] ? FORMAT_MAP.formatTime(new Date(item[key]), '${filed.showFormat}') : item[key]; }\n`;
 			}
 		});
 	/** mapping 字段列表 */
@@ -61,7 +61,7 @@ export const spliceDataFormatString = (entity: Entity, entities: Entity[]) => {
 		
 		entity.fieldAry.forEach(f => {
 			if (f.bizType === FieldBizType.DATETIME && f.showFormat) {
-				ifString += `;if (key === '${field.name}_${f.name}') { item['_' + key] = item[key]; item[key] = FORMAT_MAP.formatTime(new Date(item[key]), '${f.showFormat}') }\n`;
+				ifString += `;if (key === '${field.name}_${f.name}') { item['_' + key] = item[key]; item[key] = item[key] ? FORMAT_MAP.formatTime(new Date(item[key]), '${f.showFormat}') : item[key]; }\n`;
 			}
 			
 			convertString += `item.${field.name}.${f.name} = item.${field.name}_${f.name};
