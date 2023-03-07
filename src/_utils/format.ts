@@ -61,7 +61,7 @@ export const spliceDataFormatString = (entity: Entity, entities: Entity[]) => {
 		
 		entity.fieldAry.forEach(f => {
 			if (f.bizType === FieldBizType.DATETIME && f.showFormat) {
-				ifString += `;if (key === '${field.name}_${f.name}') { item['_' + key] = item[key]; item[key] = item[key] ? FORMAT_MAP.formatTime(new Date(item[key]), '${f.showFormat}') : item[key]; }\n`;
+				ifString += `;if (key === '${field.name}_${f.name}') { item['${field.name}']['_${f.name}'] = item[key]; item[key] = item[key] ? FORMAT_MAP.formatTime(new Date(item[key]), '${f.showFormat}') : item[key]; }\n`;
 			}
 			
 			convertString += `item.${field.name}.${f.name} = item.${field.name}_${f.name};
