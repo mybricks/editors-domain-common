@@ -3,6 +3,18 @@ export enum FieldBizType {
 	STRING = 'string',
 	NUMBER = 'number',
 	DATETIME = 'datetime',
+	/** 超链接 */
+	HREF = 'href',
+	/** 电话 */
+	PHONE = 'phone',
+	/** 图片 */
+	IMAGE = 'image',
+	/** 附件 */
+	APPEND_FILE = 'appendFile',
+	/** 单选 */
+	RADIO = 'radio',
+	/** 多选 */
+	CHECKBOX = 'checkbox',
 	/** 外键，关联其他表 */
 	RELATION = 'relation',
 	/** 映射其他表 */
