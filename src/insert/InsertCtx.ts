@@ -1,7 +1,7 @@
-import { DomainViewModel } from '../typing';
-import { getQuoteByFieldType } from '../_utils/field';
-import { DefaultValueWhenCreate, FieldBizType } from '../_constants/field';
-import { safeEncodeURIComponent } from '../_utils/util';
+import { DomainViewModel } from "../typing";
+import { getQuoteByFieldType } from "../_utils/field";
+import { DefaultValueWhenCreate, FieldBizType } from "../_constants/field";
+import { safeEncodeURIComponent } from "../_utils/util";
 
 export type T_Field = {
   id,
@@ -60,7 +60,7 @@ export default class InsertCtx {
 
 	save() {
 		const { entities, conAry } = this.nowValue;
-		let desc = '';
+		let desc = "";
 
 		if (entities.length && entities[0].fieldAry.length > 0) {
 			desc = `${entities[0].name}`;
@@ -74,18 +74,18 @@ export default class InsertCtx {
 					
 					const con = conAry.find(con => con.to === `/${field.name}`);
 					if (con) {
-						const fromPropName = con.from.substring(con.from.indexOf('/') + 1);
+						const fromPropName = con.from.substring(con.from.indexOf("/") + 1);
 						const q = getQuoteByFieldType(field.dbType);
 						valueAry.push(`\${params.${fromPropName} === undefined ? null : \`${q}\${params.${fromPropName}}${q}\`}`);
 					} else {
 						if (field.isPrimaryKey) {
-							valueAry.push('${genUniqueId()}');
-						} else if (field.name === '_STATUS_DELETED') {
-							valueAry.push('0');
-						} else if (['_UPDATE_TIME', '_CREATE_TIME'].includes(field.name) || field.defaultValueWhenCreate === DefaultValueWhenCreate.CURRENT_TIME) {
-							valueAry.push('${Date.now()}');
+							valueAry.push("${genUniqueId()}");
+						} else if (field.name === "_STATUS_DELETED") {
+							valueAry.push("0");
+						} else if (["_UPDATE_TIME", "_CREATE_TIME"].includes(field.name) || field.defaultValueWhenCreate === DefaultValueWhenCreate.CURRENT_TIME) {
+							valueAry.push("${Date.now()}");
 						} else {
-							valueAry.push('null');
+							valueAry.push("null");
 						}
 					}
 				}
@@ -94,7 +94,7 @@ export default class InsertCtx {
 			const script = `
       (params, context)=>{
         const { genUniqueId } = context;
-        return \`${sql}(${fieldAry.join(',')}) VALUES (${valueAry.join(',')})\`
+        return \`${sql}(${fieldAry.join(",")}) VALUES (${valueAry.join(",")})\`
       }
       `;
 			

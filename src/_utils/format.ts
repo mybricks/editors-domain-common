@@ -1,12 +1,12 @@
-import { Entity } from '../_types/domain';
-import { FieldBizType } from '../_constants/field';
+import { Entity } from "../_types/domain";
+import { FieldBizType } from "../_constants/field";
 
 /** 转化时间 */
 export const formatTime = (date, format) => {
 	if (date == null) {
-		return '';
+		return "";
 	}
-	const pad = n => n < 10 ? '0' + n : n;
+	const pad = n => n < 10 ? "0" + n : n;
 	const year = date.getFullYear(),
 		yearShort = year.toString().substring(2),
 		month = date.getMonth() + 1,
@@ -42,14 +42,14 @@ export const spliceDataFormatString = (entity: Entity, entities: Entity[]) => {
 	const mappingFields = entity.fieldAry.filter(field => {
 		return field.selected && field.mapping?.entity?.fieldAry?.length && entityMap[field.mapping.entity.id];
 	});
-	let ifString = '';
-	let convertString = '';
+	let ifString = "";
+	let convertString = "";
 	
 	entity.fieldAry
 		.filter(field => field.bizType !== FieldBizType.MAPPING && field.selected)
 		.forEach(filed => {
 			if (filed.bizType === FieldBizType.DATETIME && filed.showFormat) {
-				ifString += `;if (key === '${filed.name}') { item['_' + key] = item[key]; item[key] = item[key] ? FORMAT_MAP.formatTime(new Date(item[key]), '${filed.showFormat}') : item[key]; }\n`;
+				ifString += `;if (key === "${filed.name}") { item["_" + key] = item[key]; item[key] = item[key] ? FORMAT_MAP.formatTime(new Date(item[key]), "${filed.showFormat}") : item[key]; }\n`;
 			}
 		});
 	/** mapping 字段列表 */
@@ -62,7 +62,7 @@ export const spliceDataFormatString = (entity: Entity, entities: Entity[]) => {
 		entity.fieldAry.forEach(f => {
 			if (f.bizType === FieldBizType.DATETIME && f.showFormat) {
 				convertString += `item.${field.name}._${f.name} = item.${field.name}_${f.name};\n`;
-				ifString += `;if (key === '${field.name}_${f.name}') { item['_' + key] = item[key] ? FORMAT_MAP.formatTime(new Date(item[key]), '${f.showFormat}') : item[key]; }\n`;
+				ifString += `;if (key === "${field.name}_${f.name}") { item["_" + key] = item[key] ? FORMAT_MAP.formatTime(new Date(item[key]), "${f.showFormat}") : item[key]; }\n`;
 			}
 			
 			convertString += `item.${field.name}.${f.name} = item._${field.name}_${f.name} || item.${field.name}_${f.name};

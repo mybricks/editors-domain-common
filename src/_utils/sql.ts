@@ -1,7 +1,7 @@
-import { Condition, Entity, Field, Order } from '../_types/domain';
-import { FieldBizType, SQLWhereJoiner } from '../_constants/field';
-import { getQuoteByFieldType, getValueByFieldType, getValueByOperatorAndFieldType } from './field';
-import { AnyType } from '../_types';
+import { Condition, Entity, Field, Order } from "../_types/domain";
+import { FieldBizType, SQLWhereJoiner } from "../_constants/field";
+import { getQuoteByFieldType, getValueByOperatorAndFieldType } from "./field";
+import { AnyType } from "../_types";
 
 
 /** 根据条件拼接 where sql */
@@ -23,12 +23,12 @@ export const spliceWhereSQLFragmentByConditions = (fnParams: {
 				return true;
 			} else {
 				/** 变量 */
-				if (condition.value?.startsWith('{') && condition.value?.endsWith('}')) {
+				if (condition.value?.startsWith("{") && condition.value?.endsWith("}")) {
 					const curValue = condition.value.substr(1, condition.value.length - 2);
 
 					/** 非实体字段，即使用的变量，如 params.id */
-					if (!new RegExp(`^${entities.map(e => e.name).join('|')}\\.`).test(curValue)) {
-						return params[curValue.substring(curValue.indexOf('.') + 1)] !== undefined;
+					if (!new RegExp(`^${entities.map(e => e.name).join("|")}\\.`).test(curValue)) {
+						return params[curValue.substring(curValue.indexOf(".") + 1)] !== undefined;
 					}
 				} else {
 					return condition?.value !== undefined;
@@ -41,7 +41,7 @@ export const spliceWhereSQLFragmentByConditions = (fnParams: {
 	const conditionSqlList: string[] = [];
 
 	curConditions.forEach(condition => {
-		let curSQL = '';
+		let curSQL = "";
 
 		if (condition.conditions) {
 			curSQL = spliceWhereSQLFragmentByConditions({
@@ -64,23 +64,23 @@ export const spliceWhereSQLFragmentByConditions = (fnParams: {
 					const mappingField = curEntity.fieldAry.find(f => f.mapping?.entity?.id === condition.entityId);
 					const curField = mappingField?.mapping?.entity?.fieldAry.find(f => f.id === condition.fieldId);
 					
-					fieldName = `MAPPING_${mappingField?.name || entityMapElement.name}` + (curField?.isPrimaryKey ? `.MAPPING_${mappingField?.name || entityMapElement.name}_` : '.') + (curField?.name || field.name);
+					fieldName = `MAPPING_${mappingField?.name || entityMapElement.name}` + (curField?.isPrimaryKey ? `.MAPPING_${mappingField?.name || entityMapElement.name}_` : ".") + (curField?.name || field.name);
 				}
-				let value = condition.value || '';
+				let value = condition.value || "";
 				let isEntityField = false;
 				/** 支持直接使用数据库字段，如 文件表.id = 用户表.文件id */
-				if (condition.value.startsWith('{') && condition.value.endsWith('}')) {
+				if (condition.value.startsWith("{") && condition.value.endsWith("}")) {
 					const curValue = condition.value.substr(1, condition.value.length - 2);
 
-					if (new RegExp(`^${entities.map(e => e.name).join('|')}\\.`).test(curValue)) {
+					if (new RegExp(`^${entities.map(e => e.name).join("|")}\\.`).test(curValue)) {
 						value = curValue;
 						isEntityField = true;
 					} else {
 						if (templateMode) {
-							let key = curValue.substring(curValue.indexOf('.') + 1);
+							let key = curValue.substring(curValue.indexOf(".") + 1);
 							value = `\${params.${key}}`;
 						} else {
-							value = params[curValue.substring(curValue.indexOf('.') + 1)] as string;
+							value = params[curValue.substring(curValue.indexOf(".") + 1)] as string;
 						}
 					}
 				}
@@ -93,13 +93,13 @@ export const spliceWhereSQLFragmentByConditions = (fnParams: {
 	});
 
 	/** 只有多个条件才需要括号拼接 */
-	let sql = `${conditionSqlList.length > 1 ? '(' : ''}${conditionSqlList.join(` ${whereJoiner} `)}${conditionSqlList.length > 1 ? ')' : ''}`;
-	let prefix = '';
+	let sql = `${conditionSqlList.length > 1 ? "(" : ""}${conditionSqlList.join(` ${whereJoiner} `)}${conditionSqlList.length > 1 ? ")" : ""}`;
+	let prefix = "";
 	
 	/** whereJoiner 不存在表示最外层 SQL */
 	if (!whereJoiner) {
 		/** 当 condition 存在时 */
-		prefix = `WHERE _STATUS_DELETED = 0${sql ? ' AND ' : ''}`;
+		prefix = `WHERE _STATUS_DELETED = 0${sql ? " AND " : ""}`;
 	}
 
 	return prefix + sql;
@@ -114,11 +114,11 @@ export const spliceUpdateSQLFragmentByConditions = (fnParams: {
 	return connectors
 		.map(connector => {
 			const { from, to } = connector;
-			const toFieldName = to.replace('/', '');
+			const toFieldName = to.replace("/", "");
 			const field = entity.fieldAry.find(f => f.name === toFieldName);
-			const fromNames = from.split('/').filter(Boolean);
+			const fromNames = from.split("/").filter(Boolean);
 
-			let value = 'params';
+			let value = "params";
 			fromNames.forEach(key => {
 				value += `.${key}`;
 			});
@@ -127,7 +127,7 @@ export const spliceUpdateSQLFragmentByConditions = (fnParams: {
 			return field ? `${toFieldName} = \${${value} === undefined ? null : \`${q}\${${value}}${q}\`}` : undefined;
 		})
 		.filter(Boolean)
-		.join(', ');
+		.join(", ");
 };
 
 /** 根据规则以及实体拼接 select 语句 */
@@ -166,7 +166,7 @@ export const spliceSelectSQLByConditions = (fnParams: {
 
 			/** 与主实体存在关联关系的外键字段 */
 			let relationField: Field | null = null;
-			if (type === 'primary') {
+			if (type === "primary") {
 				relationField = originEntity.fieldAry.find(f => f.isPrimaryKey) ?? null;
 			} else {
 				relationField = originEntity.fieldAry.find(f => f.bizType === FieldBizType.RELATION && f.relationEntityId === curEntity.id) ?? null;
@@ -176,27 +176,27 @@ export const spliceSelectSQLByConditions = (fnParams: {
 				return;
 			}
 
-			const isMaxCondition = condition.startsWith('max(') && condition.endsWith(')');
-			let entityName = '';
+			const isMaxCondition = condition.startsWith("max(") && condition.endsWith(")");
+			let entityName = "";
 			/** 被关联 */
-			if (type === 'primary') {
-				if (condition === '-1') {
+			if (type === "primary") {
+				if (condition === "-1") {
 					const relationField = curEntity.fieldAry.find(f => [FieldBizType.RELATION, FieldBizType.SYS_USER, FieldBizType.SYS_USER_CREATOR, FieldBizType.SYS_USER_UPDATER].includes(f.bizType) && f.relationEntityId === originEntity.id);
-					const extraFieldName = entity.fieldAry.filter(f => !f.isPrimaryKey).map(f => f.name).join(', ');
+					const extraFieldName = entity.fieldAry.filter(f => !f.isPrimaryKey).map(f => f.name).join(", ");
 					
-					entityName = `LEFT JOIN (SELECT id AS MAPPING_${mappingField.name}_id${extraFieldName ? `, ${extraFieldName}` : ''} FROM ${originEntity.name} WHERE _STATUS_DELETED = 0) MAPPING_${mappingField.name} ON MAPPING_${mappingField.name}.MAPPING_${mappingField.name}_id = ${curEntity.name}.${relationField?.name}`;
+					entityName = `LEFT JOIN (SELECT id AS MAPPING_${mappingField.name}_id${extraFieldName ? `, ${extraFieldName}` : ""} FROM ${originEntity.name} WHERE _STATUS_DELETED = 0) MAPPING_${mappingField.name} ON MAPPING_${mappingField.name}.MAPPING_${mappingField.name}_id = ${curEntity.name}.${relationField?.name}`;
 				}
 			} else {
 				/** 关联 */
-				if (condition === '-1') {
-					const extraFieldName = entity.fieldAry.filter(f => !f.isPrimaryKey && f.name !== relationField?.name).map(f => `GROUP_CONCAT(${f.name} SEPARATOR '${fieldJoiner}') ${f.name}`).join(', ');
+				if (condition === "-1") {
+					const extraFieldName = entity.fieldAry.filter(f => !f.isPrimaryKey && f.name !== relationField?.name).map(f => `GROUP_CONCAT(${f.name} SEPARATOR "${fieldJoiner}") ${f.name}`).join(", ");
 					
-					entityName = `LEFT JOIN (SELECT id AS MAPPING_${mappingField.name}_id, ${relationField.name}${extraFieldName ? `, ${extraFieldName}` : ''} FROM ${originEntity.name} WHERE _STATUS_DELETED = 0 GROUP BY ${relationField.name}) MAPPING_${mappingField.name} ON MAPPING_${mappingField.name}.${relationField.name} = ${curEntity.name}.id`;
+					entityName = `LEFT JOIN (SELECT id AS MAPPING_${mappingField.name}_id, ${relationField.name}${extraFieldName ? `, ${extraFieldName}` : ""} FROM ${originEntity.name} WHERE _STATUS_DELETED = 0 GROUP BY ${relationField.name}) MAPPING_${mappingField.name} ON MAPPING_${mappingField.name}.${relationField.name} = ${curEntity.name}.id`;
 				} else if (isMaxCondition) {
 					const filedName = condition.substr(4, condition.length - 5);
-					const extraFieldName = entity.fieldAry.filter(f => !f.isPrimaryKey && f.name !== relationField?.name).map(f => f.name).join(', ');
+					const extraFieldName = entity.fieldAry.filter(f => !f.isPrimaryKey && f.name !== relationField?.name).map(f => f.name).join(", ");
 					
-					entityName = `LEFT JOIN (SELECT id AS MAPPING_${mappingField.name}_id, ${relationField.name}${extraFieldName ? `, ${extraFieldName}` : ''} FROM ${originEntity.name} WHERE _STATUS_DELETED = 0 AND ${filedName} IN (SELECT max(${filedName}) FROM ${originEntity.name} WHERE _STATUS_DELETED = 0 GROUP BY ${relationField.name})) MAPPING_${mappingField.name} ON MAPPING_${mappingField.name}.${relationField.name} = ${curEntity.name}.id`;
+					entityName = `LEFT JOIN (SELECT id AS MAPPING_${mappingField.name}_id, ${relationField.name}${extraFieldName ? `, ${extraFieldName}` : ""} FROM ${originEntity.name} WHERE _STATUS_DELETED = 0 AND ${filedName} IN (SELECT max(${filedName}) FROM ${originEntity.name} WHERE _STATUS_DELETED = 0 GROUP BY ${relationField.name})) MAPPING_${mappingField.name} ON MAPPING_${mappingField.name}.${relationField.name} = ${curEntity.name}.id`;
 				}
 			}
 
@@ -216,16 +216,16 @@ export const spliceSelectSQLByConditions = (fnParams: {
 			fieldList.push(
 				...entity.fieldAry.map(f => {
 					if (f.isPrimaryKey) {
-						return `MAPPING_${field.name}.MAPPING_${field.name}_id AS '${field.name}_${f.name}'`;
+						return `MAPPING_${field.name}.MAPPING_${field.name}_id AS "${field.name}_${f.name}"`;
 					} else {
-						return `MAPPING_${field.name}.${f.name} AS '${field.name}_${f.name}'`;
+						return `MAPPING_${field.name}.${f.name} AS "${field.name}_${f.name}"`;
 					}
 				})
 			);
 		});
 
 		/** 前置 sql */
-		sql.push(`SELECT ${fieldList.join(', ')} FROM ${entityNames.join(' ')}`);
+		sql.push(`SELECT ${fieldList.join(", ")} FROM ${entityNames.join(" ")}`);
 		sql.push(spliceWhereSQLFragmentByConditions({
 			conditions: [conditions],
 			entities,
@@ -242,7 +242,7 @@ export const spliceSelectSQLByConditions = (fnParams: {
 				if (mappingField) {
 					const currentField = mappingField.mapping?.entity?.fieldAry.find(f => f.id === order.fieldId);
 
-					currentField && orderList.push(`MAPPING_${mappingField.name}.${currentField.isPrimaryKey ? `MAPPING_${mappingField.name}_` : ''}${currentField.name} ${order.order}`);
+					currentField && orderList.push(`MAPPING_${mappingField.name}.${currentField.isPrimaryKey ? `MAPPING_${mappingField.name}_` : ""}${currentField.name} ${order.order}`);
 				} else {
 					const field = curEntity.fieldAry.find(f => f.id === order.fieldId);
 
@@ -251,13 +251,13 @@ export const spliceSelectSQLByConditions = (fnParams: {
 					}
 				}
 			});
-			orderList.length && sql.push(`ORDER BY ${orderList.join(', ')}`);
+			orderList.length && sql.push(`ORDER BY ${orderList.join(", ")}`);
 		}
 
-		let limitValue: AnyType = limit.value ? String(limit.value) :'';
+		let limitValue: AnyType = limit.value ? String(limit.value) :"";
 		if (limitValue) {
-			if (limitValue.startsWith('{') && limitValue.endsWith('}')) {
-				limitValue = params[limitValue.slice(limitValue.indexOf('.') + 1, -1)];
+			if (limitValue.startsWith("{") && limitValue.endsWith("}")) {
+				limitValue = params[limitValue.slice(limitValue.indexOf(".") + 1, -1)];
 				
 				if (limitValue) {
 					sql.push(`LIMIT ${limitValue}`);
@@ -268,8 +268,8 @@ export const spliceSelectSQLByConditions = (fnParams: {
 		}
 
 		if (pageIndex) {
-			if (pageIndex.startsWith('{') && pageIndex.endsWith('}')) {
-				const curValue = params[pageIndex.slice(pageIndex.indexOf('.') + 1, -1)];
+			if (pageIndex.startsWith("{") && pageIndex.endsWith("}")) {
+				const curValue = params[pageIndex.slice(pageIndex.indexOf(".") + 1, -1)];
 
 				if (curValue) {
 					sql.push(`OFFSET ${(Number(curValue) - 1) * Number(limit)}`);
@@ -279,7 +279,7 @@ export const spliceSelectSQLByConditions = (fnParams: {
 			}
 		}
 
-		return sql.join(' ');
+		return sql.join(" ");
 	}
 };
 
@@ -312,7 +312,7 @@ export const spliceSelectCountSQLByConditions = (fnParams: {
 
 			/** 与主实体存在关联关系的外键字段 */
 			let relationField: Field | null = null;
-			if (type === 'primary') {
+			if (type === "primary") {
 				relationField = originEntity.fieldAry.find(f => f.isPrimaryKey) ?? null;
 			} else {
 				relationField = originEntity.fieldAry.find(f => f.bizType === FieldBizType.RELATION && f.relationEntityId === curEntity.id) ?? null;
@@ -322,27 +322,27 @@ export const spliceSelectCountSQLByConditions = (fnParams: {
 				return;
 			}
 
-			const isMaxCondition = condition.startsWith('max(') && condition.endsWith(')');
-			let entityName = '';
+			const isMaxCondition = condition.startsWith("max(") && condition.endsWith(")");
+			let entityName = "";
 			/** 被关联 */
-			if (type === 'primary') {
-				if (condition === '-1') {
+			if (type === "primary") {
+				if (condition === "-1") {
 					const relationField = curEntity.fieldAry.find(f => [FieldBizType.RELATION, FieldBizType.SYS_USER, FieldBizType.SYS_USER_CREATOR, FieldBizType.SYS_USER_UPDATER].includes(f.bizType) && f.relationEntityId === originEntity.id);
-					const extraFieldName = entity.fieldAry.filter(f => !f.isPrimaryKey).map(f => f.name).join(', ');
+					const extraFieldName = entity.fieldAry.filter(f => !f.isPrimaryKey).map(f => f.name).join(", ");
 					
-					entityName = `LEFT JOIN (SELECT id AS MAPPING_${mappingField.name}_id${extraFieldName ? `, ${extraFieldName}` : ''} FROM ${originEntity.name} WHERE _STATUS_DELETED = 0) MAPPING_${mappingField.name} ON MAPPING_${mappingField.name}.MAPPING_${mappingField.name}_id = ${curEntity.name}.${relationField?.name}`;
+					entityName = `LEFT JOIN (SELECT id AS MAPPING_${mappingField.name}_id${extraFieldName ? `, ${extraFieldName}` : ""} FROM ${originEntity.name} WHERE _STATUS_DELETED = 0) MAPPING_${mappingField.name} ON MAPPING_${mappingField.name}.MAPPING_${mappingField.name}_id = ${curEntity.name}.${relationField?.name}`;
 				}
 			} else {
 				/** 关联 */
-				if (condition === '-1') {
-					const extraFieldName = entity.fieldAry.filter(f => !f.isPrimaryKey && f.name !== relationField?.name).map(f => `GROUP_CONCAT(${f.name} SEPARATOR '${fieldJoiner}') ${f.name}`).join(', ');
+				if (condition === "-1") {
+					const extraFieldName = entity.fieldAry.filter(f => !f.isPrimaryKey && f.name !== relationField?.name).map(f => `GROUP_CONCAT(${f.name} SEPARATOR "${fieldJoiner}") ${f.name}`).join(", ");
 					
-					entityName = `LEFT JOIN (SELECT id AS MAPPING_${mappingField.name}_id, ${relationField.name}${extraFieldName ? `, ${extraFieldName}` : ''} FROM ${originEntity.name} WHERE _STATUS_DELETED = 0 GROUP BY ${relationField.name}) MAPPING_${mappingField.name} ON MAPPING_${mappingField.name}.${relationField.name} = ${curEntity.name}.id`;
+					entityName = `LEFT JOIN (SELECT id AS MAPPING_${mappingField.name}_id, ${relationField.name}${extraFieldName ? `, ${extraFieldName}` : ""} FROM ${originEntity.name} WHERE _STATUS_DELETED = 0 GROUP BY ${relationField.name}) MAPPING_${mappingField.name} ON MAPPING_${mappingField.name}.${relationField.name} = ${curEntity.name}.id`;
 				} else if (isMaxCondition) {
 					const filedName = condition.substr(4, condition.length - 5);
-					const extraFieldName = entity.fieldAry.filter(f => !f.isPrimaryKey && f.name !== relationField?.name).map(f => f.name).join(', ');
+					const extraFieldName = entity.fieldAry.filter(f => !f.isPrimaryKey && f.name !== relationField?.name).map(f => f.name).join(", ");
 					
-					entityName = `LEFT JOIN (SELECT id AS MAPPING_${mappingField.name}_id, ${relationField.name}${extraFieldName ? `, ${extraFieldName}` : ''} FROM ${originEntity.name} WHERE _STATUS_DELETED = 0 AND ${filedName} IN (SELECT max(${filedName}) FROM ${originEntity.name} WHERE _STATUS_DELETED = 0 GROUP BY ${relationField.name})) MAPPING_${mappingField.name} ON MAPPING_${mappingField.name}.${relationField.name} = ${curEntity.name}.id`;
+					entityName = `LEFT JOIN (SELECT id AS MAPPING_${mappingField.name}_id, ${relationField.name}${extraFieldName ? `, ${extraFieldName}` : ""} FROM ${originEntity.name} WHERE _STATUS_DELETED = 0 AND ${filedName} IN (SELECT max(${filedName}) FROM ${originEntity.name} WHERE _STATUS_DELETED = 0 GROUP BY ${relationField.name})) MAPPING_${mappingField.name} ON MAPPING_${mappingField.name}.${relationField.name} = ${curEntity.name}.id`;
 				}
 			}
 
@@ -350,7 +350,7 @@ export const spliceSelectCountSQLByConditions = (fnParams: {
 		});
 
 		/** 前置 sql */
-		sql.push(`SELECT count(*) as total FROM ${entityNames.join(' ')}`);
+		sql.push(`SELECT count(*) as total FROM ${entityNames.join(" ")}`);
 		sql.push(spliceWhereSQLFragmentByConditions({
 			conditions: [conditions],
 			entities,
@@ -359,7 +359,7 @@ export const spliceSelectCountSQLByConditions = (fnParams: {
 			curEntity,
 		}, templateMode));
 
-		return sql.join(' ');
+		return sql.join(" ");
 	}
 };
 
@@ -379,7 +379,7 @@ export const spliceUpdateSQLByConditions = (fnParams: {
 		const sql: string[] = [];
 
 		/** 前置 sql */
-		sql.push(`UPDATE ${curEntity.name} SET _UPDATE_USER_ID = '', _UPDATE_TIME = \${Date.now()},`);
+		sql.push(`UPDATE ${curEntity.name} SET _UPDATE_USER_ID = "", _UPDATE_TIME = \${Date.now()},`);
 		sql.push(spliceUpdateSQLFragmentByConditions({
 			connectors,
 			entity: curEntity,
@@ -392,7 +392,7 @@ export const spliceUpdateSQLByConditions = (fnParams: {
 			entityMap,
 		}, templateMode));
 
-		return sql.join(' ');
+		return sql.join(" ");
 	}
 };
 
@@ -411,7 +411,7 @@ export const spliceDeleteSQLByConditions = (fnParams: {
 		const sql: string[] = [];
 
 		/** 前置 sql */
-		sql.push(`UPDATE ${curEntity.name} SET _STATUS_DELETED = 1, _UPDATE_USER_ID = '', _UPDATE_TIME = \${Date.now()}`);
+		sql.push(`UPDATE ${curEntity.name} SET _STATUS_DELETED = 1, _UPDATE_USER_ID = "", _UPDATE_TIME = \${Date.now()}`);
 		sql.push(spliceWhereSQLFragmentByConditions({
 			conditions: [conditions],
 			entities,
@@ -420,6 +420,6 @@ export const spliceDeleteSQLByConditions = (fnParams: {
 			entityMap,
 		}, templateMode));
 
-		return sql.join(' ');
+		return sql.join(" ");
 	}
 };
