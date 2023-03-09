@@ -62,13 +62,13 @@ export const getFieldConditionAry = (dbType: string): Array<{ label: string; val
 export const getQuoteByFieldType = (dbType: string) => {
 	switch (dbType) {
 	case FieldDBType.VARCHAR: {
-		return '\'';
+		return '"';
 	}
 	case FieldDBType.BIGINT: {
 		return '';
 	}
 	case FieldDBType.MEDIUMTEXT: {
-		return '\'';
+		return '"';
 	}
 	default: return '';
 	}

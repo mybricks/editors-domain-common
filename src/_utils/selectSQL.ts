@@ -1,3 +1,4 @@
+/* eslint-disable no-useless-escape */
 interface Entity {
 	/** 表 ID，在前端编辑页使用 */
 	id: string;
@@ -66,9 +67,9 @@ export const spliceSelectSQLByConditions = (fnParams: {
 	/** 根据字段类型返回拼接 sql 的具体指 */
 	const getValueByFieldType = (dbType: string, val: string) => {
 		switch (dbType) {
-		case "varchar": return `"${val}"`;
+		case "varchar": return `\"${val}\"`;
 		case "bigint": return val;
-		case "mediumtext": return `"${val}"`;
+		case "mediumtext": return `\"${val}\"`;
 		default: return val;
 		}
 	};
@@ -76,7 +77,7 @@ export const spliceSelectSQLByConditions = (fnParams: {
 	/** 根据字段类型以及操作符号返回拼接 sql 的具体值 */
 	const getValueByOperatorAndFieldType = (dbType: string, operator: string, val: string) => {
 		if (operator === "LIKE" || operator === "NOT LIKE") {
-			return `"%${val}%"`;
+			return `\"%${val}%\"`;
 		} else if (operator === "IN" || operator === "NOT IN") {
 			return `(${val.split(",").map(item => getValueByFieldType(dbType, item)).join(",")})`;
 		}
@@ -235,7 +236,7 @@ export const spliceSelectSQLByConditions = (fnParams: {
 			} else {
 				/** 关联 */
 				if (condition === "-1") {
-					const extraFieldName = entity.fieldAry.filter(f => !f.isPrimaryKey && f.name !== relationField?.name).map(f => `GROUP_CONCAT(${f.name} SEPARATOR "${fieldJoiner}") ${f.name}`).join(", ");
+					const extraFieldName = entity.fieldAry.filter(f => !f.isPrimaryKey && f.name !== relationField?.name).map(f => `GROUP_CONCAT(${f.name} SEPARATOR \"${fieldJoiner}\") ${f.name}`).join(", ");
 					
 					entityName = `LEFT JOIN (SELECT id AS MAPPING_${mappingField.name}_id, ${relationField.name}${extraFieldName ? `, ${extraFieldName}` : ""} FROM ${originEntity.name} WHERE _STATUS_DELETED = 0 GROUP BY ${relationField.name}) MAPPING_${mappingField.name} ON MAPPING_${mappingField.name}.${relationField.name} = ${curEntity.name}.id`;
 				} else if (isMaxCondition) {
@@ -262,9 +263,9 @@ export const spliceSelectSQLByConditions = (fnParams: {
 			fieldList.push(
 				...entity.fieldAry.map(f => {
 					if (f.isPrimaryKey) {
-						return `MAPPING_${field.name}.MAPPING_${field.name}_id AS "${field.name}_${f.name}"`;
+						return `MAPPING_${field.name}.MAPPING_${field.name}_id AS \"${field.name}_${f.name}\"`;
 					} else {
-						return `MAPPING_${field.name}.${f.name} AS "${field.name}_${f.name}"`;
+						return `MAPPING_${field.name}.${f.name} AS \"${field.name}_${f.name}\"`;
 					}
 				})
 			);
@@ -338,9 +339,9 @@ export const spliceSelectCountSQLByConditions = (fnParams: {
 	/** 根据字段类型返回拼接 sql 的具体指 */
 	const getValueByFieldType = (dbType: string, val: string) => {
 		switch (dbType) {
-		case "varchar": return `"${val}"`;
+		case "varchar": return `\"${val}\"`;
 		case "bigint": return val;
-		case "mediumtext": return `"${val}"`;
+		case "mediumtext": return `\"${val}\"`;
 		default: return val;
 		}
 	};
@@ -348,7 +349,7 @@ export const spliceSelectCountSQLByConditions = (fnParams: {
 	/** 根据字段类型以及操作符号返回拼接 sql 的具体值 */
 	const getValueByOperatorAndFieldType = (dbType: string, operator: string, val: string) => {
 		if (operator === "LIKE" || operator === "NOT LIKE") {
-			return `"%${val}%"`;
+			return `\"%${val}%\"`;
 		} else if (operator === "IN" || operator === "NOT IN") {
 			return `(${val.split(",").map(item => getValueByFieldType(dbType, item)).join(",")})`;
 		}
@@ -503,7 +504,7 @@ export const spliceSelectCountSQLByConditions = (fnParams: {
 			} else {
 				/** 关联 */
 				if (condition === "-1") {
-					const extraFieldName = entity.fieldAry.filter(f => !f.isPrimaryKey && f.name !== relationField?.name).map(f => `GROUP_CONCAT(${f.name} SEPARATOR "${fieldJoiner}") ${f.name}`).join(", ");
+					const extraFieldName = entity.fieldAry.filter(f => !f.isPrimaryKey && f.name !== relationField?.name).map(f => `GROUP_CONCAT(${f.name} SEPARATOR \"${fieldJoiner}\") ${f.name}`).join(", ");
 					
 					entityName = `LEFT JOIN (SELECT id AS MAPPING_${mappingField.name}_id, ${relationField.name}${extraFieldName ? `, ${extraFieldName}` : ""} FROM ${originEntity.name} WHERE _STATUS_DELETED = 0 GROUP BY ${relationField.name}) MAPPING_${mappingField.name} ON MAPPING_${mappingField.name}.${relationField.name} = ${curEntity.name}.id`;
 				} else if (isMaxCondition) {

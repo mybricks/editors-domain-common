@@ -7,6 +7,8 @@ export enum FieldBizType {
 	HREF = 'href',
 	/** 电话 */
 	PHONE = 'phone',
+	/** 邮箱 */
+	EMAIL = 'email',
 	/** 图片 */
 	IMAGE = 'image',
 	/** 附件 */

@@ -1,3 +1,4 @@
+/* eslint-disable no-useless-escape */
 import { Condition, Entity, Field, Order } from "../_types/domain";
 import { FieldBizType, SQLWhereJoiner } from "../_constants/field";
 import { getQuoteByFieldType, getValueByOperatorAndFieldType } from "./field";
@@ -379,7 +380,7 @@ export const spliceUpdateSQLByConditions = (fnParams: {
 		const sql: string[] = [];
 
 		/** 前置 sql */
-		sql.push(`UPDATE ${curEntity.name} SET _UPDATE_USER_ID = "", _UPDATE_TIME = \${Date.now()},`);
+		sql.push(`UPDATE ${curEntity.name} SET _UPDATE_USER_ID = \"\", _UPDATE_TIME = \${Date.now()},`);
 		sql.push(spliceUpdateSQLFragmentByConditions({
 			connectors,
 			entity: curEntity,
