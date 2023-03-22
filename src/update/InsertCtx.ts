@@ -3,6 +3,7 @@ import { getParamsByConditions } from '../_utils/params';
 import { AnyType } from '../_types';
 import { Condition } from '../_types/domain';
 import { safeEncodeURIComponent } from '../_utils/util';
+import { FieldBizType } from '../_constants/field';
 
 export type T_Field = {
 	id,
@@ -91,7 +92,10 @@ export default class InsertCtx {
 			const allowUseFields: string[] = [];
 			currentEntity.fieldAry.forEach(field => {
 				if (field.mapping?.entity && field.selected) {
-					field.mapping?.entity?.fieldAry?.forEach(f => allowUseFields.push(f.id));
+					if (field.bizType !== FieldBizType.MAPPING) {
+						allowUseFields.push(field.id);
+					}
+					field.mapping?.entity?.fieldAry?.filter(field => !field.isPrimaryKey).forEach(f => allowUseFields.push(f.id));
 				} else {
 					allowUseFields.push(field.id);
 				}

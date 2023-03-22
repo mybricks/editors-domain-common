@@ -99,7 +99,7 @@ const OrderItem: FC<OrderItemProps> = props => {
 					
 					if (originEntity && entity?.fieldAry.length) {
 						options.push(
-							...entity?.fieldAry.map(field => {
+							...entity?.fieldAry.filter(field => !field.isPrimaryKey).map(field => {
 								return (
 									<option
 										key={`${entity?.id}&&${field.id}`}

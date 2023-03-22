@@ -181,7 +181,7 @@ const Conditions: FC = () => {
 							
 							if (originEntity && entity?.fieldAry.length) {
 								fieldSelectOptions.push(
-									...entity?.fieldAry.map(field => {
+									...entity?.fieldAry.filter(field => !field.isPrimaryKey).map(field => {
 										return (
 											<option
 												key={`${entity?.id}&&${field.id}`}

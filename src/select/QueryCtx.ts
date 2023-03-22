@@ -1,5 +1,5 @@
 import { AnyType } from '../_types';
-import { SQLLimitType, SQLOrder, SQLWhereJoiner } from '../_constants/field';
+import { FieldBizType, SQLLimitType, SQLOrder, SQLWhereJoiner } from '../_constants/field';
 import { spliceSelectCountSQLByConditions, spliceSelectSQLByConditions } from '../_utils/selectSQL';
 import { safeEncodeURIComponent } from '../_utils/util';
 import { formatTime, spliceDataFormatString } from '../_utils/format';
@@ -110,7 +110,10 @@ export default class QueryCtx {
 			const allowUseFields: string[] = [];
 			currentEntity.fieldAry.forEach(field => {
 				if (field.mapping?.entity && field.selected) {
-					field.mapping?.entity?.fieldAry?.forEach(f => allowUseFields.push(f.id));
+					if (field.bizType !== FieldBizType.MAPPING) {
+						allowUseFields.push(field.id);
+					}
+					field.mapping?.entity?.fieldAry?.filter(field => !field.isPrimaryKey).forEach(f => allowUseFields.push(f.id));
 				} else {
 					allowUseFields.push(field.id);
 				}
