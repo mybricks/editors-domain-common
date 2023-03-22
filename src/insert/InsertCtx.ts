@@ -76,7 +76,7 @@ export default class InsertCtx {
 					if (con) {
 						const fromPropName = con.from.substring(con.from.indexOf("/") + 1);
 						const q = getQuoteByFieldType(field.dbType);
-						valueAry.push(`\${params.${fromPropName} === undefined ? null : \`${q}\${params.${fromPropName}}${q}\`}`);
+						valueAry.push(`\${(params.${fromPropName} === undefined || params.${fromPropName} === null) ? null : \`${q}\${params.${fromPropName}}${q}\`}`);
 					} else {
 						if (field.isPrimaryKey) {
 							valueAry.push("${genUniqueId()}");

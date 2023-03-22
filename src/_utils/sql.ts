@@ -125,7 +125,7 @@ export const spliceUpdateSQLFragmentByConditions = (fnParams: {
 			});
 			
 			const q = getQuoteByFieldType(field?.dbType as string);
-			return field ? `${toFieldName} = \${${value} === undefined ? null : \`${q}\${${value}}${q}\`}` : undefined;
+			return field ? `${toFieldName} = \${(${value} === undefined || ${value} === null) ? null : \`${q}\${${value}}${q}\`}` : undefined;
 		})
 		.filter(Boolean)
 		.join(", ");
