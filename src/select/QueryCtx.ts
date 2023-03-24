@@ -133,7 +133,7 @@ export default class QueryCtx {
 					conditions: ${JSON.stringify(conditions)} || [],
 					entities: ${JSON.stringify(entities)},
 					limit: ${JSON.stringify(limit)},
-					orders: ${JSON.stringify(orders)},
+					orders: (params.orders && Array.isArray(params.orders)) ? params.orders : ${JSON.stringify(orders)},
 					pageIndex: ${JSON.stringify(pageIndex)},
 				});
 				

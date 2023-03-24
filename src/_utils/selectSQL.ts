@@ -51,7 +51,7 @@ interface Condition {
 	whereJoiner: AnyType;
 }
 
-type Order = { fieldId: string; fieldName: string; order: AnyType; entityId: string };
+type Order = { fieldId: string; fieldName: string | string[]; order: AnyType; entityId: string };
 
 type AnyType = any;
 
@@ -186,7 +186,7 @@ export const spliceSelectSQLByConditions = (fnParams: {
 		return prefix + sql;
 	};
 	
-	let { conditions, entities, params, limit, orders, pageIndex } = fnParams;
+	let { conditions, entities, params, limit, orders = [], pageIndex } = fnParams;
 	const entityMap = {};
 	entities.forEach(e => entityMap[e.id] = e);
 	const curEntity = entities.find(e => e.selected);
@@ -196,7 +196,7 @@ export const spliceSelectSQLByConditions = (fnParams: {
 		const fieldList: string[] = [];
 		const entityNames: string[] = [curEntity.name];
 		
-		orders = orders.filter(order => order.fieldId);
+		orders = orders.filter(order => order.fieldId || order.fieldName);
 		
 		/** mapping 字段，存在映射且实体存在 */
 		const mappingFields = curEntity.fieldAry.filter(field => {
@@ -284,14 +284,15 @@ export const spliceSelectSQLByConditions = (fnParams: {
 		if (orders.length) {
 			const orderList: string[] = [];
 			orders.forEach(order => {
-				const mappingField = mappingFields.find(m => m.mapping?.entity?.id === order.entityId);
+				order.fieldName = Array.isArray(order.fieldName) ? order.fieldName : [order.fieldName];
+				const mappingField = order.entityId ? mappingFields.find(m => m.mapping?.entity?.id === order.entityId) : (order.fieldName.length > 1 ? mappingFields.find(m => m.name === order.fieldName[0]) : null);
 				
 				if (mappingField) {
-					const currentField = mappingField.mapping?.entity?.fieldAry.find(f => f.id === order.fieldId);
+					const currentField = mappingField.mapping?.entity?.fieldAry.find(f => f.id === order.fieldId) || mappingField.mapping?.entity?.fieldAry.find(f => f.name === order.fieldName[1]);
 					
 					currentField && orderList.push(`MAPPING_${mappingField.name}.${currentField.isPrimaryKey ? `MAPPING_${mappingField.name}_` : ""}${currentField.name} ${order.order}`);
 				} else {
-					const field = curEntity.fieldAry.find(f => f.id === order.fieldId);
+					const field = curEntity.fieldAry.find(f => f.id === order.fieldId) || curEntity.fieldAry.find(f => f.name === order.fieldName[0]);
 					
 					if (field) {
 						orderList.push(`${curEntity.name}.${field.name} ${order.order}`);
