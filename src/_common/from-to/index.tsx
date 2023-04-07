@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect } from 'react';
 // @ts-ignore
 import { getPosition, observe, useComputed, useObservable } from '@mybricks/rxui';
 import FromRender from './FromRender';
@@ -26,12 +26,12 @@ export default function FromTo({ conAry, from, to, addBlurFn }) {
 		<div className={css.content} ref={e => e && (ctx.contentEle = e)}>
 			<div className={css.scroll} ref={e => e && (ctx.ele = e)}>
 				<div className={css.from} ref={e => e && (ctx.fromEle = e)}>
-					<FromRender title={from.title} schema={from.schema}/>
+					<FromRender title={from.title} schema={from.schema} />
 				</div>
 				<div className={css.to} ref={e => e && (ctx.toEle = e)}>
-					<ToRender title={to.title} schema={to.schema}/>
+					<ToRender title={to.title} schema={to.schema} />
 				</div>
-				{ctx.ele ? <Cons/> : null}
+				{ctx.ele ? <Cons /> : null}
 			</div>
 		</div>
 	);
@@ -87,7 +87,7 @@ function Cons() {
 		<div className={css.relations} ref={e => e && (ctx.consEle = e)}>
 			<svg>
 				{
-					ctx.conAry.map((con, idx) => {
+					ctx.conAry.map((con) => {
 						return (
 							<Con key={`${con.from}-${con.to}`} fromXpath={con.from} toXpath={con.to}/>
 						);

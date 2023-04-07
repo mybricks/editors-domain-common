@@ -1,7 +1,7 @@
-import { DomainViewModel } from "../typing";
 import { getQuoteByFieldType } from "../_utils/field";
 import { DefaultValueWhenCreate, FieldBizType } from "../_constants/field";
 import { safeEncodeURIComponent } from "../_utils/util";
+import { AnyType } from "../_types";
 
 export type T_Field = {
   id,
@@ -23,7 +23,7 @@ export type T_Entity = {
 }
 
 export default class InsertCtx {
-	domainModel: DomainViewModel;
+	domainModel: AnyType;
 
 	value: {
 		get, set
