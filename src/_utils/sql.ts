@@ -125,10 +125,10 @@ export const spliceUpdateSQLFragmentByConditions = (fnParams: {
 			});
 			
 			const q = getQuoteByFieldType(field?.dbType as string);
-			return field ? `${toFieldName} = \${(${value} === undefined || ${value} === null) ? null : \`${q}\${${value}}${q}\`}` : undefined;
+			return field ? `\${${value} === undefined ? "" : \`, ${toFieldName} = \${${value} === null ? null : \`${q}\${${value}}${q}\`}\`}` : undefined;
 		})
 		.filter(Boolean)
-		.join(", ");
+		.join("");
 };
 
 /** 根据规则以及实体拼接 select 语句 */
@@ -380,7 +380,7 @@ export const spliceUpdateSQLByConditions = (fnParams: {
 		const sql: string[] = [];
 
 		/** 前置 sql */
-		sql.push(`UPDATE ${curEntity.name} SET _UPDATE_USER_ID = \"\", _UPDATE_TIME = \${Date.now()},`);
+		sql.push(`UPDATE ${curEntity.name} SET _UPDATE_USER_ID = \"\", _UPDATE_TIME = \${Date.now()}`);
 		sql.push(spliceUpdateSQLFragmentByConditions({
 			connectors,
 			entity: curEntity,

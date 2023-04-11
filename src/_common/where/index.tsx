@@ -108,10 +108,6 @@ const Conditions: FC = () => {
 		whereContext.removeCondition?.(params);
 	}, []);
 	
-	const getConditionFieldIds = useCallback((conditions: Condition[]) => {
-		return conditions.filter(con => !con.conditions).map(con => con.fieldId);
-	}, []);
-	
 	const showAdder = useCallback((showFieldGroupId: string) => {
 		currentContext.showFieldGroupId = showFieldGroupId;
 		
@@ -124,7 +120,6 @@ const Conditions: FC = () => {
 		const currentEntity = whereContext.nowValue.entities.find(e => e.selected);
 		
 		return (conditions: Condition[], parentCondition: Condition | null) => {
-			const conditionFieldIds = getConditionFieldIds(conditions);
 			
 			return conditions.map((condition, index) => {
 				let originField: Field | null = null;
@@ -162,11 +157,7 @@ const Conditions: FC = () => {
 							.filter((field: Field) => !field.isPrivate && field.bizType !== FieldBizType.MAPPING)
 							.map((field) => {
 								return (
-									<option
-										key={`${currentEntity.id}&&${field.id}`}
-										value={`${currentEntity.id}&&${field.id}`}
-										disabled={conditionFieldIds.includes(field.id)}
-									>
+									<option key={`${currentEntity.id}&&${field.id}`} value={`${currentEntity.id}&&${field.id}`}>
 										{field.name}
 									</option>
 								);
@@ -183,11 +174,7 @@ const Conditions: FC = () => {
 								fieldSelectOptions.push(
 									...entity?.fieldAry.filter(field => !field.isPrimaryKey).map(field => {
 										return (
-											<option
-												key={`${entity?.id}&&${field.id}`}
-												value={`${entity?.id}&&${field.id}`}
-												disabled={conditionFieldIds.includes(field.id ?? '')}
-											>
+											<option key={`${entity?.id}&&${field.id}`} value={`${entity?.id}&&${field.id}`}>
 												{mappingField.name}.{field.name}
 											</option>
 										);
