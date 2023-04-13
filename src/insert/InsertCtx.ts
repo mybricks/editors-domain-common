@@ -2,6 +2,8 @@ import { getQuoteByFieldType } from "../_utils/field";
 import { DefaultValueWhenCreate, FieldBizType } from "../_constants/field";
 import { safeEncodeURIComponent } from "../_utils/util";
 import { AnyType } from "../_types";
+import { generateValidateScript } from "../_utils/validate";
+import { Entity } from "../_types/domain";
 
 export type T_Field = {
   id,
@@ -12,6 +14,7 @@ export type T_Field = {
 	bizType: FieldBizType;
 	isPrivate: boolean;
 	defaultValueWhenCreate?: string;
+	enumValues?: string[];
 }
 
 export type T_Entity = {
@@ -82,7 +85,10 @@ export default class InsertCtx {
 							valueAry.push("${genUniqueId()}");
 						} else if (field.name === "_STATUS_DELETED") {
 							valueAry.push("0");
-						} else if (["_UPDATE_TIME", "_CREATE_TIME"].includes(field.name) || field.defaultValueWhenCreate === DefaultValueWhenCreate.CURRENT_TIME) {
+						} else if (
+							["_UPDATE_TIME", "_CREATE_TIME"].includes(field.name)
+							|| (field.bizType === FieldBizType.DATETIME && field.defaultValueWhenCreate === DefaultValueWhenCreate.CURRENT_TIME)
+						) {
 							valueAry.push("${Date.now()}");
 						} else {
 							valueAry.push("null");
@@ -94,7 +100,8 @@ export default class InsertCtx {
 			const script = `
       (params, context)=>{
         const { genUniqueId } = context;
-        return \`${sql}(${fieldAry.join(",")}) VALUES (${valueAry.join(",")})\`
+        ${generateValidateScript(entities[0] as Entity, conAry)}
+        return \`${sql}(${fieldAry.join(",")}) VALUES (${valueAry.join(",")})\`;
       }
       `;
 			

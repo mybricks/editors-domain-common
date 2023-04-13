@@ -1,9 +1,10 @@
 import { spliceUpdateSQLByConditions } from '../_utils/sql';
 import { getParamsByConditions } from '../_utils/params';
 import { AnyType } from '../_types';
-import { Condition } from '../_types/domain';
+import { Condition, Entity } from '../_types/domain';
 import { safeEncodeURIComponent } from '../_utils/util';
 import { FieldBizType } from '../_constants/field';
+import { generateValidateScript } from "../_utils/validate";
 
 export type T_Field = {
 	id,
@@ -111,7 +112,8 @@ export default class InsertCtx {
 			}, true);
 			
 			let script = `
-			(params)=>{ 
+			(params)=>{
+        ${generateValidateScript(currentEntity as Entity, conAry)}
 				return \`${sql}\`;
 			}
 			`;
