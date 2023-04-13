@@ -19,7 +19,7 @@ const ServiceSelect = ({ editConfig: { value, options } }: AnyType, { domainMode
 
 	return (
 		<>
-	    <div className={`${css.editor} ${css[options?.type]}`} onClick={openPop}>
+	    <div className={css.editor} onClick={openPop}>
 		    <span>已选择:</span>
 		    <span className={css.tt}>{val?.desc ? `${val.desc}` : '[空] 点击选择..'}</span>
 	    </div>
