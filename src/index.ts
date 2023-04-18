@@ -6,6 +6,7 @@ import EditorDelete from './delete';
 import EditorSqlAI from './sqlAI';
 import EditorMapping from './mapping';
 import { AnyType } from './_types';
+import DefaultValue from "./defaultValue";
 
 
 const EditorMap: Record<string, unknown> = {
@@ -14,6 +15,7 @@ const EditorMap: Record<string, unknown> = {
 	'DOMAIN.DBUPDATE': EditorUpdate,
 	'DOMAIN.DBDELETE': EditorDelete,
 	'DOMAIN.MAPPING': EditorMapping,
+	'DOMAIN.DEFAULTVALUE': DefaultValue,
 	'DOMAIN.AISQL': EditorSqlAI
 };
 

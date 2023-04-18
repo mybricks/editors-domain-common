@@ -1,10 +1,11 @@
 import React from 'react';
-import { useComputed, useObservable } from '@mybricks/rxui';
+import { evt, useComputed, useObservable } from '@mybricks/rxui';
 import QueryCtx from './QueryCtx';
 import Where from './Where';
 import { AnyType } from '../_types';
 
 import css from './QueryEditor.less';
+import PopView from "../_common/pop-view";
 
 let ctx: QueryCtx;
 
@@ -82,15 +83,10 @@ export default function QueryEditor({ domainModel, fieldModel, value, close }: A
 	}, { to: "children" });
 
 	return (
-		<div className={css.view} onClick={ctx.blurAll}>
-			<div className={css.toolbar}>
-				<button onClick={ctx.save}>确定</button>
-			</div>
-			<div className={css.main}>
-				<SelectFrom/>
-				{ctx.nowValue.entity ? <Where /> : null}
-			</div>
-		</div>
+		<PopView close={close} save={ctx.save} clickView={evt(ctx.blurAll).stop}>
+			<SelectFrom/>
+			{ctx.nowValue.entity ? <Where /> : null}
+		</PopView>
 	);
 }
 
