@@ -7,10 +7,7 @@ import { AnyType } from '../_types';
 import css from './index.less';
 
 export default function MappingEditor({ editConfig: { value } }: AnyType, { domainModel, canvasEle, fieldModel }: AnyType) {
-	if (!fieldModel.isBizTypeOfMapping() && !fieldModel.isBizTypeOfRelation() && !fieldModel.isBizTypeOfSystem()) {
-		return null;
-	}
-	
+	console.log('fieldModel', fieldModel);
 	const [visible, setVisible] = useState(false);
 	const val = value.get();
 	

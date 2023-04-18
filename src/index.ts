@@ -4,6 +4,7 @@ import EditorInsert from './insert';
 import EditorUpdate from './update';
 import EditorDelete from './delete';
 import EditorSqlAI from './sqlAI';
+import EditorMapping from './mapping';
 import { AnyType } from './_types';
 
 
@@ -12,6 +13,7 @@ const EditorMap: Record<string, unknown> = {
 	'DOMAIN.DBINSERT': EditorInsert,
 	'DOMAIN.DBUPDATE': EditorUpdate,
 	'DOMAIN.DBDELETE': EditorDelete,
+	'DOMAIN.MAPPING': EditorMapping,
 	'DOMAIN.AISQL': EditorSqlAI
 };
 

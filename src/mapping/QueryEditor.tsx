@@ -88,9 +88,7 @@ export default function QueryEditor({ domainModel, fieldModel, value, close }: A
 			</div>
 			<div className={css.main}>
 				<SelectFrom/>
-				{
-					ctx.nowValue.entity ? <Where /> : null
-				}
+				{ctx.nowValue.entity ? <Where /> : null}
 			</div>
 		</div>
 	);
