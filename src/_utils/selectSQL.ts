@@ -67,9 +67,9 @@ export const spliceSelectSQLByConditions = (fnParams: {
 	/** 根据字段类型返回拼接 sql 的具体指 */
 	const getValueByFieldType = (dbType: string, val: string) => {
 		switch (dbType) {
-		case "varchar": return `\"${val}\"`;
+		case "varchar": return `'${val}'`;
 		case "bigint": return val;
-		case "mediumtext": return `\"${val}\"`;
+		case "mediumtext": return `'${val}'`;
 		default: return val;
 		}
 	};
@@ -77,7 +77,7 @@ export const spliceSelectSQLByConditions = (fnParams: {
 	/** 根据字段类型以及操作符号返回拼接 sql 的具体值 */
 	const getValueByOperatorAndFieldType = (dbType: string, operator: string, val: string) => {
 		if (operator === "LIKE" || operator === "NOT LIKE") {
-			return `\"%${val}%\"`;
+			return `'%${val}%'`;
 		} else if (operator === "IN" || operator === "NOT IN") {
 			return `(${val.split(",").map(item => getValueByFieldType(dbType, item)).join(",")})`;
 		}
@@ -340,9 +340,9 @@ export const spliceSelectCountSQLByConditions = (fnParams: {
 	/** 根据字段类型返回拼接 sql 的具体指 */
 	const getValueByFieldType = (dbType: string, val: string) => {
 		switch (dbType) {
-		case "varchar": return `\"${val}\"`;
+		case "varchar": return `'${val}'`;
 		case "bigint": return val;
-		case "mediumtext": return `\"${val}\"`;
+		case "mediumtext": return `'${val}'`;
 		default: return val;
 		}
 	};
@@ -350,7 +350,7 @@ export const spliceSelectCountSQLByConditions = (fnParams: {
 	/** 根据字段类型以及操作符号返回拼接 sql 的具体值 */
 	const getValueByOperatorAndFieldType = (dbType: string, operator: string, val: string) => {
 		if (operator === "LIKE" || operator === "NOT LIKE") {
-			return `\"%${val}%\"`;
+			return `'%${val}%'`;
 		} else if (operator === "IN" || operator === "NOT IN") {
 			return `(${val.split(",").map(item => getValueByFieldType(dbType, item)).join(",")})`;
 		}
