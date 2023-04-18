@@ -1,0 +1,67 @@
+.editor {
+  background-color: #FFF;
+  border-radius: 3px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  flex: 1;
+  font-style: italic;
+  color: #AAA;
+  overflow: hidden;
+  height: auto;
+  padding: 10px 5px 10px 10px;
+
+  span {
+    display: inline-block;
+  }
+
+  span:first-child {
+    width: 40px;
+    flex-shrink: 0;
+    margin-right: 4px;
+  }
+
+  .tt {
+    cursor: pointer;
+    flex: 1;
+    overflow: hidden;
+    color: #333;
+    font-style: normal;
+    padding-left: 2px;
+    word-wrap: break-word;
+    white-space: pre-wrap;
+  }
+
+  .type {
+    color: #AAA;
+    font-style: italic;
+    margin-left: auto;
+    padding-top: 5px;
+    width: 18px;
+
+    svg {
+      max-width: 16px;
+    }
+  }
+
+  .icons {
+    width: 20px;
+    padding-top: 3px;
+    margin-left: 4px;
+
+    svg {
+      max-width: 12px;
+      max-height: 16px;
+
+      path {
+        fill: #999;
+      }
+    }
+  }
+
+  .disabled {
+    opacity: .3;
+    pointer-events: none;
+  }
+}

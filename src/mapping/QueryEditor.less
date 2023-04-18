@@ -1,0 +1,160 @@
+@import "../../../theme.less";
+
+.view {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+
+  .toolbar {
+    height: 42px;
+    background: #FAFAFA;
+    margin-bottom: -1px;
+    position: relative;
+    z-index: 12233;
+    text-align: right;
+    padding: 10px;
+    border-bottom: 1px solid #EEE;
+
+    button {
+      background: @color-primary;
+      color: #FFF;
+      font-weight: bold;
+      padding: 1px 8px;
+      //border: 1px solid #DDD;
+      border-radius: 3px;
+      height: 22px;
+    }
+  }
+
+  .main {
+    flex: 1;
+    overflow: auto;
+  }
+}
+
+.segTitle {
+  position: relative;
+  padding: 15px 10px 3px 15px;
+  font-style: italic;
+  color: #999;
+  border-top: 1px dashed #ddd;
+  //border-bottom: 1px dashed #eee;
+  //background: #FAFAFA;
+
+  //&:not(:first-of-type) {
+  //  border-top: 1px dashed #eee;
+  //}
+}
+
+.select {
+  display: flex;
+  flex-direction: row;
+  min-height: 200px;
+  max-height: 300px;
+  overflow: hidden;
+
+  .tables {
+    width: 250px;
+    border-right: 1px solid #EEE;
+    padding: 10px;
+    background: #F7F7F7;
+    overflow: auto;
+
+    .table {
+      padding: 3px 10px 3px 12px;
+      display: flex;
+      flex-direction: column;
+      /* align-items: center; */
+      border-radius: 3px;
+      position: relative;
+      margin: 2px 0;
+
+      .nm {
+        display: flex;
+        justify-content: space-between;
+
+        span:last-of-type {
+          color: #AAA;
+          font-style: italic;
+        }
+      }
+
+      .desc {
+        color: #AAA;
+        font-size: 10px;
+        font-style: italic;
+      }
+    }
+
+    .foreigner {
+      &:before {
+        position: absolute;
+        content: '*';
+        left: 2px;
+        font-size: 14px;
+        //font-style: italic;
+        color: #FF0000;
+      }
+    }
+
+    .selected {
+      outline: 2px solid @color-primary;
+    }
+  }
+
+
+  .fields {
+    flex: 1;
+    overflow: auto;
+
+    .field {
+      height: 30px;
+      padding: 0 10px;
+      display: flex;
+      align-items: center;
+
+      span {
+        margin-left: 5px;
+        color: #AAA;
+        font-style: italic;
+      }
+
+      input[type=checkbox] {
+        width: 16px;
+        height: 16px;
+        appearance: none;
+        margin-right: 5px;
+        //background-color: #DDD;
+        //border-radius: 3px;
+      }
+
+      input:not(:checked):after {
+        border-radius: 3px;
+        content: "✓";
+        font-size: 12px;
+        color: #EEE;
+        background-color: #EEE;
+        text-align: center;
+        padding: 0 2px;
+      }
+
+      input:checked:after {
+        border-radius: 3px;
+        content: "✓";
+        font-size: 12px;
+        font-weight: bold;
+        color: #fff;
+        background-color: @color-primary;
+        text-align: center;
+        padding: 0 2px;
+      }
+    }
+  }
+}
+
+
+.selectDom {
+  margin: 0 10px;
+  color: #333;
+  font-style: normal;
+}
