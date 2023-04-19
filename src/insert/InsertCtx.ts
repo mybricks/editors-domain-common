@@ -90,6 +90,10 @@ export default class InsertCtx {
 							|| (field.bizType === FieldBizType.DATETIME && field.defaultValueWhenCreate === DefaultValueWhenCreate.CURRENT_TIME)
 						) {
 							valueAry.push("${Date.now()}");
+						} else if (field.defaultValueWhenCreate !== undefined && field.defaultValueWhenCreate !== null) {
+							const q = getQuoteByFieldType(field.dbType);
+							
+							valueAry.push(`${q}${field.defaultValueWhenCreate}${q}`);
 						} else {
 							valueAry.push("null");
 						}
