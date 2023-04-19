@@ -38,6 +38,8 @@ const DefaultValue: FC = ({ editConfig: { value, options } }: AnyType) => {
 				style={{ width: '100%' }}
 				value={curValue === null ? '__empty__' : curValue}
 				dropdownClassName="default-value-select-popup"
+				// @ts-ignore
+				popupClassName="default-value-select-popup"
 				onChange={v => {
 					setCurValue(v);
 					value.set(v === '__empty__' ? null : v);
@@ -105,6 +107,8 @@ const DefaultDate: FC<{ onChange(value: AnyType): void; onError(error: string): 
 				<Select
 					style={{ width: '110px', flexShrink: 0 }}
 					size="small"
+					// @ts-ignore
+					popupClassName="default-value-select-popup"
 					dropdownClassName="default-value-select-popup"
 					value={type}
 					onChange={v => {
