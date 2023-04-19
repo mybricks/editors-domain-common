@@ -70,11 +70,7 @@ const DefaultValue: FC = ({ editConfig: { value, options } }: AnyType) => {
 		};
 		formItem = <Input size="small" value={curValue} onChange={e => setCurValue(e.target.value.trim())} onBlur={onBlur} />;
 	} else {
-		const onChange = e => {
-			setCurValue(e.target.value);
-			value.set(e.target.value);
-		};
-		formItem = <Input size="small" value={curValue} onChange={onChange} />;
+		formItem = <Input size="small" value={curValue} onChange={e => setCurValue(e.target.value)} onBlur={e => value.set(e.target.value)} />;
 	}
 		
 	return (
