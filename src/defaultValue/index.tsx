@@ -1,7 +1,7 @@
 import React, { FC, ReactNode, useCallback, useState } from 'react';
 import { Input, Select } from "antd";
 import { AnyType } from '../_types';
-import { DefaultValueWhenCreate, FieldBizType } from '../_constants/field';
+import { DefaultValueWhenCreate, FieldBizType, FieldDBType } from '../_constants/field';
 
 import styles from './index.less';
 
@@ -71,8 +71,25 @@ const DefaultValue: FC = ({ editConfig: { value, options } }: AnyType) => {
 			}
 		};
 		formItem = <Input size="small" value={curValue} onChange={e => setCurValue(e.target.value.trim())} onBlur={onBlur} />;
+	} else if (fieldModel.bizType === FieldBizType.STRING && fieldModel.dbType === FieldDBType.MEDIUMTEXT) {
+		formItem = (
+			<Input.TextArea
+				rows={4}
+				size="small"
+				value={curValue}
+				onChange={e => setCurValue(e.target.value)}
+				onBlur={e => value.set(e.target.value)}
+			/>
+		);
 	} else {
-		formItem = <Input size="small" value={curValue} onChange={e => setCurValue(e.target.value)} onBlur={e => value.set(e.target.value)} />;
+		formItem = (
+			<Input
+				size="small"
+				value={curValue}
+				onChange={e => setCurValue(e.target.value)}
+				onBlur={e => value.set(e.target.value)}
+			/>
+		);
 	}
 		
 	return (
@@ -85,8 +102,16 @@ const DefaultValue: FC = ({ editConfig: { value, options } }: AnyType) => {
 
 const DefaultDate: FC<{ onChange(value: AnyType): void; onError(error: string): void; value: string }> = props => {
 	const { value, onChange, onError } = props;
-	const [type, setType] = useState(value !== undefined ? (value === null ? "" : (value === DefaultValueWhenCreate.CURRENT_TIME ? value : 'custom')) : '');
-	const [curValue, setCurValue] = useState(value !== undefined && value !== null && value !== DefaultValueWhenCreate.CURRENT_TIME ? window.moment(value).format('yyyy-MM-DD HH:mm:ss') : '');
+	const [type, setType] = useState(
+		value !== undefined
+			? (value === null ? "" : (value === DefaultValueWhenCreate.CURRENT_TIME ? value : 'custom'))
+			: ''
+	);
+	const [curValue, setCurValue] = useState(
+		value !== undefined && value !== null && value !== DefaultValueWhenCreate.CURRENT_TIME
+			? window.moment(value).format('yyyy-MM-DD HH:mm:ss')
+			: ''
+	);
 	const onBlur = useCallback(e => {
 		const v = e.target.value?.trim();
 		
