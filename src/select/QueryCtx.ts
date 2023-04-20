@@ -3,7 +3,7 @@ import { FieldBizType, SQLLimitType, SQLOrder, SQLWhereJoiner } from '../_consta
 import { spliceSelectCountSQLByConditions, spliceSelectSQLByConditions } from '../_utils/selectSQL';
 import { safeEncodeURIComponent } from '../_utils/util';
 import { formatTime, spliceDataFormatString } from '../_utils/format';
-import { Entity } from '../_types/domain';
+import { Entity, SelectedField } from '../_types/domain';
 
 
 export type T_Field = {
@@ -61,6 +61,7 @@ export default class QueryCtx {
 
 	nowValue!: {
 		desc: string
+		fields: SelectedField[];
 		script?: string | Record<string, string>;
 		entities: T_Entity[],
 		conditions: T_Condition,
@@ -188,6 +189,7 @@ export default class QueryCtx {
 		});
 		entity.selected = true;
 		entity.fieldAry[0].selected = true;
+		this.nowValue.fields = [{ fieldId: entity.fieldAry[0].id, fieldName: entity.fieldAry[0].name, entityId: entity.id, fromPath: [] }];
 	}
 
 	setField(entity: T_Entity, fieldId: string) {
@@ -195,6 +197,20 @@ export default class QueryCtx {
 
 		if (field) {
 			field.selected = !field.selected;
+			
+			if (field.selected) {
+				const items = { fieldId: field.id, fieldName: field.name, entityId: entity.id, fromPath: [] };
+				this.nowValue.fields.push(items);
+				
+				if (field.mapping?.entity) {
+					field.mapping?.entity.fieldAry.forEach(f => {
+						this.nowValue.fields.push({ fieldId: f.id, fieldName: f.name, entityId: (field.mapping?.entity!.id as string), fromPath: [items] });
+					});
+				}
+			} else {
+				const mappingEntityId = (field.mapping?.entity!.id as string);
+				this.nowValue.fields = this.nowValue.fields.filter(f => f.fieldId !== field.id && mappingEntityId !== f.entityId);
+			}
 		}
 
 	}

@@ -1,4 +1,4 @@
-import { Entity, Field } from '../_types/domain';
+import { Entity, Field, SelectedField } from '../_types/domain';
 import { AnyType } from '../_types';
 import { DefaultValueWhenCreate, FieldBizType } from '../_constants/field';
 
@@ -25,6 +25,39 @@ export const formatEntitiesByOriginEntities = (entities: Entity[], originEntitie
 			return (originEntity as AnyType).toJSON();
 		}
 	});
+};
+
+export const formatFieldsByOriginEntities = (fields: SelectedField[], originEntities: AnyType[]) => {
+	const entityFieldMap: Record<string, Field> = {};
+	originEntities.forEach(entity => {
+		entity.fieldAry.forEach(field => {
+			entityFieldMap[entity.id + field.id] = field;
+			
+			if (entity.isSystem && !field.isPrivate) {
+				entityFieldMap[entity.id + field.name] = field;
+			}
+		});
+	});
+	const nextFields = fields.filter(field => !!entityFieldMap[field.entityId + field.fieldId] && !field.fromPath.length);
+	const entityMap: Record<string, boolean> = {};
+	fields.filter(field => !!entityFieldMap[field.entityId + field.fieldId] && field.fromPath.length).forEach(field => {
+		if (entityMap[field.entityId]) {
+			return;
+		}
+		const entityField = entityFieldMap[field.fromPath[0].entityId + field.fromPath[0].fieldId];
+		entityMap[field.entityId] = true;
+		
+		entityField?.mapping?.entity?.fieldAry.forEach(f => {
+			nextFields.push({
+				fieldName: f.name,
+				fieldId: f.id,
+				entityId: (entityField.mapping!.entity!.id as string),
+				fromPath: [{ fieldId: entityField.id, fieldName: entityField.name, entityId: field.entityId, fromPath: [] }],
+			});
+		});
+	});
+	
+	return nextFields;
 };
 
 /** 格式化无效的连接 */

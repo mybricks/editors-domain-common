@@ -8,7 +8,7 @@ import { AnyType } from '../_types';
 import { SQLLimitType, SQLWhereJoiner } from '../_constants/field';
 import { Entity, Field } from '../_types/domain';
 import OrderBy from '../_common/order-by';
-import { formatEntitiesByOriginEntities } from '../_utils/entity';
+import { formatEntitiesByOriginEntities, formatFieldsByOriginEntities } from '../_utils/entity';
 
 import css from './QueryEditor.less';
 
@@ -22,6 +22,7 @@ export default function QueryEditor({ domainModel, paramSchema, value, close, sh
 			val = JSON.parse(JSON.stringify(oriVal));//深度复制
 		} else {
 			val = {
+				fields: [],
 				whereJoiner: 'and',
 				conditions: {
 					fieldId: Date.now(),
@@ -40,6 +41,7 @@ export default function QueryEditor({ domainModel, paramSchema, value, close, sh
 		
 		/** 实体信息可能存在变更，每次使用最新的实体信息 */
 		val.entities = formatEntitiesByOriginEntities(val.entities, domainModel.entityAry);
+		val.fields = formatFieldsByOriginEntities(val.fields ?? [], domainModel.entityAry);
 
 		next({
 			domainModel,

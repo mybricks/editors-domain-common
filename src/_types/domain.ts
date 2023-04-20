@@ -64,3 +64,13 @@ export interface Condition {
 }
 
 export type Order = { fieldId: string; fieldName: string; order: SQLOrder; entityId: string };
+
+export interface SelectedField {
+	/** 字段 ID */
+	fieldId: string;
+	/** 字段名 */
+	fieldName: string;
+	/** 实体ID */
+	entityId: string;
+	fromPath: SelectedField[];
+}
