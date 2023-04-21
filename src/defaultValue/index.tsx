@@ -1,4 +1,4 @@
-import React, { FC, ReactNode, useCallback, useState } from 'react';
+import React, { FC, ReactNode, useCallback, useRef, useState } from 'react';
 import { Input, Select } from "antd";
 import { AnyType } from '../_types';
 import { DefaultValueWhenCreate, FieldBizType, FieldDBType } from '../_constants/field';
@@ -8,6 +8,7 @@ import styles from './index.less';
 const DefaultValue: FC = ({ editConfig: { value, options } }: AnyType) => {
 	const [curValue, setCurValue] = useState(value.get() || null);
 	const [error, setError] = useState('');
+	const containerRef = useRef<HTMLElement>(document.body);
 	const fieldModel = options.fieldModel;
 	let formItem: ReactNode;
 	
@@ -30,16 +31,21 @@ const DefaultValue: FC = ({ editConfig: { value, options } }: AnyType) => {
 			/>
 		);
 	} else if (fieldModel.bizType === FieldBizType.DATETIME) {
-		formItem = <DefaultDate value={curValue} onError={setError} onChange={v => value.set(v)} />;
+		formItem = (
+			<DefaultDate
+				containerRef={containerRef.current}
+				value={curValue}
+				onError={setError}
+				onChange={v => value.set(v)}
+			/>
+		);
 	} else if (fieldModel.bizType === FieldBizType.ENUM) {
 		formItem = (
 			<Select
 				size="small"
 				style={{ width: '100%' }}
 				value={curValue === null ? '__empty__' : curValue}
-				dropdownClassName="default-value-select-popup"
-				// @ts-ignore
-				popupClassName="default-value-select-popup"
+				getPopupContainer={() => containerRef.current}
 				onChange={v => {
 					setCurValue(v);
 					value.set(v === '__empty__' ? null : v);
@@ -93,15 +99,20 @@ const DefaultValue: FC = ({ editConfig: { value, options } }: AnyType) => {
 	}
 		
 	return (
-		<div className={styles.defaultValue}>
+		<div className={styles.defaultValue} ref={ref => ref && (containerRef.current = ref)}>
 			{formItem}
 			{error ? <div className={styles.error}>{error}</div> : null}
 		</div>
 	);
 };
 
-const DefaultDate: FC<{ onChange(value: AnyType): void; onError(error: string): void; value: string }> = props => {
-	const { value, onChange, onError } = props;
+const DefaultDate: FC<{
+	onChange(value: AnyType): void;
+	onError(error: string): void;
+	value: string;
+	containerRef: HTMLElement
+}> = props => {
+	const { value, onChange, onError, containerRef } = props;
 	const [type, setType] = useState(
 		value !== undefined
 			? (value === null ? "" : (value === DefaultValueWhenCreate.CURRENT_TIME ? value : 'custom'))
@@ -132,9 +143,7 @@ const DefaultDate: FC<{ onChange(value: AnyType): void; onError(error: string): 
 				<Select
 					style={{ width: '110px', flexShrink: 0 }}
 					size="small"
-					// @ts-ignore
-					popupClassName="default-value-select-popup"
-					dropdownClassName="default-value-select-popup"
+					getPopupContainer={() => containerRef}
 					value={type}
 					onChange={v => {
 						setType(v);
