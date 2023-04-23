@@ -13,6 +13,11 @@
   height: auto;
   padding: 10px;
 
+  &.error {
+    border: 1.5px dashed red;
+    background: #F2DBDB;
+  }
+
   span {
     display: inline-block;
   }
@@ -30,18 +35,10 @@
     padding-left: 2px;
     word-wrap: break-word;
     white-space: pre-wrap;
-    //line-height: 14px;
   }
+}
 
-  .type {
-    color: #AAA;
-    font-style: italic;
-    margin-left: auto;
-    padding-top: 5px;
-    width: 18px;
-
-    svg {
-      max-width: 16px;
-    }
-  }
+.errorMessage {
+  color: red;
+  margin-top: 4px;
 }

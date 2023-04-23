@@ -19,10 +19,11 @@ const ServiceSelect = ({ editConfig: { value, options } }: AnyType, { domainMode
 
 	return (
 		<>
-	    <div className={css.editor} onClick={openPop}>
+	    <div className={`${css.editor} ${options.errorMessage ? css.error : ''}`} onClick={openPop}>
 		    <span>已选择:</span>
 		    <span className={css.tt}>{val?.desc ? `${val.desc}` : '[空] 点击选择..'}</span>
 	    </div>
+			{options.errorMessage ? <div className={css.errorMessage}>{options.errorMessage}，请打开选择面板确认！</div> : null}
 	    {
 		    visible ? createPortal(
 			    <QueryEditor

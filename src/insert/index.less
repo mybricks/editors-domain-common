@@ -6,16 +6,18 @@
   display: flex;
   flex-direction: row;
   align-items: center;
-
   flex: 1;
-  //border: 1px solid #EEE;
   cursor: pointer;
   font-style: italic;
   color: #AAA;
   overflow: hidden;
   height: 30px;
   padding: 0 10px;
-  //justify-content: center;
+
+  &.error {
+    border: 1.5px dashed red;
+    background: #F2DBDB;
+  }
 
   span {
     display: inline-block;
@@ -33,16 +35,9 @@
     word-wrap: break-word;
     //line-height: 14px;
   }
+}
 
-  .type {
-    color: #AAA;
-    font-style: italic;
-    margin-left: auto;
-    padding-top: 5px;
-    width: 18px;
-
-    svg {
-      max-width: 16px;
-    }
-  }
+.errorMessage {
+  color: red;
+  margin-top: 4px;
 }

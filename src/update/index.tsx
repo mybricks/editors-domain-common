@@ -20,13 +20,12 @@ export default function ({ editConfig: { value, options } }: AnyType, { domainMo
 
 	return (
 		<>
-			<div className={`${css.editor} ${css[options?.type]}`}
+			<div className={`${css.editor} ${options.errorMessage ? css.error : ''}`}
 				onClick={openPop}>
 				<span>规则:</span>
 				<span className={css.tt}>{val?.desc ? `${val.desc}` : '[空] 点击编辑..'}</span>
-				{/*{selectedCon ? <span className={css.type}>{selectedCon.icon}</span> : null}*/}
-
 			</div>
+			{options.errorMessage ? <div className={css.errorMessage}>{options.errorMessage}，请打开编辑面板确认！</div> : null}
 			{
 				popTrue ? createPortal(
 					<InsertEditor domainModel={domainModel} paramSchema={options.paramSchema} value={value} close={close} />,

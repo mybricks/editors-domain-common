@@ -19,10 +19,11 @@ const Delete: FC = ({ editConfig: { value, options } }: AnyType, { domainModel, 
 	
 	return (
 		<>
-			<div className={css.editor} onClick={openPop}>
+			<div className={`${css.editor} ${options.errorMessage ? css.error : ''}`} onClick={openPop}>
 				<span>规则:</span>
 				<span className={css.tt}>{val?.desc ? `${val.desc}` : '[空] 点击编辑..'}</span>
 			</div>
+			{options.errorMessage ? <div className={css.errorMessage}>{options.errorMessage}，请打开编辑面板确认！</div> : null}
 			{
 				popTrue ? createPortal(
 					<DeleteEditor domainModel={domainModel} paramSchema={options.paramSchema} value={value} close={close} />,
