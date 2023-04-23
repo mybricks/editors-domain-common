@@ -47,6 +47,7 @@ export default class InsertCtx {
 	close;
 
 	blurAry = [];
+	batch?: boolean;
 
 
 	//------------------------------------------------------------
@@ -101,13 +102,27 @@ export default class InsertCtx {
 				}
 			});
 			
-			const script = `
-      (params, context)=>{
-        const { genUniqueId } = context;
-        ${generateValidateScript(entities[0] as Entity, conAry)}
-        return \`${sql}(${fieldAry.join(",")}) VALUES (${valueAry.join(",")})\`;
-      }
-      `;
+			let script: string;
+			if (this.batch) {
+				script = `
+		      (values, context)=>{
+		        const { genUniqueId } = context;
+		        for (let i = 0; i < values.length; i++) {
+		          const params = values[i];
+		          ${generateValidateScript(entities[0] as Entity, conAry)}
+		        }
+		        return \`${sql}(${fieldAry.join(",")}) VALUES \${values.map(params => \`(${valueAry.join(",")})\`).join(', ')}\`;
+		      }
+		      `;
+			} else {
+				script = `
+		      (params, context)=>{
+		        const { genUniqueId } = context;
+		        ${generateValidateScript(entities[0] as Entity, conAry)}
+		        return \`${sql}(${fieldAry.join(",")}) VALUES (${valueAry.join(",")})\`;
+		      }
+		      `;
+			}
 			
 			this.nowValue.script = safeEncodeURIComponent(script);
 		} else {

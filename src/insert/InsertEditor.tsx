@@ -13,7 +13,7 @@ import styles from './InsertEditor.less';
 
 let ctx: InsertCtx;
 
-const InsertEditor = ({ domainModel, paramSchema, value, close }: AnyType) => {
+const InsertEditor = ({ domainModel, paramSchema, value, close, batch }: AnyType) => {
 	ctx = useObservable(InsertCtx, next => {
 		const oriVal = value.get();
 		let val;
@@ -37,6 +37,7 @@ const InsertEditor = ({ domainModel, paramSchema, value, close }: AnyType) => {
 		next({
 			domainModel,
 			paramSchema,
+			batch,
 			nowValue: val,
 			value,
 			close
@@ -67,6 +68,9 @@ const InsertEditor = ({ domainModel, paramSchema, value, close }: AnyType) => {
 			return rtn;
 		}
 	});
+	const curParmaSchema = useComputed(() => {
+		return batch ? paramSchema.items || { type: 'object', properties: {} } : paramSchema;
+	});
 
 	return (
 		<PopView close={close} save={ctx.save} clickView={evt(ctx.blurAll).stop}>
@@ -87,7 +91,7 @@ const InsertEditor = ({ domainModel, paramSchema, value, close }: AnyType) => {
 			</div>
 			<FromTo
 				conAry={nowValue.conAry}
-			  from={{ title: '参数', schema: paramSchema }}
+			  from={{ title: '参数', schema: curParmaSchema }}
 				to={{ title: nowValue.entities[0]?.name, schema: fieldSchema }}
 				addBlurFn={ctx.addBlur}
 			/>

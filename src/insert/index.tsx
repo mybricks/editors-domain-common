@@ -28,7 +28,7 @@ export default function ({ editConfig: { value, options } }: AnyType, { domainMo
 			{options.errorMessage ? <div className={css.errorMessage}>{options.errorMessage}，请打开编辑面板确认！</div> : null}
 			{
 				visible ? createPortal(
-					<InsertEditor domainModel={domainModel} paramSchema={options.paramSchema} value={value} close={close}/>,
+					<InsertEditor batch={options.batch} domainModel={domainModel} paramSchema={options.paramSchema} value={value} close={close} />,
 	        canvasEle
 				) : null
 			}
