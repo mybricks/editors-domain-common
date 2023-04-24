@@ -10,6 +10,7 @@ export interface Entity {
 	fieldAry: Field[];
 	/** 是否被选中 */
 	selected?: boolean;
+	isSystem?: boolean;
 }
 
 export interface Field {
@@ -56,6 +57,7 @@ export interface Condition {
 	fieldName: string;
 	/** 操作符 */
 	operator?: string;
+	fromPath: SelectedField[];
 	/** 条件语句值 */
 	value: string;
 	checkExist: boolean;
@@ -63,7 +65,7 @@ export interface Condition {
 	whereJoiner: SQLWhereJoiner;
 }
 
-export type Order = { fieldId: string; fieldName: string; order: SQLOrder; entityId: string };
+export type Order = { fieldId: string; fieldName: string; order: SQLOrder; entityId: string; fromPath: SelectedField[]; };
 
 export interface SelectedField {
 	/** 字段 ID */

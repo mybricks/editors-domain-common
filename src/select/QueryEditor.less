@@ -27,11 +27,12 @@
 .select {
   display: flex;
   flex-direction: row;
-  height: 200px;
-  overflow: hidden;
+  height: 240px;
+  overflow-x: auto;
 
   .tables {
     width: 180px;
+    flex-shrink: 0;
     border-right: 1px solid #EEE;
     padding: 10px;
     background: #F7F7F7;
@@ -69,24 +70,15 @@
   }
 
   .fields {
-    flex: 1;
+    width: 200px;
+    flex-shrink: 0;
     overflow: auto;
     padding: 5px 0 10px 5px;
 
     &.relationFields {
       border-left: 1px dashed #ddd;
       padding-right: 5px;
-
-      .entity {
-        width: 100%;
-      }
-
-      .entityName {
-        color: #777;
-        font-style: italic;
-        margin-bottom: 5px;
-        padding: 0 10px;
-      }
+      width: 260px;
     }
 
     .field {
@@ -149,6 +141,25 @@
         padding: 0 2px;
       }
     }
+  }
+
+  .mappingFields {
+    .mappingFieldHeader {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: #777;
+      font-style: italic;
+    }
+
+    .mappingFieldEntity {
+      margin-left: 4px;
+    }
+  }
+
+  .mappingFields + .mappingFields {
+    border-top: 1px dashed #ddd;
+    padding-top: 4px;
   }
 }
 

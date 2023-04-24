@@ -1,4 +1,4 @@
-import { Entity, Field, SelectedField } from '../_types/domain';
+import { Condition, Entity, Field, Order, SelectedField } from '../_types/domain';
 import { AnyType } from '../_types';
 import { DefaultValueWhenCreate, FieldBizType } from '../_constants/field';
 
@@ -27,9 +27,10 @@ export const formatEntitiesByOriginEntities = (entities: Entity[], originEntitie
 	});
 };
 
-export const formatFieldsByOriginEntities = (fields: SelectedField[], originEntities: AnyType[]) => {
+export const getEntityFieldMap = (entities: Entity[]) => {
 	const entityFieldMap: Record<string, Field> = {};
-	originEntities.forEach(entity => {
+	
+	entities.forEach(entity => {
 		entity.fieldAry.forEach(field => {
 			entityFieldMap[entity.id + field.id] = field;
 			
@@ -38,26 +39,112 @@ export const formatFieldsByOriginEntities = (fields: SelectedField[], originEnti
 			}
 		});
 	});
-	const nextFields = fields.filter(field => !!entityFieldMap[field.entityId + field.fieldId] && !field.fromPath.length);
-	const entityMap: Record<string, boolean> = {};
-	fields.filter(field => !!entityFieldMap[field.entityId + field.fieldId] && field.fromPath.length).forEach(field => {
-		if (entityMap[field.entityId]) {
-			return;
-		}
-		const entityField = entityFieldMap[field.fromPath[0].entityId + field.fromPath[0].fieldId];
-		entityMap[field.entityId] = true;
-		
-		entityField?.mapping?.entity?.fieldAry.forEach(f => {
-			nextFields.push({
-				fieldName: f.name,
-				fieldId: f.id,
-				entityId: (entityField.mapping!.entity!.id as string),
-				fromPath: [{ fieldId: entityField.id, fieldName: entityField.name, entityId: field.entityId, fromPath: [] }],
-			});
-		});
-	});
 	
-	return nextFields;
+	return entityFieldMap;
+};
+
+/** 打开面板时格式化选择字段，存在不匹配变更即删除 */
+export const formatFieldsByOriginEntities = (fields: SelectedField[], originEntities: AnyType[]) => {
+	const entityFieldMap = getEntityFieldMap(originEntities);
+	
+	return fields.filter(field => {
+		let hasEffect = !!entityFieldMap[field.entityId + field.fieldId];
+		
+		if (field.fromPath.length) {
+			for (let idx = 0; idx < field.fromPath.length; idx++) {
+				if (!hasEffect) {
+					break;
+				}
+				const path = field.fromPath[idx];
+				const nextPath = field.fromPath[idx + 1] || field;
+				const entityField = entityFieldMap[path.entityId + path.fieldId];
+				
+				if (!entityField || !entityField.mapping?.entity?.fieldAry.length || entityField.mapping?.entity?.id !== nextPath.entityId) {
+					hasEffect = false;
+				} else {
+					hasEffect = !!entityField.mapping?.entity?.fieldAry.find(f => f.id === nextPath.fieldId);
+				}
+			}
+		}
+		
+		return hasEffect;
+	});
+};
+
+export const formatConditionByOriginEntities = (fields: SelectedField[], condition: Condition, originEntities: AnyType[]) => {
+	const entityFieldMap = getEntityFieldMap(originEntities);
+	
+	const formatCondition = (condition: Condition[]) => {
+		condition.forEach(con => {
+			if (con.conditions?.length) {
+				formatCondition(con.conditions);
+			} else {
+				let hasEffect = !!entityFieldMap[con.entityId + con.fieldId];
+				
+				if (con.fromPath?.length) {
+					const fromPath = JSON.parse(JSON.stringify(con.fromPath));
+					const parentPath = fromPath.pop();
+					parentPath.fromPath = fromPath;
+					
+					const parentField = fields.find(f => {
+						return f.fieldId === parentPath.fieldId
+							&& f.entityId === parentPath.entityId
+							&& f.fromPath.map(p => p.fieldId).join('') === parentPath.fromPath.map(p => p.fieldId).join('');
+					});
+					const entityField = entityFieldMap[parentPath.entityId + parentPath.fieldId];
+					
+					if (!parentField || !entityField || !entityField.mapping?.entity?.fieldAry.find(f => f.id === con.fieldId)) {
+						hasEffect = false;
+					}
+				}
+				
+				if (!hasEffect) {
+					con.fieldId = '';
+					con.fieldName = '';
+					con.entityId = '';
+					con.fromPath = [];
+				}
+			}
+		});
+	};
+	formatCondition([condition]);
+	
+	return condition;
+};
+
+/** 打开面板时格式化排序项，存在不匹配变更即置为失效 */
+export const formatOrderByOriginEntities = (fields: SelectedField[], orders: Order[], originEntities: AnyType[]) => {
+	const entityFieldMap = getEntityFieldMap(originEntities);
+	
+	return orders.map(order => {
+		let hasEffect = !!entityFieldMap[order.entityId + order.fieldId];
+		
+		if (order.fromPath?.length) {
+			const fromPath = JSON.parse(JSON.stringify(order.fromPath));
+			const parentPath = fromPath.pop();
+			parentPath.fromPath = fromPath;
+			
+			const parentField = fields.find(f => {
+				return f.fieldId === parentPath.fieldId
+					&& f.entityId === parentPath.entityId
+					&& f.fromPath.map(p => p.fieldId).join('') === parentPath.fromPath.map(p => p.fieldId).join('');
+			});
+			const entityField = entityFieldMap[parentPath.entityId + parentPath.fieldId];
+			
+			if (!parentField || !entityField || !entityField.mapping?.entity?.fieldAry.find(f => f.id === order.fieldId)) {
+				hasEffect = false;
+			}
+		}
+		
+		if (!hasEffect) {
+			order.fieldId = '';
+			order.fieldName = '';
+			order.entityId = '';
+			order.fromPath = [];
+		}
+		
+		return order;
+	});
 };
 
 /** 格式化无效的连接 */

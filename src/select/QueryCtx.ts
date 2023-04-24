@@ -185,20 +185,20 @@ export default class QueryCtx {
 	setEntity(entity: AnyType) {
 		this.nowValue.entities.forEach(en => {
 			en.selected = false;
-			en.fieldAry.forEach((f) => f.selected = false);
 		});
 		entity.selected = true;
-		entity.fieldAry[0].selected = true;
 		this.nowValue.fields = [{ fieldId: entity.fieldAry[0].id, fieldName: entity.fieldAry[0].name, entityId: entity.id, fromPath: [] }];
 	}
 
 	setField(entity: T_Entity, fieldId: string) {
 		const field = entity.fieldAry.find(f => f.id === fieldId);
-
+		
 		if (field) {
-			field.selected = !field.selected;
+			const selected = this.nowValue.fields.find(
+				f => f.fieldId === fieldId && f.entityId === entity.id && !f.fromPath.length
+			);
 			
-			if (field.selected) {
+			if (!selected) {
 				const items = { fieldId: field.id, fieldName: field.name, entityId: entity.id, fromPath: [] };
 				this.nowValue.fields.push(items);
 				
@@ -208,10 +208,28 @@ export default class QueryCtx {
 					});
 				}
 			} else {
-				const mappingEntityId = (field.mapping?.entity!.id as string);
-				this.nowValue.fields = this.nowValue.fields.filter(f => f.fieldId !== field.id && mappingEntityId !== f.entityId);
+				this.nowValue.fields = this.nowValue.fields.filter(f => (f.fieldId !== field.id && f.entityId === entity.id) && !f.fromPath.some(path => path.fieldId === field.id));
 			}
 		}
-
+	}
+	
+	setMappingField(field: SelectedField) {
+		const selected = this.nowValue.fields.find(
+			f => f.fieldId === field.fieldId
+				&& f.entityId === field.entityId
+				&& f.fromPath.map(ff => ff.fieldId).join('') === field.fromPath.map(ff => ff.fieldId).join('')
+		);
+		
+		if (selected) {
+			this.nowValue.fields = this.nowValue.fields
+				.filter(
+					f => f.fieldId !== field.fieldId
+					|| f.entityId !== field.entityId
+					|| f.fromPath.map(ff => ff.fieldId).join('') !== field.fromPath.map(ff => ff.fieldId).join('')
+				)
+				.filter(f => !f.fromPath.some(ff => ff.fieldId === field.fieldId));
+		} else {
+			this.nowValue.fields.push(field);
+		}
 	}
 }

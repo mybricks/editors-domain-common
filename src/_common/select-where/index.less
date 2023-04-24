@@ -1,0 +1,203 @@
+@import "../../theme";
+
+.where {
+  position: relative;
+  padding-bottom: 20px;
+
+  .addWhere {
+    position: relative;
+    color: rgba(0, 0, 0, .7);
+    cursor: pointer;
+    font-style: normal;
+    margin-left: 5px;
+    font-size: 18px;
+    vertical-align: baseline;
+
+    &:hover {
+      color: #000000;
+    }
+  }
+
+  .segTitle {
+    position: relative;
+    padding: 15px 10px 3px 15px;
+    font-style: italic;
+    color: #999;
+    border-top: 1px dashed #ddd;
+
+    &.noTopBorder {
+      border-top: none;
+      padding: 0;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      height: 28px;
+      line-height: 28px;
+    }
+
+    .selectDom {
+      margin: 0 10px;
+      color: #8d7a34;
+      font-style: normal;
+    }
+  }
+
+  .popMenu {
+    width: 250px;
+    background-color: #FFF;
+    min-height: 50px;
+    position: absolute;
+    z-index: 10000;
+    left: 220px;
+    border: 1px solid #DDD;
+    box-shadow: -3px 3px 7px #ddd;
+    padding: 5px 0;
+    max-height: 320px;
+    overflow: auto;
+
+    .item {
+      height: 28px;
+      padding: 0 15px 0 28px;
+      display: flex;
+      align-items: center;
+      color: #333;
+      font-style: normal;
+      position: relative;
+
+      &:hover {
+        background-color: #F7F7F7;
+      }
+    }
+
+    .used {
+      //background-color: #F7F7F7;
+
+      &:before {
+        content: "✓";
+        position: absolute;
+        left: 10px;
+      }
+    }
+  }
+
+  .conditions {
+    padding: 0 12px;
+
+    .conditionGroupContainer {
+      display: flex;
+      align-items: center;
+      background: rgba(247, 247, 247, 0.5);
+
+      & + .conditionGroupContainer {
+        margin-top: 15px;
+      }
+    }
+
+    .conditionGroup {
+      flex: 1;
+      border: 1px solid #DDD;
+      border-radius: 8px;
+      padding: 10px 40px 10px 10px;
+      position: relative;
+
+      &:after {
+        content: attr(data-joiner);
+        color: #AAA;
+        font-style: italic;
+        position: absolute;
+        top: 50%;
+        right: 10px;
+        transform: translateY(-50%);
+      }
+    }
+
+    .condition {
+      display: flex;
+      align-items: center;
+      position: relative;
+      padding: 10px 10px 10px 0;
+      margin: 5px 0;
+      line-height: 20px;
+
+      .checkbox {
+        cursor: pointer;
+        width: 12px;
+        height: 12px;
+        border-radius: 3px;
+        background-color: #DDD;
+        appearance: none;
+        position: relative;
+
+        & + label {
+          color: #AAA;
+          margin-left: 4px;
+        }
+      }
+
+      .checkbox:checked:after {
+        border-radius: 3px;
+        content: "✓";
+        font-size: 12px;
+        font-weight: bold;
+        color: #fff;
+        width: 12px;
+        height: 12px;
+        background-color: #fa6400;
+        text-align: center;
+        position: absolute;
+        left: 0;
+        top: 0;
+        line-height: 12px;
+      }
+
+      .fieldSelect {
+        width: 90px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .name {
+        width: 100px;
+        text-align: right;
+      }
+
+      .operatorSelect {
+        width: 50px;
+        margin: 0;
+        text-align: center;
+      }
+
+      select {
+        margin: 0 10px;
+        color: #8d7a34;
+      }
+
+      .valueInput {
+        border-radius: 3px;
+        width: 120px;
+        border: 1px solid #DDD;
+        margin-left: 10px;
+        padding: 1px 5px;
+      }
+    }
+
+    .icons {
+      margin-left: 10px;
+      height: 16px;
+      font-size: 12px;
+
+      svg {
+        max-width: 16px;
+      }
+    }
+
+    .empty {
+      padding: 10px;
+      display: flex;
+      justify-content: center;
+      color: #AAA;
+      font-style: italic;
+    }
+  }
+}

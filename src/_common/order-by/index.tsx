@@ -3,12 +3,13 @@ import React, { FC, ReactNode } from 'react';
 import { evt, useComputed, useObservable } from '@mybricks/rxui';
 import { AnyType } from '../../_types';
 import { FieldBizType, SQLOrder } from '../../_constants/field';
-import { Entity, Field } from '../../_types/domain';
+import { Field, SelectedField } from '../../_types/domain';
 import { Remove } from '../../_constants/icons';
+import { getEntityFieldMap } from '../../_utils/entity';
 
 import styles from './index.less';
 
-type OrderType = { fieldId: string; fieldName: string; order: SQLOrder; entityId: string };
+type OrderType = { fieldId: string; fieldName: string; order: SQLOrder; entityId: string; fromPath: SelectedField[] };
 class OrderByContext {
 	nowValue: AnyType;
 	domainModal: AnyType;
@@ -71,53 +72,81 @@ const OrderItem: FC<OrderItemProps> = props => {
 	});
 	
 	const orderFieldIds = useComputed(() => {
-		return orderContext.nowValue.orders.map((o: OrderType) => o.fieldId);
+		return orderContext.nowValue.orders.map((o: OrderType) => [...(o.fromPath?.map(path => path.fieldId) || []), o.fieldId].join('.')) || [];
+	});
+	
+	const entityFieldMap = useComputed(() => getEntityFieldMap(orderContext.nowValue.entities));
+	
+	const selectedMappingFields = useComputed(() => {
+		const res: AnyType[] = [];
+		let depIndex = 0;
+		let selectedField = orderContext.nowValue.fields.filter(f => f.fromPath.length === depIndex);
+		
+		while (selectedField.length) {
+			const mappingFields = selectedField.filter(f => entityFieldMap[f.entityId + f.fieldId]?.mapping?.entity?.fieldAry.length);
+			
+			if (mappingFields.length) {
+				const curMappings = mappingFields.map(f => ({ ...entityFieldMap[f.entityId + f.fieldId], entityId: f.entityId, fromPath: f.fromPath }));
+				
+				if (!res[depIndex]) {
+					res[depIndex] = [...curMappings];
+				} else {
+					res[depIndex].push(...curMappings);
+				}
+			} else {
+				break;
+			}
+			
+			depIndex++;
+			selectedField = orderContext.nowValue.fields.filter(f => f.fromPath.length === depIndex);
+		}
+		
+		return res;
 	});
 	
 	/** 字段选择时下拉列表 */
-	const fieldSelectOptions = useComputed(() => {
-		const options: ReactNode[] = [];
-		if (currentEntity) {
-			options.push(
-				...currentEntity.fieldAry
+	const fieldSelectOptions: ReactNode[] = [];
+	if (currentEntity) {
+		fieldSelectOptions.push(
+			<optgroup label={`来自实体：${currentEntity.name}`}>
+				{currentEntity.fieldAry
 					.filter((field: Field) => !field.isPrivate && field.bizType !== FieldBizType.MAPPING)
 					.map((field) => {
-						return (
-							<option key={field.id} value={`${currentEntity.id}&&${field.id}`} disabled={orderFieldIds.includes(field.id)}>
-								{field.name}
-							</option>
-						);
-					}) || []
-			);
-			
-			/** 映射字段 */
-			currentEntity.fieldAry
-				.filter((field: Field) => field.selected && field.mapping?.entity)
-				.forEach((mappingField: Field) => {
-					const entity = mappingField.mapping?.entity;
-					const originEntity = orderContext.nowValue?.entities.find((origin: Entity) => origin.id === entity?.id);
+						const value = field.id;
+						const dataValue = JSON.stringify({ fieldId: field.id, fieldName: field.name, entityId: currentEntity.id, fromPath: [] });
 					
-					if (originEntity && entity?.fieldAry.length) {
-						options.push(
-							...entity?.fieldAry.filter(field => !field.isPrimaryKey).map(field => {
-								return (
-									<option
-										key={`${entity?.id}&&${field.id}`}
-										value={`${entity?.id}&&${field.id}`}
-										disabled={orderFieldIds.includes(field.id ?? '')}
-									>
-										{mappingField.name}.{field.name}
-									</option>
-								);
-							}) || []
-						);
-					}
-				});
-		}
+						return <option key={value} disabled={orderFieldIds.includes(value)} value={value} data-value={dataValue}>{field.name}</option>;
+					})}
+			</optgroup>
+		);
 		
-		return options;
-	});
-	
+		selectedMappingFields.forEach(mapping => {
+			mapping.forEach(mappingField => {
+				if (mappingField.mapping.entity?.fieldAry.filter(field => !field.isPrimaryKey).length) {
+					fieldSelectOptions.push(
+						<optgroup label={`来自实体：${mappingField.mapping.entity?.name}`}>
+							{mappingField.mapping.entity?.fieldAry.filter(field => !field.isPrimaryKey).map(field => {
+								const pathName = [...mappingField.fromPath.map(path => entityFieldMap[path.entityId + path.fieldId]?.name || ''), mappingField.name].join('.');
+								const dataValue = JSON.stringify({
+									fieldId: field.id,
+									fieldName: field.name,
+									entityId: currentEntity.id,
+									fromPath: [
+										...mappingField.fromPath,
+										{  fieldId: mappingField.id, fieldName: mappingField.name, entityId: mappingField.entityId, fromPath: [] }
+									]
+								});
+								const value = [...mappingField.fromPath.map(path => path.fieldId), mappingField.id, field.id].join('.');
+								
+								return <option key={value} value={value} data-value={dataValue}>{pathName}.{field.name}</option>;
+							})}
+						</optgroup>
+					);
+				}
+			});
+		});
+	}
+	const selectValue = [...(order.fromPath?.map(path => path.fieldId) || []), order.fieldId].join('.');
 	
 	return (
 		<div className={styles.orderItem}>
@@ -125,20 +154,25 @@ const OrderItem: FC<OrderItemProps> = props => {
 			按
 			<select
 				className={styles.fieldSelect}
-				value={order.entityId ? `${order.entityId}&&${order.fieldId}` : ''}
+				value={order.entityId ? selectValue : ''}
 				/** 更新条件语句 */
 				onChange={(e) => {
-					const [entityId, fieldId] = e.target.value.split('&&');
-					const originEntity = orderContext.nowValue.entities.find((entity: Entity) => entity.id === entityId);
-					
-					if (originEntity) {
-						const originField = originEntity.fieldAry.find((field: Field) => field.id === fieldId);
+					if (e.target.value) {
+						const option = Array.from(e.target).find((o: AnyType) => o.value === e.target.value);
 						
-						if (originField) {
-							order.entityId = originEntity.id;
-							order.fieldId = originField.id;
-							order.fieldName = `${originEntity.name}.${originField.name}`;
+						if (option) {
+							const newCondition = JSON.parse(option.getAttribute('data-value') || '{}');
+							
+							order.fieldId = newCondition.fieldId;
+							order.fieldName = newCondition.fieldName;
+							order.entityId = newCondition.entityId;
+							order.fromPath = newCondition.fromPath;
 						}
+					} else {
+						order.fieldId = '';
+						order.fieldName = '';
+						order.entityId = '';
+						order.fromPath = [];
 					}
 				}}>
 				<option key="" value="">请选择字段</option>
