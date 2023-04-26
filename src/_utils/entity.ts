@@ -103,6 +103,8 @@ export const formatConditionByOriginEntities = (fields: SelectedField[], conditi
 					con.fieldName = '';
 					con.entityId = '';
 					con.fromPath = [];
+				} else if (!con.fromPath) {
+					con.fromPath = [];
 				}
 			}
 		});
@@ -140,6 +142,8 @@ export const formatOrderByOriginEntities = (fields: SelectedField[], orders: Ord
 			order.fieldId = '';
 			order.fieldName = '';
 			order.entityId = '';
+			order.fromPath = [];
+		} else if (!order.fromPath) {
 			order.fromPath = [];
 		}
 		

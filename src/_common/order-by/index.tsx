@@ -130,7 +130,7 @@ const OrderItem: FC<OrderItemProps> = props => {
 								const dataValue = JSON.stringify({
 									fieldId: field.id,
 									fieldName: field.name,
-									entityId: currentEntity.id,
+									entityId: mappingField.mapping.entity?.id,
 									fromPath: [
 										...mappingField.fromPath,
 										{  fieldId: mappingField.id, fieldName: mappingField.name, entityId: mappingField.entityId, fromPath: [] }

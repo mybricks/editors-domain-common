@@ -45,6 +45,7 @@ export type T_Condition = {
 
 	conditions?: T_Condition[];
 	whereJoiner?: SQLWhereJoiner;
+	fromPath: SelectedField[];
 }
 
 export default class QueryCtx {
@@ -67,7 +68,7 @@ export default class QueryCtx {
 		conditions: T_Condition,
 		limit: { type: SQLLimitType; value: number | string };
 		pageIndex?: string;
-		orders: Array<{ fieldId: string; fieldName: string; order: SQLOrder; entityId: string }>;
+		orders: Array<{ fieldId: string; fieldName: string; order: SQLOrder; entityId: string; fromPath: SelectedField[] }>;
 	};
 
 	close!: () => void;
@@ -101,26 +102,23 @@ export default class QueryCtx {
 	}
 
 	save() {
-		const { entities, conditions, orders, limit, pageIndex } = this.nowValue;
+		const { entities, conditions, orders, limit, pageIndex, fields } = this.nowValue;
 		let desc = '';
 		const currentEntity = entities.find(entity => entity.fieldAry.length && entity.selected);
 
-		if (currentEntity && currentEntity.fieldAry.length > 0) {
-			desc = `${currentEntity.name} 的 ${currentEntity.fieldAry.filter(f => f.selected).map(field => field.name).join(', ')}`;
-			/** 统计所有允许使用的 field id */
-			const allowUseFields: string[] = [];
-			currentEntity.fieldAry.forEach(field => {
-				if (field.mapping?.entity && field.selected) {
-					if (field.bizType !== FieldBizType.MAPPING) {
-						allowUseFields.push(field.id);
-					}
-					field.mapping?.entity?.fieldAry?.filter(field => !field.isPrimaryKey).forEach(f => allowUseFields.push(f.id));
-				} else {
-					allowUseFields.push(field.id);
-				}
-			});
-			this.filterConditionByEffectFieldIds([conditions], allowUseFields);
+		if (currentEntity) {
+			const currentFieldIds = fields.filter(f => f.entityId === currentEntity.id && !f.fromPath.length).map(f => f.fieldId);
+			desc = `${currentEntity.name} 的 ${currentEntity.fieldAry.filter(f => currentFieldIds.includes(f.id)).map(f => f.name).join(', ')}`;
 			let countScript = '';
+			console.log(spliceSelectSQLByConditions({
+				params: {},
+				fields: fields,
+				conditions: conditions,
+				entities: entities,
+				limit: limit,
+				orders: orders,
+				pageIndex: pageIndex,
+			}));
 
 			const selectScript = `
 			async (params, executeSql)=>{
@@ -131,6 +129,7 @@ export default class QueryCtx {
 				
 				const sql = spliceSelectSQLByConditions({
 					params: params || {},
+					fields: ${JSON.stringify(fields)} || [],
 					conditions: ${JSON.stringify(conditions)} || [],
 					entities: ${JSON.stringify(entities)},
 					limit: ${JSON.stringify(limit)},
@@ -203,12 +202,16 @@ export default class QueryCtx {
 				this.nowValue.fields.push(items);
 				
 				if (field.mapping?.entity) {
-					field.mapping?.entity.fieldAry.forEach(f => {
-						this.nowValue.fields.push({ fieldId: f.id, fieldName: f.name, entityId: (field.mapping?.entity!.id as string), fromPath: [items] });
-					});
+					this.nowValue.fields.push(
+						...(
+							field.mapping?.entity.fieldAry.map(f => ({ fieldId: f.id, fieldName: f.name, entityId: (field.mapping?.entity!.id as string), fromPath: [items] }))
+							|| []
+						)
+					);
+					
 				}
 			} else {
-				this.nowValue.fields = this.nowValue.fields.filter(f => (f.fieldId !== field.id && f.entityId === entity.id) && !f.fromPath.some(path => path.fieldId === field.id));
+				this.nowValue.fields = this.nowValue.fields.filter(f => !(f.fieldId === field.id && !f.fromPath.length || (f.fromPath.length === 1 && f.fromPath[0].fieldId === field.id)));
 			}
 		}
 	}
