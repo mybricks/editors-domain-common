@@ -31,6 +31,7 @@ export default function QueryEditor({ domainModel, paramSchema, value, close, sh
 				fields: [],
 				whereJoiner: 'and',
 				conditions: {
+					entityId: Date.now(),
 					fieldId: Date.now(),
 					fieldName: '条件组',
 					whereJoiner: SQLWhereJoiner.AND,

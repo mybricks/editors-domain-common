@@ -1,4 +1,4 @@
-import React, {FC, useCallback, useState} from 'react';
+import React, { FC, useCallback, useState } from 'react';
 import QueryCtx from "./QueryCtx";
 import { AnyType } from "../_types";
 import { Entity, Field } from "../_types/domain";
@@ -9,7 +9,7 @@ interface SelectFromProps {
 	field: Field;
 	ctx: QueryCtx;
 	entity: Entity;
-	fromPath: Field[];
+	fromPath: Array<Field & { entityId: string; }>;
 	initialOpen: boolean;
 }
 
@@ -29,7 +29,7 @@ const SelectFromCollapse: FC<SelectFromProps> = props => {
 				fieldId: field.id,
 				fieldName: field.name,
 				entityId: entity.id,
-				fromPath: fromPath.map(f => ({ fieldId: f.id, fieldName: f.name, entityId: f.mapping?.entity?.id as string, fromPath: [] }))
+				fromPath: fromPath.map(f => ({ fieldId: f.id, fieldName: f.name, entityId: f.entityId, fromPath: [] }))
 			});
 		} else {
 			ctx.setField(entity as AnyType, field.id);
@@ -67,7 +67,7 @@ const SelectFromCollapse: FC<SelectFromProps> = props => {
 							<SelectFromCollapse
 								key={f.id}
 								initialOpen={false}
-								fromPath={[...fromPath, field]}
+								fromPath={[...fromPath, { ...field, entityId: entity.id }]}
 								field={f}
 								entity={field.mapping!.entity!}
 								ctx={ctx}

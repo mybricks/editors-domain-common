@@ -91,68 +91,64 @@ export const spliceSelectSQLByConditions = (fnParams: {
 		return getValueByFieldType(dbType, val);
 	};
 	
-	/** 根据条件拼接 where sql */
-	const spliceWhereSQLFragmentByConditions = (fnParams: {
-		conditions: Condition[];
-		entities: Entity[];
-		/** entityMap 是全量实体表 map */
-		entityMap: Record<string, Entity>;
-		curEntity: Entity;
-		params: Record<string, unknown>;
-		whereJoiner?: AnyType;
-	}, templateMode?) => {
-		const { conditions, entities, params, whereJoiner, entityMap, curEntity } = fnParams;
-		const curConditions = conditions
-			.filter(condition => condition.fieldId)
-		/** 筛选条件对应值不存在的情况 */
-			.filter(condition => {
-				if (condition.conditions) {
-					return true;
-				} else {
-				/** 变量 */
-					if (condition.value?.startsWith("{") && condition.value?.endsWith("}")) {
-						const curValue = condition.value.substr(1, condition.value.length - 2);
-					
-						/** 非实体字段，即使用的变量，如 params.id */
-						if (!new RegExp(`^${entities.map(e => e.name).join("|")}\\.`).test(curValue)) {
-							return params[curValue.substring(curValue.indexOf(".") + 1)] !== undefined;
-						}
+	let { conditions, entities, params, limit, orders = [], pageIndex, fields } = fnParams;
+	const curEntity = entities.find(e => e.selected);
+	
+	if (curEntity && curEntity.fieldAry.length) {
+		/** 根据条件拼接 where sql */
+		const spliceWhereSQLFragmentByConditions = (fnParams: {
+			conditions: Condition[];
+			entities: Entity[];
+			/** entityMap 是全量实体表 map */
+			entityMap: Record<string, Entity>;
+			curEntity: Entity;
+			params: Record<string, unknown>;
+			whereJoiner?: AnyType;
+		}, templateMode?) => {
+			const { conditions, entities, params, whereJoiner, entityMap, curEntity } = fnParams;
+			
+			const curConditions = conditions
+				.filter(condition => condition.fieldId)
+			/** 筛选条件对应值不存在的情况 */
+				.filter(condition => {
+					if (condition.conditions) {
+						return true;
 					} else {
-						return condition?.value !== undefined;
-					}
-				}
-			
-				return true;
-			});
-		
-		const conditionSqlList: string[] = [];
-		
-		curConditions.forEach(condition => {
-			let curSQL = "";
-			
-			if (condition.conditions) {
-				curSQL = spliceWhereSQLFragmentByConditions({
-					conditions: condition.conditions,
-					entities,
-					whereJoiner: condition.whereJoiner,
-					params,
-					entityMap,
-					curEntity,
-				}, templateMode);
-			} else {
-				const entityMapElement = entityMap[condition.entityId];
-				const field = entityMapElement?.fieldAry.find(f => f.id === condition.fieldId);
-				
-				if (field) {
-					let fieldName = `${curEntity.name}.${field.name}`;
-					
-					/** mapping 字段映射的实体 */
-					if (entityMapElement.id !== curEntity.id) {
-						const mappingField = curEntity.fieldAry.find(f => f.mapping?.entity?.id === condition.entityId);
-						const curField = mappingField?.mapping?.entity?.fieldAry.find(f => f.id === condition.fieldId);
+					/** 变量 */
+						if (condition.value?.startsWith("{") && condition.value?.endsWith("}")) {
+							const curValue = condition.value.substr(1, condition.value.length - 2);
 						
-						fieldName = `MAPPING_${mappingField?.name || entityMapElement.name}` + (curField?.isPrimaryKey ? `.MAPPING_${mappingField?.name || entityMapElement.name}_` : ".") + (curField?.name || field.name);
+							/** 非实体字段，即使用的变量，如 params.id */
+							if (!new RegExp(`^${entities.map(e => e.name).join("|")}\\.`).test(curValue)) {
+								return params[curValue.substring(curValue.indexOf(".") + 1)] !== undefined;
+							}
+						} else {
+							return condition?.value !== undefined;
+						}
 					}
+				
+					return true;
+				});
+			const conditionSqlList: string[] = [];
+			
+			curConditions.forEach(condition => {
+				let curSQL = "";
+				
+				if (condition.conditions) {
+					curSQL = spliceWhereSQLFragmentByConditions({
+						conditions: condition.conditions,
+						entities,
+						whereJoiner: condition.whereJoiner,
+						params,
+						entityMap,
+						curEntity,
+					}, templateMode);
+				} else {
+					const field = entityFieldMap[condition.entityId + condition.fieldId];
+					const fieldName = condition.fromPath.length
+						? `MAPPING_${[...condition.fromPath.map(p => entityFieldMap[p.entityId + p.fieldId].name), field.name].join('_')}`
+						: field.name;
+					
 					let value = condition.value || "";
 					let isEntityField = false;
 					/** 支持直接使用数据库字段，如 文件表.id = 用户表.文件id */
@@ -173,29 +169,24 @@ export const spliceSelectSQLByConditions = (fnParams: {
 					}
 					
 					curSQL = `${fieldName} ${condition.operator} ${isEntityField ? value : getValueByOperatorAndFieldType(field.dbType, condition.operator!, value)}`;
+					
 				}
+				
+				curSQL && conditionSqlList.push(curSQL);
+			});
+			
+			/** 只有多个条件才需要括号拼接 */
+			let sql = `${conditionSqlList.length > 1 ? "(" : ""}${conditionSqlList.join(` ${whereJoiner} `)}${conditionSqlList.length > 1 ? ")" : ""}`;
+			let prefix = "";
+			
+			/** whereJoiner 不存在表示最外层 SQL */
+			if (!whereJoiner) {
+				/** 当 condition 存在时 */
+				prefix = `WHERE _STATUS_DELETED = 0${sql ? " AND " : ""}`;
 			}
 			
-			curSQL && conditionSqlList.push(curSQL);
-		});
-		
-		/** 只有多个条件才需要括号拼接 */
-		let sql = `${conditionSqlList.length > 1 ? "(" : ""}${conditionSqlList.join(` ${whereJoiner} `)}${conditionSqlList.length > 1 ? ")" : ""}`;
-		let prefix = "";
-		
-		/** whereJoiner 不存在表示最外层 SQL */
-		if (!whereJoiner) {
-			/** 当 condition 存在时 */
-			prefix = `WHERE _STATUS_DELETED = 0${sql ? " AND " : ""}`;
-		}
-		
-		return prefix + sql;
-	};
-	
-	let { conditions, entities, params, limit, orders = [], pageIndex, fields } = fnParams;
-	const curEntity = entities.find(e => e.selected);
-	
-	if (curEntity && curEntity.fieldAry.length) {
+			return prefix + sql;
+		};
 		/** 实体 Map */
 		const entityMap = {};
 		entities.forEach(e => entityMap[e.id] = e);
@@ -389,7 +380,9 @@ export const spliceSelectSQLByConditions = (fnParams: {
 			}
 			
 			if (field.fromPath.length) {
-				fieldList.push('MAPPING_' + [...field.fromPath.map(path => entityFieldMap[path.entityId + path.fieldId].name), entityField.name].join('_'));
+				fieldList.push(
+					'MAPPING_' + [...field.fromPath.map(path => entityFieldMap[path.entityId + path.fieldId].name), entityField.name].join('_')
+				);
 			} else {
 				fieldList.push(entityField.name);
 			}

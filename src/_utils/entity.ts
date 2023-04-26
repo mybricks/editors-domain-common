@@ -76,7 +76,7 @@ export const formatConditionByOriginEntities = (fields: SelectedField[], conditi
 	
 	const formatCondition = (condition: Condition[]) => {
 		condition.forEach(con => {
-			if (con.conditions?.length) {
+			if (con.conditions) {
 				formatCondition(con.conditions);
 			} else {
 				let hasEffect = !!entityFieldMap[con.entityId + con.fieldId];
