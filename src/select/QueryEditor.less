@@ -70,96 +70,11 @@
   }
 
   .fields {
-    width: 200px;
+    min-width: 200px;
+    width: auto;
     flex-shrink: 0;
     overflow: auto;
-    padding: 5px 0 10px 5px;
-
-    &.relationFields {
-      border-left: 1px dashed #ddd;
-      padding-right: 5px;
-      width: 260px;
-    }
-
-    .field {
-      height: 30px;
-      padding: 0 10px;
-      display: flex;
-      align-items: center;
-      overflow: hidden;
-
-      & > span:first-of-type {
-        flex-shrink: 0;
-        color: rgba(0,0,0,.85);
-      }
-
-      & > span:last-of-type {
-        color: #999;
-        font-style: italic;
-        word-break: break-all;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-      }
-
-      span {
-        margin-top: 3px;
-        margin-left: 5px;
-      }
-
-      input[type=checkbox] {
-        width: 16px;
-        height: 16px;
-        appearance: none;
-        margin-right: 5px;
-        position: relative;
-        flex-shrink: 0;
-      }
-
-      input:not(:checked):after {
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: 16px;
-        height: 16px;
-        border-radius: 3px;
-        content: "✓";
-        font-size: 12px;
-        color: #EEE;
-        background-color: #EEE;
-        text-align: center;
-        padding: 0 2px;
-      }
-
-      input:checked:after {
-        border-radius: 3px;
-        content: "✓";
-        font-size: 12px;
-        font-weight: bold;
-        color: #fff;
-        background-color: #fa6400;
-        text-align: center;
-        padding: 0 2px;
-      }
-    }
-  }
-
-  .mappingFields {
-    .mappingFieldHeader {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      color: #777;
-      font-style: italic;
-    }
-
-    .mappingFieldEntity {
-      margin-left: 4px;
-    }
-  }
-
-  .mappingFields + .mappingFields {
-    border-top: 1px dashed #ddd;
-    padding-top: 4px;
+    padding: 5px 10px;
   }
 }
 
@@ -206,5 +121,98 @@
     &:hover {
       background-color: #F7F7F7;
     }
+  }
+}
+
+.selectFromCollapse {
+  .collapseIcon {
+    width: 14px;
+    height: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 5px;
+    cursor: pointer;
+    transition: transform .2s ease-in-out;
+    margin-top: 1px;
+  }
+
+  .field {
+    height: 30px;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+
+    & > span:first-of-type {
+      flex-shrink: 0;
+      color: rgba(0,0,0,.85);
+    }
+
+    & > span:last-of-type {
+      color: #999;
+      font-style: italic;
+      word-break: break-all;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    span {
+      margin-left: 5px;
+      line-height: 16px;
+    }
+
+    input[type=checkbox] {
+      width: 16px;
+      height: 16px;
+      appearance: none;
+      margin-right: 5px;
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    input:not(:checked):after {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 16px;
+      height: 16px;
+      border-radius: 3px;
+      content: "✓";
+      font-size: 12px;
+      color: #EEE;
+      background-color: #EEE;
+      text-align: center;
+      padding: 0 2px;
+    }
+
+    input:checked:after {
+      border-radius: 3px;
+      content: "✓";
+      font-size: 12px;
+      line-height: 16px;
+      width: 16px;
+      height: 16px;
+      font-weight: bold;
+      color: #fff;
+      background-color: #fa6400;
+      text-align: center;
+      padding: 0 2px;
+      display: inline-flex;
+      justify-content: center;
+    }
+  }
+
+  .selectFromChildren {
+    padding: 10px 10px 10px 0;
+    border-radius: 5px;
+    margin-left: 20px;
+  }
+
+  .mappingFieldHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: #777;
+    font-style: italic;
   }
 }
