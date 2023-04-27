@@ -21,7 +21,13 @@ const SelectFromCollapse: FC<SelectFromProps> = props => {
 			&& f2.fromPath.map(path => path.fieldId).join('') === (fromPath.map(path => path.id).join(''))
 	);
 	const isMapping = !!field.mapping?.entity?.fieldAry.length;
-	const fieldMappingEntity = field.mapping?.entity as AnyType as Entity;
+	let fieldMappingEntity = field.mapping?.entity as AnyType as Entity;
+	
+	if (isMapping) {
+		fieldMappingEntity = JSON.parse(JSON.stringify(ctx.nowValue.entities.find(en => en.id === fieldMappingEntity.id) as AnyType as Entity) || 'null');
+		const oldFieldIds = field.mapping?.entity?.fieldAry.map(f => f.id) || [];
+		fieldMappingEntity.fieldAry = fieldMappingEntity.fieldAry.filter(f => oldFieldIds.includes(f.id));
+	}
 	
 	const onSelect = () => {
 		if (fromPath.length) {
@@ -69,7 +75,7 @@ const SelectFromCollapse: FC<SelectFromProps> = props => {
 								initialOpen={false}
 								fromPath={[...fromPath, { ...field, entityId: entity.id }]}
 								field={f}
-								entity={field.mapping!.entity!}
+								entity={fieldMappingEntity}
 								ctx={ctx}
 							/>
 						))}

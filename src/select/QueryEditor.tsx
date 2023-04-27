@@ -1,4 +1,4 @@
-import React, { ReactNode, useCallback, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 // @ts-ignore
 import { evt, getPosition, useComputed, useObservable } from '@mybricks/rxui';
 import QueryCtx from './QueryCtx';
@@ -47,7 +47,7 @@ export default function QueryEditor({ domainModel, paramSchema, value, close, sh
 		}
 		
 		/** 实体信息可能存在变更，每次使用最新的实体信息 */
-		val.entities = formatEntitiesByOriginEntities(val.entities, domainModel.entityAry);
+		val.entities = formatEntitiesByOriginEntities(val.entities, domainModel.entityAry.map((entity: AnyType) => entity.toJSON()));
 		val.fields = formatFieldsByOriginEntities(val.fields ?? [], domainModel.entityAry);
 		val.orders = formatOrderByOriginEntities(val.fields ?? [], val.orders ?? [], domainModel.entityAry);
 		val.conditions = formatConditionByOriginEntities(val.fields ?? [], val.conditions, domainModel.entityAry);
