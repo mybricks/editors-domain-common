@@ -1,6 +1,6 @@
 import { AnyType } from '../_types';
-import { FieldBizType, SQLLimitType, SQLOrder, SQLWhereJoiner } from '../_constants/field';
-import { spliceSelectCountSQLByConditions, spliceSelectSQLByConditions } from '../_utils/selectSQL';
+import { SQLLimitType, SQLOrder, SQLWhereJoiner } from '../_constants/field';
+import { spliceSelectSQLByConditions } from '../_utils/selectSQL';
 import { safeEncodeURIComponent } from '../_utils/util';
 import { formatTime, spliceDataFormatString } from '../_utils/format';
 import { Entity, SelectedField } from '../_types/domain';
@@ -109,16 +109,6 @@ export default class QueryCtx {
 		if (currentEntity) {
 			const currentFieldIds = fields.filter(f => f.entityId === currentEntity.id && !f.fromPath.length).map(f => f.fieldId);
 			desc = `${currentEntity.name} 的 ${currentEntity.fieldAry.filter(f => currentFieldIds.includes(f.id)).map(f => f.name).join(', ')}`;
-			let countScript = '';
-			console.log(spliceSelectSQLByConditions({
-				params: {},
-				fields: fields,
-				conditions: conditions,
-				entities: entities,
-				limit: limit,
-				orders: orders,
-				pageIndex: pageIndex,
-			}));
 
 			const selectScript = `
 			async (params, executeSql)=>{
@@ -127,50 +117,34 @@ export default class QueryCtx {
 				};
 				const spliceSelectSQLByConditions = ${spliceSelectSQLByConditions.toString()};
 				
-				const sql = spliceSelectSQLByConditions({
+				const [sql, countSql] = spliceSelectSQLByConditions({
 					params: params || {},
 					fields: ${JSON.stringify(fields)} || [],
 					conditions: ${JSON.stringify(conditions)} || [],
 					entities: ${JSON.stringify(entities)},
 					limit: ${JSON.stringify(limit)},
+					showPager: ${JSON.stringify(this.showPager || false)},
 					orders: (params.orders && Array.isArray(params.orders)) ? params.orders : ${JSON.stringify(orders)},
 					pageIndex: ${JSON.stringify(pageIndex)},
 				});
 				
-				let { rows } = await executeSql(sql);
+				${this.showPager ? `
+					let [{ rows }, { rows: countRows }] = await Promise.all([executeSql(sql), executeSql(countSql)]);
 				
-				${spliceDataFormatString(currentEntity as Entity, entities as Entity[])}
-				
-				return rows;
-			}
-			`;
-
-			if (this.showPager) {
-				countScript = `
-				async (params, executeSql)=>{
-					const spliceSelectCountSQLByConditions = ${spliceSelectCountSQLByConditions.toString()};
+					${spliceDataFormatString(currentEntity as Entity, entities as Entity[])}
 					
-					const sql = spliceSelectCountSQLByConditions({
-						params: params || {},
-						conditions: ${JSON.stringify(conditions)} || [],
-						entities: ${JSON.stringify(entities)},
-					});
-	
-					const { rows } = await executeSql(sql);
+					return { list: rows, total: countRows[0] ? countRows[0].total : 0 };
+				` : `
+					let { rows } = await executeSql(sql);
+					
+					${spliceDataFormatString(currentEntity as Entity, entities as Entity[])}
 					
 					return rows;
-				}
-				`;
+				`}
 			}
-
-			if (!this.showPager) {
-				this.nowValue.script = safeEncodeURIComponent(selectScript);
-			} else {
-				this.nowValue.script = {
-					list: safeEncodeURIComponent(selectScript),
-					total: safeEncodeURIComponent(countScript)
-				};
-			}
+			`;
+			
+			this.nowValue.script = safeEncodeURIComponent(selectScript);
 		} else {
 			this.nowValue.script = void 0;
 		}
