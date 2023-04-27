@@ -261,17 +261,17 @@ export const spliceSelectSQLByConditions = (fnParams: {
 		
 		const spliceLeftJoinSql = (mappingFields: Field[], depIndex: number, fromPath: Field[], parentEntity: Entity) => {
 			const entityNames: string[] = [];
-			mappingFields.forEach(mappingField => {
-				if (!mappingField) {
+			mappingFields.forEach(parentField => {
+				if (!parentField) {
 					return;
 				}
-				const depFields = allFields.filter(f => f.fromPath.length === depIndex && f.fromPath[f.fromPath.length - 1].fieldId === mappingField.id);
+				const depFields = allFields.filter(f => f.fromPath.length === depIndex && f.fromPath[f.fromPath.length - 1].fieldId === parentField.id);
 				if (!depFields.length) {
 					return;
 				}
-				const entity = mappingField.mapping!.entity!;
-				const condition = String(mappingField.mapping!.condition!);
-				const type = mappingField.mapping!.type!;
+				const entity = parentField.mapping!.entity!;
+				const condition = String(parentField.mapping!.condition!);
+				const type = parentField.mapping!.type!;
 				/** 源实体，即实体面板中存在的实体 */
 				const originEntity = entityMap[entity.id];
 				
@@ -287,75 +287,133 @@ export const spliceSelectSQLByConditions = (fnParams: {
 					return;
 				}
 				
-				const leftJoinSqlList = spliceLeftJoinSql(depFields.map(f => entityFieldMap[f.entityId + f.fieldId]), depIndex + 1, [...fromPath, mappingField], originEntity);
+				const leftJoinSqlList = spliceLeftJoinSql(depFields.map(f => entityFieldMap[f.entityId + f.fieldId]), depIndex + 1, [...fromPath, parentField], originEntity);
 				const isMaxCondition = condition.startsWith("max(") && condition.endsWith(")");
-				const SEPARATOR = `$__${[...fromPath.map(p => p.name), mappingField.name].join('_')}__$`;
-				// TODO: 适配 where 条件
+				const SEPARATOR = `$$`;
 				let entityName = "";
+				
 				/** 关联，当前实体主动关联另一个实体，即当前实体字段存在一个字段作为外键关联另一个实体的主键（id） */
 				if (type === "primary") {
 					if (condition === "-1") {
 						const relationField = parentEntity.fieldAry.find(f => ["relation", "SYS_USER", "SYS_USER.CREATOR", "SYS_USER.UPDATER"].includes(f.bizType) && f.relationEntityId === originEntity.id);
-						const mappingTableName = [...fromPath.map(p => p.name), mappingField.name].join('_');
+						const mappingTableName = [...fromPath.map(p => p.name), parentField.name].join('_');
+						let jsonFieldNameList: string[] = [];
+						/** 标识对应的 json 字段是否已被拼接 */
+						const jsonMappingFieldMap = {};
+						
 						const extraFieldNames = allFields
-							.filter(f => f.fromPath.find(path => path.fieldId === mappingField.id && path.entityId === parentEntity.id) && (f.entityId === originEntity.id ? !entityFieldMap[f.entityId + f.fieldId].isPrimaryKey : true))
+							.filter(f => f.fromPath.find(path => path.fieldId === parentField.id && path.entityId === parentEntity.id))
 							.map(f => {
-								const index = f.fromPath.findIndex(path => path.fieldId === mappingField.id && path.entityId === parentEntity.id);
-								const mappingFieldName = `MAPPING_${[...(f.fromPath.map(path => entityFieldMap[path.entityId + path.fieldId].name)), entityFieldMap[f.entityId + f.fieldId].name].join('_')}`;
+								const currentField = entityFieldMap[f.entityId + f.fieldId];
 								
+								if (f.entityId === originEntity.id && currentField.isPrimaryKey) {
+									jsonFieldNameList.push(`'${currentField.name}', ${currentField.name}`);
+									return;
+								}
+								
+								const index = f.fromPath.findIndex(path => path.fieldId === parentField.id && path.entityId === parentEntity.id);
+								const mappingFieldName = `MAPPING_${[...(f.fromPath.map(path => entityFieldMap[path.entityId + path.fieldId].name)), currentField.name].join('_')}`;
+								
+								/** 字段来源于当前表中 */
 								if (f.fromPath.length - 1 === index) {
-									return `${entityFieldMap[f.entityId + f.fieldId].name} AS ${mappingFieldName}`;
+									const isMapping = allFields.find(p => p.fromPath.length === f.fromPath.length + 1 && p.fromPath[p.fromPath.length - 1].fieldId === currentField.id);
+									jsonFieldNameList.push(`'${isMapping ? '_' : ''}${currentField.name}', ${currentField.name}`);
+									
+									return `${currentField.name} AS ${mappingFieldName}`;
 								} else {
+									const entityFieldMapElement = entityFieldMap[f.fromPath[index + 1].entityId + f.fromPath[index + 1].fieldId];
+									
+									if (!jsonMappingFieldMap[entityFieldMapElement.name]) {
+										jsonFieldNameList.push(`'${entityFieldMapElement.name}', ${entityFieldMapElement.name}_JSON`);
+										jsonMappingFieldMap[entityFieldMapElement.name] = 1;
+									}
+									
+									/** 字段来源于子查询 */
 									return mappingFieldName;
 								}
-							});
-						
-						entityName = `LEFT JOIN (SELECT id AS MAPPING_${mappingTableName}_id${extraFieldNames.length ? `, ${extraFieldNames.join(', ')}` : ""} FROM ${originEntity.name} ${leftJoinSqlList.join(' ')} WHERE _STATUS_DELETED = 0) MAPPING_${mappingTableName} ON MAPPING_${mappingTableName}.MAPPING_${mappingTableName}_id = ${(parentEntity.name)}.${(relationField?.name)}`;
+							}).filter(Boolean);
+						entityName = `LEFT JOIN (SELECT id AS MAPPING_${mappingTableName}_id${extraFieldNames.length ? `, ${extraFieldNames.join(', ')}` : ""}${jsonFieldNameList.length ? `, JSON_OBJECT(${jsonFieldNameList.join(', ')}) ${parentField.name}_JSON` : ""} FROM ${originEntity.name} ${leftJoinSqlList.join(' ')} WHERE _STATUS_DELETED = 0) MAPPING_${mappingTableName} ON MAPPING_${mappingTableName}.MAPPING_${mappingTableName}_id = ${(parentEntity.name)}.${(relationField?.name)}`;
 					}
 				} else if (type === 'foreigner') {
 					/** 被关联，当前实体被另一实体关联，即当前实体的主键（id）被另一个实体作为外键相互关联 */
-					const mappingTableName = [...fromPath.map(p => p.name), mappingField.name].join('_');
+					const mappingTableName = [...fromPath.map(p => p.name), parentField.name].join('_');
 					const curRelationFieldName = 'MAPPING_' + [mappingTableName, relationField?.name].join('_');
+					let jsonFieldNameList: string[] = [];
+					/** 标识对应的 json 字段是否已被拼接 */
+					const jsonMappingFieldMap = {};
 					
 					if (condition === "-1") {
 						const extraFieldNames = allFields
 							.filter(f => {
-								const entityField = entityFieldMap[f.entityId + f.fieldId];
-								
-								return f.fromPath.find(path => path.fieldId === mappingField.id && path.entityId === parentEntity.id) && (f.entityId === originEntity.id ? !entityField.isPrimaryKey : true) && entityField.name !== relationField?.name;
+								return f.fromPath.find(path => path.fieldId === parentField.id && path.entityId === parentEntity.id);
 							})
 							.map(f => {
-								const index = f.fromPath.findIndex(path => path.fieldId === mappingField.id && path.entityId === parentEntity.id);
+								const currentField = entityFieldMap[f.entityId + f.fieldId];
+								
+								if ((f.entityId === originEntity.id ? currentField.isPrimaryKey : false) || currentField.name === relationField?.name) {
+									const isMapping = allFields.find(p => p.fromPath.length === f.fromPath.length + 1 && p.fromPath[p.fromPath.length - 1].fieldId === currentField.id);
+									jsonFieldNameList.push(`'${isMapping ? '_' : ''}${currentField.name}', ${currentField.name}`);
+									
+									return;
+								}
+								
+								const index = f.fromPath.findIndex(path => path.fieldId === parentField.id && path.entityId === parentEntity.id);
 								const mappingFieldName = `MAPPING_${[...(f.fromPath.map(path => entityFieldMap[path.entityId + path.fieldId].name)), entityFieldMap[f.entityId + f.fieldId].name].join('_')}`;
 								
 								if (f.fromPath.length - 1 === index) {
+									const isMapping = allFields.find(p => p.fromPath.length === f.fromPath.length + 1 && p.fromPath[p.fromPath.length - 1].fieldId === currentField.id);
+									jsonFieldNameList.push(`'${isMapping ? '_' : ''}${currentField.name}', ${currentField.name}`);
+									
 									return `GROUP_CONCAT(${entityFieldMap[f.entityId + f.fieldId].name} SEPARATOR \"${SEPARATOR}\") ${mappingFieldName}`;
 								} else {
+									const entityFieldMapElement = entityFieldMap[f.fromPath[index + 1].entityId + f.fromPath[index + 1].fieldId];
+									if (!jsonMappingFieldMap[entityFieldMapElement.name]) {
+										jsonFieldNameList.push(`'${entityFieldMapElement.name}', ${entityFieldMapElement.name}_JSON`);
+										jsonMappingFieldMap[entityFieldMapElement.name] = 1;
+									}
+									
 									return `GROUP_CONCAT(${mappingFieldName} SEPARATOR \"${SEPARATOR}\") ${mappingFieldName}`;
 								}
-							});
+							})
+							.filter(Boolean);
 						
-						entityName = `LEFT JOIN (SELECT GROUP_CONCAT(id SEPARATOR \"${SEPARATOR}\") MAPPING_${mappingTableName}_id, GROUP_CONCAT(${relationField?.name} SEPARATOR \"${SEPARATOR}\") ${curRelationFieldName}${extraFieldNames.length ? `, ${extraFieldNames.join(', ')}` : ""} FROM ${originEntity.name} ${leftJoinSqlList.join(' ')} WHERE _STATUS_DELETED = 0 GROUP BY ${relationField?.name}) MAPPING_${mappingTableName} ON MAPPING_${mappingTableName}.${curRelationFieldName} = ${(parentEntity.name)}.id`;
+						entityName = `LEFT JOIN (SELECT GROUP_CONCAT(id SEPARATOR \"${SEPARATOR}\") MAPPING_${mappingTableName}_id, GROUP_CONCAT(${relationField?.name} SEPARATOR \"${SEPARATOR}\") ${curRelationFieldName}${extraFieldNames.length ? `, ${extraFieldNames.join(', ')}` : ""}${jsonFieldNameList.length ? `, JSON_ARRAYAGG(JSON_OBJECT(${jsonFieldNameList.join(', ')})) ${parentField.name}_JSON` : ""} FROM ${originEntity.name} ${leftJoinSqlList.join(' ')} WHERE _STATUS_DELETED = 0 GROUP BY ${relationField?.name}) MAPPING_${mappingTableName} ON MAPPING_${mappingTableName}.${curRelationFieldName} = ${(parentEntity.name)}.id`;
 					} else if (isMaxCondition) {
 						const filedName = condition.substr(4, condition.length - 5);
 						const extraFieldNames = allFields
 							.filter(f => {
-								const entityField = entityFieldMap[f.entityId + f.fieldId];
-								
-								return f.fromPath.find(path => path.fieldId === mappingField.id && path.entityId === parentEntity.id) && (f.entityId === originEntity.id ? !entityField.isPrimaryKey : true) && entityField.name !== relationField?.name;
+								return f.fromPath.find(path => path.fieldId === parentField.id && path.entityId === parentEntity.id);
 							})
 							.map(f => {
-								const index = f.fromPath.findIndex(path => path.fieldId === mappingField.id && path.entityId === parentEntity.id);
+								const currentField = entityFieldMap[f.entityId + f.fieldId];
+							
+								if ((f.entityId === originEntity.id ? currentField.isPrimaryKey : false) || currentField.name === relationField?.name) {
+									const isMapping = allFields.find(p => p.fromPath.length === f.fromPath.length + 1 && p.fromPath[p.fromPath.length - 1].fieldId === currentField.id);
+									jsonFieldNameList.push(`'${isMapping ? '_' : ''}${currentField.name}', ${currentField.name}`);
+									
+									return;
+								}
+								const index = f.fromPath.findIndex(path => path.fieldId === parentField.id && path.entityId === parentEntity.id);
 								const mappingFieldName = `MAPPING_${[...(f.fromPath.map(path => entityFieldMap[path.entityId + path.fieldId].name)), entityFieldMap[f.entityId + f.fieldId].name].join('_')}`;
 							
 								if (f.fromPath.length - 1 === index) {
+									const isMapping = allFields.find(p => p.fromPath.length === f.fromPath.length + 1 && p.fromPath[p.fromPath.length - 1].fieldId === currentField.id);
+									jsonFieldNameList.push(`'${isMapping ? '_' : ''}${currentField.name}', ${currentField.name}`);
+									
 									return `${entityFieldMap[f.entityId + f.fieldId].name} AS ${mappingFieldName}`;
 								} else {
+									const entityFieldMapElement = entityFieldMap[f.fromPath[index + 1].entityId + f.fromPath[index + 1].fieldId];
+									if (!jsonMappingFieldMap[entityFieldMapElement.name]) {
+										jsonFieldNameList.push(`'${entityFieldMapElement.name}', ${entityFieldMapElement.name}_JSON`);
+										jsonMappingFieldMap[entityFieldMapElement.name] = 1;
+									}
+									
 									return mappingFieldName;
 								}
-							});
+							})
+							.filter(Boolean);
 						
-						entityName = `LEFT JOIN (SELECT GROUP_CONCAT(id SEPARATOR \"${SEPARATOR}\") MAPPING_${mappingTableName}_id, GROUP_CONCAT(${relationField?.name} SEPARATOR \"${SEPARATOR}\") ${curRelationFieldName}${extraFieldNames.length ? `, ${extraFieldNames.join(', ')}` : ""} FROM ${originEntity.name} ${leftJoinSqlList.join(' ')} WHERE _STATUS_DELETED = 0 AND ${filedName} IN (SELECT max(${filedName}) FROM ${originEntity.name} WHERE _STATUS_DELETED = 0 GROUP BY ${relationField.name})) MAPPING_${mappingTableName} ON MAPPING_${mappingTableName}.${curRelationFieldName} = ${(parentEntity.name)}.id`;
+						entityName = `LEFT JOIN (SELECT GROUP_CONCAT(id SEPARATOR \"${SEPARATOR}\") MAPPING_${mappingTableName}_id, GROUP_CONCAT(${relationField?.name} SEPARATOR \"${SEPARATOR}\") ${curRelationFieldName}${extraFieldNames.length ? `, ${extraFieldNames.join(', ')}` : ""}${jsonFieldNameList.length ? `, JSON_ARRAYAGG(JSON_OBJECT(${jsonFieldNameList.join(', ')})) ${parentField.name}_JSON` : ""} FROM ${originEntity.name} ${leftJoinSqlList.join(' ')} WHERE _STATUS_DELETED = 0 AND ${filedName} IN (SELECT max(${filedName}) FROM ${originEntity.name} WHERE _STATUS_DELETED = 0 GROUP BY ${relationField.name})) MAPPING_${mappingTableName} ON MAPPING_${mappingTableName}.${curRelationFieldName} = ${(parentEntity.name)}.id`;
 					}
 				}
 				
@@ -372,21 +430,23 @@ export const spliceSelectSQLByConditions = (fnParams: {
 			}), 1, [], curEntity));
 		
 		/** 字段列表 */
-		
-		fields.map(field => {
-			const entityField = entityFieldMap[field.entityId + field.fieldId];
-			if (entityField.bizType === 'mapping') {
-				return;
-			}
-			
-			if (field.fromPath.length) {
-				fieldList.push(
-					'MAPPING_' + [...field.fromPath.map(path => entityFieldMap[path.entityId + path.fieldId].name), entityField.name].join('_')
-				);
-			} else {
-				fieldList.push(entityField.name);
-			}
-		});
+		fields
+			.filter(field => !field.fromPath.length)
+			.map(field => {
+				const entityField = entityFieldMap[field.entityId + field.fieldId];
+				if (entityField.bizType === 'mapping') {
+					fieldList.push(`${entityField.name}_JSON AS ${entityField.name}`);
+					return;
+				}
+				
+				const isMapping = allFields.find(p => p.fromPath[0]?.fieldId === field.fieldId);
+				
+				if (isMapping) {
+					fieldList.push(`${entityField.name} AS _${entityField.name}`, `${entityField.name}_JSON AS ${entityField.name}`);
+				} else {
+					fieldList.push(entityField.name);
+				}
+			});
 		
 		/** 前置 sql */
 		sql.push(`SELECT ${fieldList.join(", ")} FROM ${entityNames.join(" ")}`);

@@ -256,6 +256,7 @@ const Conditions: FC = () => {
 			) : (
 				<div key={index} className={styles.condition}>
 					<select
+						title={[...(condition.fromPath?.map(path => path.fieldName) || []), condition.fieldName].join('.')}
 						className={styles.fieldSelect}
 						value={condition.entityId ? selectValue : ''}
 						/** 更新条件语句 */
