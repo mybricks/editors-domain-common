@@ -1,9 +1,9 @@
 import { AnyType } from '../_types';
-import { SQLLimitType, SQLOrder, SQLWhereJoiner } from '../_constants/field';
+import { FieldBizType, SQLLimitType, SQLOrder, SQLWhereJoiner } from '../_constants/field';
 import { spliceSelectSQLByConditions } from '../_utils/selectSQL';
 import { safeEncodeURIComponent } from '../_utils/util';
 import { formatTime, spliceDataFormatString } from '../_utils/format';
-import { Entity, SelectedField } from '../_types/domain';
+import { Field, SelectedField } from '../_types/domain';
 
 
 export type T_Field = {
@@ -109,14 +109,29 @@ export default class QueryCtx {
 		if (currentEntity) {
 			const currentFieldIds = fields.filter(f => f.entityId === currentEntity.id && !f.fromPath.length).map(f => f.fieldId);
 			desc = `${currentEntity.name} 的 ${currentEntity.fieldAry.filter(f => currentFieldIds.includes(f.id)).map(f => f.name).join(', ')}`;
-
+			/** 实体 + 字段的 Map */
+			const entityFieldMap: Record<string, Field> = {};
+			entities.forEach(entity => {
+				entity.fieldAry.forEach(field => {
+					entityFieldMap[entity.id + field.id] = field as Field;
+					
+					if (entity.isSystem && !field.isPrivate) {
+						entityFieldMap[entity.id + field.name] = field as Field;
+					}
+				});
+			});
+			const needFormatFields = fields.filter(f => {
+				const curField = entityFieldMap[f.entityId + f.fieldId];
+				
+				return curField.showFormat && curField.bizType === FieldBizType.DATETIME;
+			});
+			
 			const selectScript = `
 			async (params, executeSql)=>{
 				const FORMAT_MAP = {
 					formatTime: ${formatTime.toString()},
 				};
 				const spliceSelectSQLByConditions = ${spliceSelectSQLByConditions.toString()};
-				
 				const [sql, countSql] = spliceSelectSQLByConditions({
 					params: params || {},
 					fields: ${JSON.stringify(fields)} || [],
@@ -127,18 +142,13 @@ export default class QueryCtx {
 					orders: (params.orders && Array.isArray(params.orders)) ? params.orders : ${JSON.stringify(orders)},
 					pageIndex: ${JSON.stringify(pageIndex)},
 				});
-				
 				${this.showPager ? `
 					let [{ rows }, { rows: countRows }] = await Promise.all([executeSql(sql), executeSql(countSql)]);
-				
-					${spliceDataFormatString(currentEntity as Entity, entities as Entity[])}
-					
+					${needFormatFields.length ? spliceDataFormatString(entityFieldMap, needFormatFields) : ''}
 					return { list: rows, total: countRows[0] ? countRows[0].total : 0 };
 				` : `
 					let { rows } = await executeSql(sql);
-					
-					${spliceDataFormatString(currentEntity as Entity, entities as Entity[])}
-					
+					${needFormatFields.length ? spliceDataFormatString(entityFieldMap, needFormatFields) : ''}
 					return rows;
 				`}
 			}

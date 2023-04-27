@@ -1,5 +1,5 @@
 /* eslint-disable no-useless-escape */
-import { Entity } from "../_types/domain";
+import { Entity, Field, SelectedField } from "../_types/domain";
 import { FieldBizType } from "../_constants/field";
 
 /** 转化时间 */
@@ -36,50 +36,43 @@ export const formatTime = (date, format) => {
 		.replace(/s/g, second);
 };
 
-export const spliceDataFormatString = (entity: Entity, entities: Entity[]) => {
-	const entityMap = {};
-	entities.forEach(e => entityMap[e.id] = e);
-	/** mapping 字段，存在映射且实体存在 */
-	const mappingFields = entity.fieldAry.filter(field => {
-		return field.selected && field.mapping?.entity?.fieldAry?.length && entityMap[field.mapping.entity.id];
-	});
-	let ifString = "";
-	let convertString = "";
-	
-	entity.fieldAry
-		.filter(field => field.bizType !== FieldBizType.MAPPING && field.selected)
-		.forEach(filed => {
-			if (filed.bizType === FieldBizType.DATETIME && filed.showFormat) {
-				ifString += `;if (key === \"${filed.name}\") { item[\"_\" + key] = item[key]; item[key] = item[key] ? FORMAT_MAP.formatTime(new Date(item[key]), \"${filed.showFormat}\") : item[key]; }\n`;
-			}
-		});
-	/** mapping 字段列表 */
-	mappingFields.forEach(field => {
-		const entity = field.mapping!.entity!;
-		
-		convertString += `item._${field.name} = item.${field.name};
-		item.${field.name} = {};\n`;
-		
-		entity.fieldAry.forEach(f => {
-			if (f.bizType === FieldBizType.DATETIME && f.showFormat) {
-				convertString += `item.${field.name}._${f.name} = item.${field.name}_${f.name};\n`;
-				ifString += `;if (key === \"${field.name}_${f.name}\") { item[\"_\" + key] = item[key] ? FORMAT_MAP.formatTime(new Date(item[key]), \"${f.showFormat}\") : item[key]; }\n`;
+export const spliceDataFormatString = (entityFieldMap: Record<string, Field>, fields: SelectedField[] = []) => {
+	const deepFormatCodeString = `
+		const deepFormat = (item, path) => {
+			if (!path.length) { return; }
+			const key = path[0];
+			if (path.length === 1) {
+				if (Array.isArray(item)) {
+					item.forEach(i => {
+						i['_' + key] = i[key];
+						i[key] = FORMAT_MAP.formatTime(new Date(i[key]));
+					})
+				} else {
+					item['_' + key] = item[key];
+					item[key] = FORMAT_MAP.formatTime(new Date(item[key]));
+				}
+				
+				return ;
 			}
 			
-			convertString += `item.${field.name}.${f.name} = item._${field.name}_${f.name} || item.${field.name}_${f.name};
-				delete item.${field.name}_${f.name};
-				delete item._${field.name}_${f.name};\n`;
-		});
-	});
+			if (Array.isArray(item)) {
+				item.forEach(i => {
+					deepFormat(i, path.slice(1));
+				})
+			} else {
+				deepFormat(item[key], path.slice(1));
+			}
+		};
+	`;
 	
+	const needFormatPaths = fields.map(field => [...field.fromPath.map(p => entityFieldMap[p.entityId + p.fieldId].name), entityFieldMap[field.entityId + field.fieldId].name]);
 	return `
+		${deepFormatCodeString}
 		rows = Array.from(rows || []).map(item => {
-			Object.keys(item).forEach(key => {
-				${ifString}
+			${JSON.stringify(needFormatPaths)}.forEach(path => {
+				deepFormat(item, path)
 			});
-			
-			${convertString}
-			
+
 			return item;
 		});
 	`;

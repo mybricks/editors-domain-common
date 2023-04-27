@@ -96,6 +96,7 @@ export const spliceSelectSQLByConditions = (fnParams: {
 	const curEntity = entities.find(e => e.selected);
 	
 	if (curEntity && curEntity.fieldAry.length) {
+		const joinArray = (...res) => Array.from(res);
 		/** 根据条件拼接 where sql */
 		const spliceWhereSQLFragmentByConditions = (fnParams: {
 			conditions: Condition[];
@@ -148,7 +149,7 @@ export const spliceSelectSQLByConditions = (fnParams: {
 					const field = entityFieldMap[condition.entityId + condition.fieldId];
 					/** 变量名拼接 */
 					const fieldName = condition.fromPath.length
-						? `MAPPING_${[...condition.fromPath.map(p => entityFieldMap[p.entityId + p.fieldId].name), field.name].join('_')}`
+						? `MAPPING_${joinArray(...condition.fromPath.map(p => entityFieldMap[p.entityId + p.fieldId].name), field.name).join('_')}`
 						: field.name;
 					
 					let value = condition.value || "";
@@ -250,11 +251,11 @@ export const spliceSelectSQLByConditions = (fnParams: {
 			}
 		}).filter(Boolean) as AnyType as Order[];
 		/** 所有使用到的字段，类型定义为 SelectedField */
-		let allFields: SelectedField[] = [...fields, ...(orders as AnyType), ...conditionFields];
+		let allFields: SelectedField[] = joinArray(...fields, ...(orders as AnyType), ...conditionFields);
 		/** 所有使用到的字段的 Map */
 		const allFieldsMap: Record<string, boolean> = {};
 		allFields = allFields.filter(field => {
-			const paths = [...field.fromPath.map(p => p.fieldId), field.fieldId].join('.');
+			const paths = joinArray(...field.fromPath.map(p => p.fieldId), field.fieldId).join('.');
 			
 			if (allFieldsMap[paths]) {
 				return false;
@@ -299,7 +300,7 @@ export const spliceSelectSQLByConditions = (fnParams: {
 					return;
 				}
 				
-				const leftJoinSqlList = spliceLeftJoinSql(depFields.map(f => entityFieldMap[f.entityId + f.fieldId]), depIndex + 1, [...fromPath, parentField], originEntity);
+				const leftJoinSqlList = spliceLeftJoinSql(depFields.map(f => entityFieldMap[f.entityId + f.fieldId]), depIndex + 1, joinArray(...fromPath, parentField), originEntity);
 				const isMaxCondition = condition.startsWith("max(") && condition.endsWith(")");
 				const SEPARATOR = `$$`;
 				let entityName = '';
@@ -308,7 +309,7 @@ export const spliceSelectSQLByConditions = (fnParams: {
 				if (type === "primary") {
 					if (condition === "-1") {
 						const relationField = parentEntity.fieldAry.find(f => ["relation", "SYS_USER", "SYS_USER.CREATOR", "SYS_USER.UPDATER"].includes(f.bizType) && f.relationEntityId === originEntity.id);
-						const mappingTableName = [...fromPath.map(p => p.name), parentField.name].join('_');
+						const mappingTableName = joinArray(...fromPath.map(p => p.name), parentField.name).join('_');
 						/** 聚合为 json 的字段列表 */
 						let jsonFieldNameList: string[] = [];
 						/** 标识对应的 json 字段是否已被拼接 */
@@ -340,7 +341,7 @@ export const spliceSelectSQLByConditions = (fnParams: {
 							.map(f => {
 								const currentField = entityFieldMap[f.entityId + f.fieldId];
 								const index = f.fromPath.findIndex(path => path.fieldId === parentField.id && path.entityId === parentEntity.id);
-								const mappingFieldName = `MAPPING_${[...(f.fromPath.map(path => entityFieldMap[path.entityId + path.fieldId].name)), currentField.name].join('_')}`;
+								const mappingFieldName = `MAPPING_${joinArray(...(f.fromPath.map(path => entityFieldMap[path.entityId + path.fieldId].name)), currentField.name).join('_')}`;
 								
 								/** 字段来源于当前表中 */
 								if (f.fromPath.length - 1 === index) {
@@ -354,7 +355,7 @@ export const spliceSelectSQLByConditions = (fnParams: {
 					}
 				} else if (type === 'foreigner') {
 					/** 被关联，当前实体被另一实体关联，即当前实体的主键（id）被另一个实体作为外键相互关联 */
-					const mappingTableName = [...fromPath.map(p => p.name), parentField.name].join('_');
+					const mappingTableName = joinArray(...fromPath.map(p => p.name), parentField.name).join('_');
 					/** 被关联的关系字段 */
 					const curRelationFieldName = 'MAPPING_' + [mappingTableName, relationField?.name].join('_');
 					/** 聚合为 json 的字段列表 */
@@ -392,7 +393,7 @@ export const spliceSelectSQLByConditions = (fnParams: {
 							})
 							.map(f => {
 								const index = f.fromPath.findIndex(path => path.fieldId === parentField.id && path.entityId === parentEntity.id);
-								const mappingFieldName = `MAPPING_${[...(f.fromPath.map(path => entityFieldMap[path.entityId + path.fieldId].name)), entityFieldMap[f.entityId + f.fieldId].name].join('_')}`;
+								const mappingFieldName = `MAPPING_${joinArray(...(f.fromPath.map(path => entityFieldMap[path.entityId + path.fieldId].name)), entityFieldMap[f.entityId + f.fieldId].name).join('_')}`;
 								
 								if (f.fromPath.length - 1 === index) {
 									return `GROUP_CONCAT(${entityFieldMap[f.entityId + f.fieldId].name} SEPARATOR \"${SEPARATOR}\") ${mappingFieldName}`;
@@ -415,7 +416,7 @@ export const spliceSelectSQLByConditions = (fnParams: {
 							})
 							.map(f => {
 								const index = f.fromPath.findIndex(path => path.fieldId === parentField.id && path.entityId === parentEntity.id);
-								const mappingFieldName = `MAPPING_${[...(f.fromPath.map(path => entityFieldMap[path.entityId + path.fieldId].name)), entityFieldMap[f.entityId + f.fieldId].name].join('_')}`;
+								const mappingFieldName = `MAPPING_${joinArray(...(f.fromPath.map(path => entityFieldMap[path.entityId + path.fieldId].name)), entityFieldMap[f.entityId + f.fieldId].name).join('_')}`;
 							
 								if (f.fromPath.length - 1 === index) {
 									return `${entityFieldMap[f.entityId + f.fieldId].name} AS ${mappingFieldName}`;
@@ -484,7 +485,7 @@ export const spliceSelectSQLByConditions = (fnParams: {
 				}
 				
 				if (order.fromPath.length) {
-					orderList.push(`MAPPING_${[...order.fromPath.map(path => entityFieldMap[path.entityId + path.fieldId].name), entityField.name].join('_')} ${order.order}`);
+					orderList.push(`MAPPING_${joinArray(...order.fromPath.map(path => entityFieldMap[path.entityId + path.fieldId].name), entityField.name).join('_')} ${order.order}`);
 				} else {
 					fieldList.push(`${entityField.name} ${order.order}`);
 				}
