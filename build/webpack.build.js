@@ -28,8 +28,22 @@ module.exports = {
   },
   module: {
     rules: [
+	    {
+		    test: /selectSQL\.ts$/,
+		    use: [
+			    {
+				    loader: 'ts-loader',
+				    options: {
+					    silent: true,
+					    transpileOnly: true,
+					    context: path.resolve(__dirname, '../'),
+					    configFile: 'tsconfig-sql.json'
+				    },
+			    },
+		    ],
+	    },
       {
-        test: /\.tsx?$/,
+        test: /(?<!selectSQL)\.tsx?$/,
         use: [
           {
             loader: 'babel-loader',

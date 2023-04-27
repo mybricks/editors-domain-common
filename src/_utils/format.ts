@@ -1,6 +1,5 @@
 /* eslint-disable no-useless-escape */
-import { Entity, Field, SelectedField } from "../_types/domain";
-import { FieldBizType } from "../_constants/field";
+import { Field, SelectedField } from "../_types/domain";
 
 /** 转化时间 */
 export const formatTime = (date, format) => {

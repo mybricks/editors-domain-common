@@ -1,11 +1,13 @@
 import React from 'react';
+// @ts-ignore
 import { evt, useComputed, useObservable } from '@mybricks/rxui';
 import QueryCtx from './QueryCtx';
 import Where from './Where';
 import { AnyType } from '../_types';
+import PopView from '../_common/pop-view';
+import { Entity } from '../_types/domain';
 
 import css from './QueryEditor.less';
-import PopView from "../_common/pop-view";
 
 let ctx: QueryCtx;
 
@@ -25,7 +27,7 @@ export default function QueryEditor({ domainModel, fieldModel, value, close }: A
 		const myEntity = fieldModel.parent;
 
 		const entityInfo = {};
-		const entityAry = [];
+		const entityAry: Entity[] = [];
 		domainModel.entityAry.forEach(et => {
 			if (fieldModel.isBizTypeOfSystem()) {
 				if (et.id === fieldModel.relationEntityId) {
