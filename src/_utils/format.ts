@@ -40,16 +40,16 @@ export const spliceDataFormatString = (entityFieldMap: Record<string, Field>, fi
 	const deepFormatCodeString = `
 		const deepFormat = (item, path) => {
 			if (!path.length) { return; }
-			const key = path[0];
+			const key = path[0].key;
 			if (path.length === 1) {
 				if (Array.isArray(item)) {
 					item.forEach(i => {
 						i['_' + key] = i[key];
-						i[key] = FORMAT_MAP.formatTime(new Date(i[key]));
+						i[key] = FORMAT_MAP.formatTime(new Date(i[key]), path[0].showFormat);
 					})
 				} else {
 					item['_' + key] = item[key];
-					item[key] = FORMAT_MAP.formatTime(new Date(item[key]));
+					item[key] = FORMAT_MAP.formatTime(new Date(item[key]), path[0].showFormat);
 				}
 				
 				return ;
@@ -65,7 +65,7 @@ export const spliceDataFormatString = (entityFieldMap: Record<string, Field>, fi
 		};
 	`;
 	
-	const needFormatPaths = fields.map(field => [...field.fromPath.map(p => entityFieldMap[p.entityId + p.fieldId].name), entityFieldMap[field.entityId + field.fieldId].name]);
+	const needFormatPaths = fields.map(field => [...field.fromPath.map(p => ({ key: entityFieldMap[p.entityId + p.fieldId].name })), { key: entityFieldMap[field.entityId + field.fieldId].name, showFormat: entityFieldMap[field.entityId + field.fieldId].showFormat }]);
 	return `
 		${deepFormatCodeString}
 		rows = Array.from(rows || []).map(item => {
