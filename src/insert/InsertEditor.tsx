@@ -7,7 +7,7 @@ import { AnyType } from '../_types';
 import { getFieldSchema } from '../_utils/field';
 import PopView from '../_common/pop-view';
 import { formatConAryByEntity, formatEntitiesByOriginEntities } from '../_utils/entity';
-import { DefaultValueWhenCreate, FieldBizType } from '../_constants/field';
+import { FieldBizType } from '../_constants/field';
 
 import styles from './InsertEditor.less';
 
@@ -21,10 +21,13 @@ const InsertEditor = ({ domainModel, paramSchema, value, close, batch }: AnyType
 			val = JSON.parse(JSON.stringify(oriVal));
 			
 			/** 实体信息可能存在变更，每次使用最新的实体信息 */
-			const format = formatEntitiesByOriginEntities(val.entities, domainModel.entityAry);
+			const format = formatEntitiesByOriginEntities(
+				val.entities,
+				domainModel.entityAry.filter(e => e.id === val.entities[0]?.id).map((entity: AnyType) => entity.toJSON())
+			);
 			const currentEntity = format.find(e => e.selected) ?? format[0];
 			val.entities = currentEntity ? [currentEntity] : [];
-			val.conAry = formatConAryByEntity(val.conAry, currentEntity);
+			val.conAry = formatConAryByEntity(val.conAry, currentEntity, paramSchema);
 		} else {
 			const entity = domainModel.entityAry.filter(e => !e.isSystem)[0];
 			
@@ -60,7 +63,6 @@ const InsertEditor = ({ domainModel, paramSchema, value, close, batch }: AnyType
 					!field.isPrimaryKey
 					&& field.bizType !== FieldBizType.MAPPING
 					&& !field.isPrivate
-					&& field.defaultValueWhenCreate !== DefaultValueWhenCreate.CURRENT_TIME
 				) {
 					properties[field.name] = getFieldSchema(field.dbType);
 				}

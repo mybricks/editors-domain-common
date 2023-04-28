@@ -28,16 +28,16 @@ export type T_Entity = {
 export default class InsertCtx {
 	domainModel: AnyType;
 
-	value: {
+	value!: {
 		get, set
 	};
 
-	paramSchema: {
+	paramSchema!: {
 		type,
 		properties
 	};
 
-	nowValue: {
+	nowValue!: {
     desc: string
     script?: string
 		entities: T_Entity[],
@@ -46,7 +46,7 @@ export default class InsertCtx {
 
 	close;
 
-	blurAry = [];
+	blurAry: AnyType[] = [];
 	batch?: boolean;
 
 
@@ -78,6 +78,7 @@ export default class InsertCtx {
 					
 					const con = conAry.find(con => con.to === `/${field.name}`);
 					if (con) {
+						/** 多级结构 */
 						const fromPropName = con.from.substring(con.from.indexOf("/") + 1);
 						const q = getQuoteByFieldType(field.dbType);
 						valueAry.push(`\${(params.${fromPropName} === undefined || params.${fromPropName} === null) ? null : \`${q}\${params.${fromPropName}}${q}\`}`);

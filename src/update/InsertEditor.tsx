@@ -22,10 +22,13 @@ export default function InsertEditor({ domainModel, paramSchema, value, close }:
 			val = JSON.parse(JSON.stringify(oriVal));
 			
 			/** 实体信息可能存在变更，每次使用最新的实体信息 */
-			const format = formatEntitiesByOriginEntities(val.entities, domainModel.entityAry);
+			const format = formatEntitiesByOriginEntities(
+				val.entities,
+				domainModel.entityAry.filter(e => e.id === val.entities[0]?.id).map((entity: AnyType) => entity.toJSON())
+			);
 			const currentEntity = format.find(e => e.selected) ?? format[0];
 			val.entities = currentEntity ? [currentEntity] : [];
-			val.conAry = formatConAryByEntity(val.conAry, currentEntity);
+			val.conAry = formatConAryByEntity(val.conAry, currentEntity, paramSchema);
 		} else {
 			const entity = domainModel.entityAry.filter(e => !e.isSystem)[0];
 			

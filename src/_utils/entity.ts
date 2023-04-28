@@ -1,6 +1,5 @@
 import { Condition, Entity, Field, Order, SelectedField } from '../_types/domain';
 import { AnyType } from '../_types';
-import { DefaultValueWhenCreate, FieldBizType } from '../_constants/field';
 
 /**
  * 实体信息可能存在变更，每次使用最新的实体信息
@@ -139,12 +138,24 @@ export const formatOrderByOriginEntities = (fields: SelectedField[], orders: Ord
 };
 
 /** 格式化无效的连接 */
-export const formatConAryByEntity = (conAry: Array<{ from: string; to: string }>, entity: Entity | null) => {
-	return entity?.fieldAry.map(field => {
-		/** 业务设置的字段 */
-		if (!field.isPrimaryKey && !field.isPrivate && field.bizType !== FieldBizType.MAPPING && field.defaultValueWhenCreate !== DefaultValueWhenCreate.CURRENT_TIME) {
-			return conAry.find(con => con.to === `/${field.name}`);
+export const formatConAryByEntity = (conAry: Array<{ from: string; to: string }>, entity: Entity | null, paramSchema: AnyType) => {
+	const fieldAryNames = entity?.fieldAry.map(field => field.name) || [];
+	
+	return conAry.filter(con => {
+		const toName = con.to.split('/').pop() as string;
+		const fromName = con.from.split('/').slice(1);
+		let effect = fieldAryNames.includes(toName);
+		let curSchema = paramSchema;
+		
+		/** 参数变化删除连线 */
+		while (fromName.length && effect) {
+			const key = fromName.shift();
+			
+			curSchema = (curSchema?.properties || curSchema?.items?.properties)?.[key as string];
+			effect = effect && !!curSchema;
 		}
-	}).filter(Boolean) || [];
+		
+		return effect;
+	});
 };
 
