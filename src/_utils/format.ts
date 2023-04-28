@@ -38,7 +38,7 @@ export const formatTime = (date, format) => {
 export const spliceDataFormatString = (entityFieldMap: Record<string, Field>, fields: SelectedField[] = []) => {
 	const deepFormatCodeString = `
 		const deepFormat = (item, path) => {
-			if (!path.length) { return; }
+			if (!path.length || !item) { return; }
 			const key = path[0].key;
 			if (path.length === 1) {
 				if (Array.isArray(item)) {
