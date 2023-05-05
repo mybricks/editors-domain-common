@@ -3,7 +3,9 @@ import { FieldBizType, SQLLimitType, SQLOrder, SQLWhereJoiner } from '../_consta
 import { spliceSelectSQLByConditions } from '../_utils/selectSQL';
 import { safeEncodeURIComponent } from '../_utils/util';
 import { formatTime, spliceDataFormatString } from '../_utils/format';
-import { Field, SelectedField } from '../_types/domain';
+import { Entity, Field, SelectedField } from '../_types/domain';
+import { getSchemaTypeByFieldType } from "../_utils/field";
+import { getEntityFieldMap } from "../_utils/entity";
 
 
 export type T_Field = {
@@ -100,6 +102,56 @@ export default class QueryCtx {
 			}
 		});
 	}
+	
+	getOutputSchema() {
+		const { fields, entities } = this.nowValue;
+		const entityFieldMap: Record<string, Field> = getEntityFieldMap(entities as Entity[]);
+		const originSchema = this.showPager ? {
+			type: 'object',
+			properties: {
+				list: { type: 'array', items: { type: 'object', properties: {} } },
+				total: { type: 'number' }
+			}
+		} : {
+			type: 'array',
+			items: { type: 'object', properties: {} }
+		};
+		
+		fields.forEach(field => {
+			const paths = [...field.fromPath, field];
+			let curSchema = this.showPager ? originSchema.properties!.list.items.properties : originSchema.items!.properties as AnyType;
+			
+			for (let i = 0; i < paths.length; i++) {
+				const path = paths[i];
+				const entityField = entityFieldMap[path.entityId + path.fieldId];
+				
+				if (i < paths.length - 1) {
+					const isForeigner = entityField.mapping?.type === 'foreigner';
+					
+					if (!curSchema[entityField.name]) {
+						curSchema[entityField.name] = isForeigner ? { type: 'array', items: { type: 'object', properties: {} } } : { type: 'object', properties: {} };
+						
+						if (entityField.bizType !== FieldBizType.MAPPING) {
+							curSchema['_' + entityField.name] = { type: getSchemaTypeByFieldType(entityField) };
+						}
+					} else if (curSchema[entityField.name].type !== 'array' && curSchema[entityField.name].type !== 'object') {
+						curSchema['_' + entityField.name] = curSchema[entityField.name];
+						curSchema[entityField.name] = isForeigner ? { type: 'array', items: { type: 'object', properties: {} } } : { type: 'object', properties: {} };
+					}
+					
+					curSchema = isForeigner ? curSchema[entityField.name]?.items?.properties : curSchema[entityField.name]?.properties as AnyType;
+				} else {
+					curSchema[entityField.name] = { type: getSchemaTypeByFieldType(entityField) };
+					
+					if (entityField.bizType === FieldBizType.DATETIME && entityField.showFormat) {
+						curSchema['_' + entityField.name] = { type: 'number' };
+					}
+				}
+			}
+		});
+		
+		return originSchema;
+	}
 
 	save() {
 		const { entities, conditions, orders, limit, pageIndex, fields } = this.nowValue;
@@ -110,16 +162,7 @@ export default class QueryCtx {
 			const currentFieldIds = fields.filter(f => f.entityId === currentEntity.id && !f.fromPath.length).map(f => f.fieldId);
 			desc = `${currentEntity.name} 的 ${currentEntity.fieldAry.filter(f => currentFieldIds.includes(f.id)).map(f => f.name).join(', ')}`;
 			/** 实体 + 字段的 Map */
-			const entityFieldMap: Record<string, Field> = {};
-			entities.forEach(entity => {
-				entity.fieldAry.forEach(field => {
-					entityFieldMap[entity.id + field.id] = field as Field;
-					
-					if (entity.isSystem && !field.isPrivate) {
-						entityFieldMap[entity.id + field.name] = field as Field;
-					}
-				});
-			});
+			const entityFieldMap: Record<string, Field> = getEntityFieldMap(entities as Entity[]);
 			const needFormatFields = fields.filter(f => {
 				const curField = entityFieldMap[f.entityId + f.fieldId];
 				
@@ -160,7 +203,7 @@ export default class QueryCtx {
 		}
 
 		this.nowValue.desc = desc;
-		this.value.set(this.nowValue);
+		this.value.set({ ...this.nowValue, outputSchema: this.getOutputSchema() });
 
 		this.close();
 	}

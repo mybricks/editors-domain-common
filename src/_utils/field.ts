@@ -95,3 +95,34 @@ export const getValueByOperatorAndFieldType = (dbType: string, operator: string,
 	
 	return getValueByFieldType(dbType, val);
 };
+
+export const getSchemaTypeByFieldType = (field: Field) => {
+	switch (field.bizType) {
+	case FieldBizType.ENUM:
+		return 'enum';
+	case FieldBizType.DATETIME:
+		return field.showFormat ? 'string' : 'number';
+	case FieldBizType.STRING:
+		return 'string';
+	case FieldBizType.NUMBER:
+		return 'number';
+	case FieldBizType.HREF:
+		return 'string';
+	case FieldBizType.PHONE:
+		return 'string';
+	case FieldBizType.EMAIL:
+		return 'string';
+	case FieldBizType.IMAGE:
+		return 'string';
+	case FieldBizType.APPEND_FILE:
+		return 'string';
+	case FieldBizType.RELATION:
+		return 'number';
+	case FieldBizType.SYS_USER:
+		return 'number';
+	case FieldBizType.SYS_USER_CREATOR:
+		return 'number';
+	case FieldBizType.SYS_USER_UPDATER:
+		return 'number';
+	}
+};
