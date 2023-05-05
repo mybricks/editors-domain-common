@@ -4,21 +4,22 @@ import React, { useEffect, useState } from 'react';
 import { getPinTypeStyle, isTypeMatch, isXpathMatch, getTypeTitleBySchema } from './utils';
 import Ctx from './Ctx';
 import { XPATH_ARRAY } from './constants';
+import { AnyType } from '../../_types';
 
 import css from './FromRender.less';
 
 
 class MyCtx {
-	title: string;
+	title!: string;
 
   @IgnoreObservable
-  	schema: {};
+  	schema!: Record<string, unknown>;
 }
 
 let edtCtx: Ctx;
 let myCtx: MyCtx;
 
-export default function FromRender({ title, schema }: { schema: {} }) {
+export default function FromRender({ title, schema }: { title: string; schema: Record<string, unknown> }) {
 	edtCtx = observe(Ctx, { from: 'parents' });
 
 	myCtx = useObservable(MyCtx, next => {
@@ -33,11 +34,11 @@ export default function FromRender({ title, schema }: { schema: {} }) {
 	) : null;
 }
 
-function ProAry({ items, xpath }) {
+function ProAry({ items, xpath }: AnyType) {
 	return items ? <ProItem val={items} xpath={`${xpath}/${XPATH_ARRAY}`}/> : null;
 }
 
-function ProObj({ properties, xpath }) {
+function ProObj({ properties, xpath }: AnyType) {
 	return properties ? (
 		<>
 			{
@@ -108,22 +109,23 @@ function ProItem({ val, keyName, xpath, root }: { val, keyName?, xpath?, root? }
 		<div key={keyName}
 			className={`${css.item} ${root ? css.rootItem : ''}`}>
 			<div className={`${css.keyName} ${hasCon ? css.done : ''} ${matchMover ? css.match : ''}`}
-				onMouseOver={e => {
+				onMouseOver={() => {
 					if (matchMover) {
 						edtCtx.hoverFromXpath = xpath;
 					}
 				}}
-				onMouseOut={e => {
+				onMouseOut={() => {
+					// @ts-ignore
 					edtCtx.hoverFromXpath = void 0;
 				}}>
 				<span className={`${css.point}`} data-xpath={xpath}
 					style={{
-						borderColor: st.strokeColor,
-						backgroundColor: st.strokeColor,
+						borderColor: st?.strokeColor,
+						backgroundColor: st?.strokeColor,
 						visibility: hasCon ? 'visible' : 'hidden'
 					}}></span>
 				{keyName}
-				<span className={css.typeName} style={{ color: st.strokeColor }}>
+				<span className={css.typeName} style={{ color: st?.strokeColor }}>
 					{root ? myCtx.title : `（${getTypeTitleBySchema(val)}）`}
 				</span>
 			</div>

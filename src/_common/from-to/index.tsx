@@ -5,10 +5,11 @@ import FromRender from './FromRender';
 import ToRender from './ToRender';
 import Ctx from './Ctx';
 import Con from './Con';
+import { AnyType } from '../../_types';
 
 import css from './index.less';
 
-export default function FromTo({ conAry, from, to, addBlurFn }) {
+export default function FromTo({ conAry, from, to, addBlurFn }: AnyType) {
 	const ctx = useObservable(Ctx, next => {
 		next({
 			conAry: conAry || [],
@@ -102,8 +103,8 @@ function Cons() {
 	);
 }
 
-function ConMenu({ ctx }) {
-	let style = {} as any;
+function ConMenu({ ctx }: AnyType) {
+	let style = {} as AnyType;
 	const fc = ctx.focusCon;
 	if (fc) {
 		style.display = 'block';

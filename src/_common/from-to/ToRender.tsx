@@ -1,22 +1,24 @@
+// @ts-ignore
 import { dragable, IgnoreObservable, observe, useComputed, useObservable } from "@mybricks/rxui";
 import React, { useCallback, useEffect, useState } from "react";
 import { getPinTypeStyle, getTypeTitleBySchema } from "./utils";
 import Ctx from "./Ctx";
 import { XPATH_ARRAY } from "./constants";
+import { AnyType } from "../../_types";
 
 import css from './ToRender.less';
 
 class MyCtx {
-	title: string;
+	title!: string;
 
   @IgnoreObservable
-  	schema: {};
+  	schema!: Record<string, unknown>;
 }
 
 let edtCtx: Ctx;
 let myCtx: MyCtx;
 
-export default function ToRender({ title, schema }: { schema: {} }) {
+export default function ToRender({ title, schema }: { title: string; schema: Record<string, unknown> }) {
 	edtCtx = observe(Ctx, { from: 'parents' });
 	myCtx = useObservable(MyCtx, next => {
 		next({ title, schema });
@@ -30,11 +32,11 @@ export default function ToRender({ title, schema }: { schema: {} }) {
 	) : null;
 }
 
-function ProAry({ items, xpath }) {
+function ProAry({ items, xpath }: AnyType) {
 	return items ? <ProItem val={items} xpath={`${xpath}/${XPATH_ARRAY}`}/> : null;
 }
 
-function ProObj({ properties, xpath }) {
+function ProObj({ properties, xpath }: AnyType) {
 	return properties ? (
 		<>
 			{
@@ -160,12 +162,12 @@ function ProItem({ val, keyName, xpath, root }: { val, keyName?, xpath?, root? }
 					!hasCon && !hasChildrenCon && !hasParentCon ? (
 						<span data-not-connect={1}
 							className={`${css.point}`}
-							style={{ left: -7, top: 11, borderColor: st.strokeColor, backgroundColor: st.fillColor }}
+							style={{ left: -7, top: 11, borderColor: st?.strokeColor, backgroundColor: st?.fillColor }}
 							onMouseDown={mouseDown}></span>
 					) : null
 				}
 				{keyName}
-				<span className={css.typeName} style={{ color: st.strokeColor }}>
+				<span className={css.typeName} style={{ color: st?.strokeColor }}>
 					{root ? myCtx.title : `（${getTypeTitleBySchema(val)}）`}
 				</span>
 			</div>
