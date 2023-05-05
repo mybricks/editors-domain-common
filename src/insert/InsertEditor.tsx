@@ -64,7 +64,7 @@ const InsertEditor = ({ domainModel, paramSchema, value, close, batch }: AnyType
 					&& field.bizType !== FieldBizType.MAPPING
 					&& !field.isPrivate
 				) {
-					properties[field.name] = getFieldSchema(field.dbType);
+					properties[field.name] = getFieldSchema(field);
 				}
 			});
 			return rtn;

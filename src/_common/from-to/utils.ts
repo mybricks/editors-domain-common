@@ -131,29 +131,20 @@ export function isTypeEqual(schema0, schema1) {
 	return false;
 }
 
+/** schema0 入参字段类型，schema1 实体字段类型 */
 export function isTypeMatch(schema0, schema1) {
 	if (isTypeEqual(schema0, schema1)) {
 		return true;
 	} else if (schema1.type === 'any') {
 		return true;
 	} else if (schema0.type === 'boolean') {
-		if (schema1.type.match(/number|string/gi)) {
-			return true;
-		} else {
-			return false;
-		}
+		return !!schema1.type.match(/number|string/gi);
 	} else if (schema0.type === 'number') {
-		if (schema1.type.match(/boolean|string/gi)) {
-			return true;
-		} else {
-			return false;
-		}
+		return !!schema1.type.match(/boolean|string/gi);
 	} else if (schema0.type === 'string') {
-		if (schema1.type.match(/boolean/gi)) {
-			return true;
-		} else {
-			return false;
-		}
+		return !!schema1.type.match(/boolean|enum/gi);
+	} else if (schema0.type === 'enum') {
+		return !!schema1.type.match(/string|enum/gi);
 	} else {
 		return false;
 	}

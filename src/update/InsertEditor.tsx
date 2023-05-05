@@ -65,7 +65,7 @@ export default function InsertEditor({ domainModel, paramSchema, value, close }:
 			
 			nowEntity.fieldAry.forEach((field: AnyType) => {
 				if (!field.isPrimaryKey && field.bizType !== FieldBizType.MAPPING && !field.isPrivate) {
-					properties[field.name] = getFieldSchema(field.dbType);
+					properties[field.name] = getFieldSchema(field);
 				}
 			});
 			return rtn;

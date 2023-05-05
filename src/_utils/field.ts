@@ -1,11 +1,12 @@
-import { FieldDBType, SQLOperator } from '../_constants/field';
+import { FieldBizType, FieldDBType, SQLOperator } from '../_constants/field';
+import { Field } from "../_types/domain";
 
 /** 获取数据库字段类型 schema */
-export const getFieldSchema = (dbType: string) => {
+export const getFieldSchema = (field: Field) => {
 	let type = '';
-	switch (dbType) {
+	switch (field.dbType) {
 	case FieldDBType.VARCHAR: {
-		type = 'string';
+		type = field.bizType === FieldBizType.ENUM ? 'enum' : 'string';
 		break;
 	}
 	case FieldDBType.BIGINT: {
