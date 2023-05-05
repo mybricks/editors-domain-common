@@ -79,9 +79,11 @@ export default class InsertCtx {
 					const con = conAry.find(con => con.to === `/${field.name}`);
 					if (con) {
 						/** 多级结构 */
-						const fromPropName = con.from.substring(con.from.indexOf("/") + 1);
+						const fromNames = con.from.split("/").filter(Boolean);
+						const value = ['params', ...fromNames.map(key => key)].join('.');
 						const q = getQuoteByFieldType(field.dbType);
-						valueAry.push(`\${(params.${fromPropName} === undefined || params.${fromPropName} === null) ? null : \`${q}\${params.${fromPropName}}${q}\`}`);
+						
+						valueAry.push(`\${(${value} === undefined || ${value} === null) ? null : \`${q}\${${value}}${q}\`}`);
 					} else {
 						if (field.isPrimaryKey) {
 							valueAry.push("${genUniqueId()}");
