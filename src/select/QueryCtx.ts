@@ -135,7 +135,9 @@ export default class QueryCtx {
 							curSchema['_' + entityField.name] = { type: getSchemaTypeByFieldType(entityField) };
 						}
 					} else if (curSchema[entityField.name].type !== 'array' && curSchema[entityField.name].type !== 'object') {
-						curSchema['_' + entityField.name] = curSchema[entityField.name];
+						if (entityField.bizType !== FieldBizType.MAPPING) {
+							curSchema['_' + entityField.name] = curSchema[entityField.name];
+						}
 						curSchema[entityField.name] = isForeigner ? { type: 'array', items: { type: 'object', properties: {} } } : { type: 'object', properties: {} };
 					}
 					
@@ -201,7 +203,7 @@ export default class QueryCtx {
 		} else {
 			this.nowValue.script = void 0;
 		}
-
+		
 		this.nowValue.desc = desc;
 		this.value.set({ ...this.nowValue, outputSchema: this.getOutputSchema() });
 
