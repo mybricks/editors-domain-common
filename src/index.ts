@@ -3,8 +3,8 @@ import EditorSelect from './select';
 import EditorInsert from './insert';
 import EditorUpdate from './update';
 import EditorDelete from './delete';
-import EditorSqlAI from './sqlAI';
 import EditorMapping from './mapping';
+import EditorView from './view';
 import { AnyType } from './_types';
 import DefaultValue from "./defaultValue";
 
@@ -16,7 +16,7 @@ const EditorMap: Record<string, unknown> = {
 	'DOMAIN.DBDELETE': EditorDelete,
 	'DOMAIN.MAPPING': EditorMapping,
 	'DOMAIN.DEFAULTVALUE': DefaultValue,
-	'DOMAIN.AISQL': EditorSqlAI
+	'DOMAIN.SELECT': EditorView,
 };
 
 function Editors(editConfig: { type: string; render: AnyType; }, extOpts: Record<string, unknown>): AnyType {
@@ -26,7 +26,7 @@ function Editors(editConfig: { type: string; render: AnyType; }, extOpts: Record
 	} catch (err) {
 		console.error(err);
 	}
-		
+	
 	if (typeCheck(editor, 'function')) {
 		return editor?.({ editConfig }, extOpts);
 	}
@@ -37,6 +37,6 @@ function Editors(editConfig: { type: string; render: AnyType; }, extOpts: Record
 	
 	return;
 }
-	
+
 export { Editors };
 
