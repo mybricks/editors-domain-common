@@ -1,6 +1,4 @@
-import DomainViewModel from "../../../DomainViewModel";
-import FieldModel from "../../../FieldModel";
-import EntityModel from "../../../EntityModel";
+import { AnyType } from '../_types';
 
 export type T_Field = {
   id,
@@ -20,34 +18,34 @@ export type T_Entity = {
 export type T_Condition = string
 
 export default class QueryCtx {
-	editorEle: HTMLElement;
+	editorEle!: HTMLElement;
 
-	paramSchema: {};
+	paramSchema!: Record<string, unknown>;
 
-	entityInfo: {
+	entityInfo!: {
     [id: string]: {
       type: 'foreigner' | 'primary',
-      field: FieldModel
+      field: AnyType
     }
   };
 
-	entityAry: EntityModel[];
+	entityAry!: AnyType[];
 
-	domainModel: DomainViewModel;
+	domainModel: AnyType;
 
 	isEntityForeigner(id: string) {
 		return this.entityInfo[id].type === 'foreigner';
 	}
 
-	fieldModel: FieldModel;
+	fieldModel: AnyType;
 
-	value: {
+	value!: {
     get, set
   };
 
-	nowValue: {
+	nowValue!: {
     desc: string
-    sql: string
+    sql?: string
     entity: T_Entity,
     type: 'foreigner' | 'primary'
     fieldJoiner: string,
@@ -56,9 +54,9 @@ export default class QueryCtx {
 
 	close;
 
-	blurAry = [];
+	blurAry: Array<() => void> = [];
 
-	addBlur(fn) {
+	addBlur(fn: () => void) {
 		this.blurAry.push(fn);
 	}
 

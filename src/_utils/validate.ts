@@ -1,18 +1,18 @@
-import { Entity } from "../_types/domain";
-import { FieldBizType, FieldDBType } from "../_constants/field";
-import { AnyType } from "../_types";
+import { Entity } from '../_types/domain';
+import { FieldBizType, FieldDBType } from '../_constants/field';
+import { AnyType } from '../_types';
 
 /** 根据连接获取值校验的 script 片段 */
 export const generateValidateScript = (entity: Entity, conAry: Array<{ from: string; to: string }>) => {
-	let validateScript = "for(let key of Object.keys(params)) {\n" +
-		"if (params[key] === undefined || params[key] === null) { continue; }\n";
+	let validateScript = 'for(let key of Object.keys(params)) {\n' +
+		'if (params[key] === undefined || params[key] === null) { continue; }\n';
 	const needValueFields = entity.fieldAry
 		.filter(field => field.bizType !== FieldBizType.MAPPING && !field.isPrimaryKey && !field.isPrivate);
 	const stringFieldNames = needValueFields
 		.filter(field => (field.dbType === FieldDBType.VARCHAR || field.dbType === FieldDBType.MEDIUMTEXT) && field.bizType !== FieldBizType.ENUM)
 		.map(field => conAry.find(con => con.to === `/${field.name}`))
 		.filter(Boolean)
-		.map((con: AnyType) => `"${con.from.substring(con.from.indexOf("/") + 1)}"`)
+		.map((con: AnyType) => `"${con.from.substring(con.from.indexOf('/') + 1)}"`)
 		.join(', ');
 	
 	if (stringFieldNames) {
@@ -26,7 +26,7 @@ export const generateValidateScript = (entity: Entity, conAry: Array<{ from: str
 		.filter(field => field.dbType === FieldDBType.BIGINT)
 		.map(field => conAry.find(con => con.to === `/${field.name}`))
 		.filter(Boolean)
-		.map((con: AnyType) => `"${con.from.substring(con.from.indexOf("/") + 1)}"`)
+		.map((con: AnyType) => `"${con.from.substring(con.from.indexOf('/') + 1)}"`)
 		.join(', ');
 	
 	if (bigintFieldNames) {
@@ -42,7 +42,7 @@ export const generateValidateScript = (entity: Entity, conAry: Array<{ from: str
 			const con = conAry.find(con => con.to === `/${field.name}`);
 		
 			if (con) {
-				const fromPropName = con.from.substring(con.from.indexOf("/") + 1);
+				const fromPropName = con.from.substring(con.from.indexOf('/') + 1);
 			
 				validateScript += `if (key === "${fromPropName}") {
 						const enumValues = ${JSON.stringify(field.enumValues ?? [])};

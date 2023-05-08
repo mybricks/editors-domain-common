@@ -1,8 +1,8 @@
-import css from "./Con.less";
-import React, { useCallback, useMemo, useRef } from "react";
+import css from './Con.less';
+import React, { useCallback, useMemo, useRef } from 'react';
 
-import { evt, getPosition, observe, useComputed, uuid } from "@mybricks/rxui";
-import Ctx from "./Ctx";
+import { evt, getPosition, observe, useComputed, uuid } from '@mybricks/rxui';
+import Ctx from './Ctx';
 
 export default function Con({ fromXpath, toXpath }) {
 	const edtCtx = observe(Ctx, { from: 'parents' });

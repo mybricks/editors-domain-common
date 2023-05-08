@@ -1,5 +1,5 @@
 import { FieldBizType, FieldDBType, SQLOperator } from '../_constants/field';
-import { Field } from "../_types/domain";
+import { Field } from '../_types/domain';
 
 /** 获取数据库字段类型 schema */
 export const getFieldSchema = (field: Field) => {
@@ -63,13 +63,13 @@ export const getFieldConditionAry = (dbType: string): Array<{ label: string; val
 export const getQuoteByFieldType = (dbType: string) => {
 	switch (dbType) {
 	case FieldDBType.VARCHAR: {
-		return "'";
+		return '\'';
 	}
 	case FieldDBType.BIGINT: {
 		return '';
 	}
 	case FieldDBType.MEDIUMTEXT: {
-		return "'";
+		return '\'';
 	}
 	default: return '';
 	}

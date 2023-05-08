@@ -1,12 +1,12 @@
 /* eslint-disable no-useless-escape */
-import { Field, SelectedField } from "../_types/domain";
+import { Field, SelectedField } from '../_types/domain';
 
 /** 转化时间 */
 export const formatTime = (date, format) => {
 	if (date == null) {
-		return "";
+		return '';
 	}
-	const pad = n => n < 10 ? "0" + n : n;
+	const pad = n => n < 10 ? '0' + n : n;
 	const year = date.getFullYear(),
 		yearShort = year.toString().substring(2),
 		month = date.getMonth() + 1,

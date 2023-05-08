@@ -1,4 +1,4 @@
-import React, {FC, ReactNode, useCallback} from 'react';
+import React, { FC, ReactNode } from 'react';
 
 import styles from './index.less';
 

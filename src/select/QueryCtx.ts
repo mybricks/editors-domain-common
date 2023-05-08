@@ -4,8 +4,8 @@ import { spliceSelectSQLByConditions } from '../_utils/selectSQL';
 import { safeEncodeURIComponent } from '../_utils/util';
 import { formatTime, spliceDataFormatString } from '../_utils/format';
 import { Entity, Field, SelectedField } from '../_types/domain';
-import { getSchemaTypeByFieldType } from "../_utils/field";
-import { getEntityFieldMap } from "../_utils/entity";
+import { getSchemaTypeByFieldType } from '../_utils/field';
+import { getEntityFieldMap } from '../_utils/entity';
 
 
 export type T_Field = {

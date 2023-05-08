@@ -1,7 +1,7 @@
 import React, { useCallback, useState } from 'react';
 import { createPortal } from 'react-dom';
 import InsertEditor from './InsertEditor';
-import { AnyType } from "../_types";
+import { AnyType } from '../_types';
 
 // @ts-ignore
 import css from './index.less';

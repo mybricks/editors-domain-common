@@ -1,9 +1,9 @@
 import React, { FC, useCallback, useState } from 'react';
-import QueryCtx from "./QueryCtx";
-import { AnyType } from "../_types";
-import { Entity, Field } from "../_types/domain";
+import QueryCtx from './QueryCtx';
+import { AnyType } from '../_types';
+import { Entity, Field } from '../_types/domain';
 
-import css from "./QueryEditor.less";
+import css from './QueryEditor.less';
 
 interface SelectFromProps {
 	field: Field;

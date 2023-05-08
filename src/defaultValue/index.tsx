@@ -1,5 +1,5 @@
 import React, { FC, ReactNode, useCallback, useRef, useState } from 'react';
-import { Input, Select } from "antd";
+import { Input, Select } from 'antd';
 import { AnyType } from '../_types';
 import { DefaultValueWhenCreate, FieldBizType, FieldDBType } from '../_constants/field';
 
@@ -97,7 +97,7 @@ const DefaultValue: FC = ({ editConfig: { value, options } }: AnyType) => {
 			/>
 		);
 	}
-		
+	
 	return (
 		<div className={styles.defaultValue} ref={ref => ref && (containerRef.current = ref)}>
 			{formItem}
@@ -115,7 +115,7 @@ const DefaultDate: FC<{
 	const { value, onChange, onError, containerRef } = props;
 	const [type, setType] = useState(
 		value !== undefined
-			? (value === null ? "" : (value === DefaultValueWhenCreate.CURRENT_TIME ? value : 'custom'))
+			? (value === null ? '' : (value === DefaultValueWhenCreate.CURRENT_TIME ? value : 'custom'))
 			: ''
 	);
 	const [curValue, setCurValue] = useState(

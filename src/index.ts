@@ -6,7 +6,7 @@ import EditorDelete from './delete';
 import EditorMapping from './mapping';
 import EditorView from './view';
 import { AnyType } from './_types';
-import DefaultValue from "./defaultValue";
+import DefaultValue from './defaultValue';
 
 
 const EditorMap: Record<string, unknown> = {
