@@ -26,7 +26,7 @@ export default function ({ editConfig: { value, options } }: AnyType, { domainMo
 			</div>
 			{
 				visible ? createPortal(
-					<ViewEditor domainModel={domainModel} value={value} close={close} />,
+					<ViewEditor fromEntity={options.fromEntity} domainModel={domainModel} value={value} close={close} />,
 	        canvasEle
 				) : null
 			}

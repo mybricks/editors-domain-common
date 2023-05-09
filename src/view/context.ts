@@ -1,7 +1,9 @@
 import { AnyType } from '../_types';
+import { Entity } from '../_types/domain';
 
 export default class ViewCtx {
 	domainModel: AnyType;
+	fromEntity!: Entity;
 	
 	value!: {
 		get(): AnyType;
@@ -13,7 +15,7 @@ export default class ViewCtx {
 	
 	blurAry: Array<() => void> = [];
 	
-	addBlur(fn) {
+	addBlur(fn: () => void) {
 		this.blurAry.push(fn);
 	}
 	

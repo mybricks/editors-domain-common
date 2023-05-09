@@ -6,16 +6,18 @@ import ViewCtx from './context';
 import { AnyType } from '../_types';
 import Where from '../_common/where';
 import { SQLWhereJoiner } from '../_constants/field';
+import { Entity } from '../_types/domain';
 
 import styles from './index.less';
 
 interface ViewEditorProps {
 	domainModel: AnyType;
 	value: AnyType;
+	fromEntity: Entity;
 	close: () => void;
 }
 
-const ViewEditor: FC<ViewEditorProps> = ({ domainModel, value, close }) => {
+const ViewEditor: FC<ViewEditorProps> = ({ domainModel, value, close, fromEntity }) => {
 	const ctx = useObservable(ViewCtx, next => {
 		const oriVal = value.get();
 		let val;
@@ -34,6 +36,7 @@ const ViewEditor: FC<ViewEditorProps> = ({ domainModel, value, close }) => {
 			};
 		}
 		next({
+			fromEntity,
 			domainModel,
 			nowValue: val,
 			value,
