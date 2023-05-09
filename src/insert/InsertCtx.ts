@@ -115,7 +115,7 @@ export default class InsertCtx {
 		          ${generateValidateScript(entities[0] as Entity, conAry)}
 		        }
 		        return \`${sql}(${fieldAry.join(',')}) VALUES \${values.map(params => \`(${valueAry.join(',')})\`).join(', ')}\`;
-		      }
+		      }//@ sourceURL=batchInsert.js
 		      `;
 			} else {
 				script = `
@@ -123,7 +123,7 @@ export default class InsertCtx {
 		        const { genUniqueId } = context;
 		        ${generateValidateScript(entities[0] as Entity, conAry)}
 		        return \`${sql}(${fieldAry.join(',')}) VALUES (${valueAry.join(',')})\`;
-		      }
+		      }//@ sourceURL=insert.js
 		      `;
 			}
 			

@@ -75,7 +75,7 @@ class DeleteContext {
 			let script = `
 			(params)=>{
 				return \`${sql}\`;
-			}
+			}//@ sourceURL=delete.js
 			`;
 			
 			this.nowValue.script = safeEncodeURIComponent(script);

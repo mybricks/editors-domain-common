@@ -115,7 +115,7 @@ export default class InsertCtx {
 			(params)=>{
         ${generateValidateScript(currentEntity as Entity, conAry)}
 				return \`${sql}\`;
-			}
+			}//@ sourceURL=update.js
 			`;
 			
 			this.nowValue.script = safeEncodeURIComponent(script);
