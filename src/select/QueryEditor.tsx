@@ -89,6 +89,12 @@ function SelectFrom() {
 	const currentEntity = useComputed(() => {
 		return nowValue.entities.find(e => e.selected);
 	});
+	const selectedAll = useComputed(() => {
+		return !!currentEntity?.fieldAry.filter(f => !f.isPrivate).every(field => nowValue.fields.some(f => f.fieldId === field.id && !f.fromPath.length));
+	});
+	const onSelectAll = useCallback(() => {
+		ctx.onSelectAllFields(selectedAll);
+	}, [selectedAll]);
 
 	return (
 		<>
@@ -112,6 +118,11 @@ function SelectFrom() {
 					}
 				</div>
 				<div className={css.fields}>
+					<div className={`${css.field} ${css.allField}`}>
+						<input type="checkbox" checked={selectedAll} onChange={onSelectAll} />
+						<span onClick={onSelectAll}>{selectedAll ? '取消所有字段' : '选中所有字段'}</span>
+						<span></span>
+					</div>
 					{currentEntity ? currentEntity.fieldAry.filter(f => !f.isPrivate).map(field => {
 						return (
 							<SelectFromCollapse

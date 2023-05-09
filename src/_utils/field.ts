@@ -124,5 +124,7 @@ export const getSchemaTypeByFieldType = (field: Field) => {
 		return 'number';
 	case FieldBizType.SYS_USER_UPDATER:
 		return 'number';
+	case FieldBizType.MAPPING:
+		return 'any';
 	}
 };

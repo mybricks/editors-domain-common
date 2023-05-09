@@ -7,7 +7,6 @@ import { Entity, Field, SelectedField } from '../_types/domain';
 import { getSchemaTypeByFieldType } from '../_utils/field';
 import { getEntityFieldMap } from '../_utils/entity';
 
-
 export type T_Field = {
 	id: string;
 	isPrimaryKey?: boolean;
@@ -148,6 +147,11 @@ export default class QueryCtx {
 					if (entityField.bizType === FieldBizType.DATETIME && entityField.showFormat) {
 						curSchema['_' + entityField.name] = { type: 'number' };
 					}
+					
+					/** 当映射字段其中所有子字段都没被选中时 */
+					if (entityField.bizType === FieldBizType.MAPPING && !fields.find(f => f.fromPath.find(path => path.fieldId === entityField.id))) {
+						delete curSchema[entityField.name];
+					}
 				}
 			}
 		});
@@ -238,7 +242,6 @@ export default class QueryCtx {
 							|| []
 						)
 					);
-					
 				}
 			} else {
 				this.nowValue.fields = this.nowValue.fields.filter(f => !(f.fieldId === field.id && !f.fromPath.length || (f.fromPath.length === 1 && f.fromPath[0].fieldId === field.id)));
@@ -263,6 +266,35 @@ export default class QueryCtx {
 				.filter(f => !f.fromPath.some(ff => ff.fieldId === field.fieldId));
 		} else {
 			this.nowValue.fields.push(field);
+		}
+	}
+	
+	onSelectAllFields(checked: boolean) {
+		if (checked) {
+			this.nowValue.fields = [];
+		} else {
+			const curEntity = this.nowValue.entities.find(e => e.selected);
+			
+			if (curEntity) {
+				const curFields: SelectedField[] = [];
+				curEntity.fieldAry
+					.filter(f => !f.isPrivate)
+					.forEach(field => {
+						const items = { fieldId: field.id, fieldName: field.name, entityId: curEntity.id, fromPath: [] };
+						curFields.push(items);
+						
+						if (field.mapping?.entity) {
+							curFields.push(
+								...(
+									field.mapping?.entity.fieldAry.map(f => ({ fieldId: f.id, fieldName: f.name, entityId: (field.mapping?.entity!.id as string), fromPath: [items] }))
+									|| []
+								)
+							);
+						}
+					});
+				
+				this.nowValue.fields = curFields;
+			}
 		}
 	}
 }
