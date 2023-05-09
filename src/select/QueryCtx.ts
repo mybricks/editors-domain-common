@@ -177,6 +177,7 @@ export default class QueryCtx {
 					formatTime: ${formatTime.toString()},
 				};
 				const spliceSelectSQLByConditions = ${spliceSelectSQLByConditions.toString()};
+				params = params || {};
 				const [sql, countSql] = spliceSelectSQLByConditions({
 					params: params || {},
 					fields: ${JSON.stringify(fields)} || [],
@@ -196,7 +197,7 @@ export default class QueryCtx {
 					${needFormatFields.length ? spliceDataFormatString(entityFieldMap, needFormatFields) : ''}
 					return rows;
 				`}
-			}
+			}//@ sourceURL=select.js
 			`;
 			
 			this.nowValue.script = safeEncodeURIComponent(selectScript);

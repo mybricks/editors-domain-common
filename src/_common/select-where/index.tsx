@@ -209,17 +209,15 @@ const Conditions: FC = () => {
 			
 			return condition.conditions ? (
 				<div key={condition.fieldId} className={styles.conditionGroupContainer}>
-					<div className={styles.conditionGroup} data-joiner={condition.whereJoiner === SQLWhereJoiner.AND ? '并且' : '或'}>
+					<div className={styles.conditionGroup}>
 						<div className={`${styles.segTitle} ${styles.noTopBorder}`}>
 							满足条件组中
-							<select
+							<span
 								className={styles.selectDom}
-								value={condition.whereJoiner}
-								onChange={e => condition.whereJoiner = e.target.value as SQLWhereJoiner}
+								onClick={() => condition.whereJoiner = (condition.whereJoiner === SQLWhereJoiner.AND ? SQLWhereJoiner.OR : SQLWhereJoiner.AND)}
 							>
-								<option value={SQLWhereJoiner.AND}>所有条件</option>
-								<option value={SQLWhereJoiner.OR}>任一条件</option>
-							</select>
+								{condition.whereJoiner === SQLWhereJoiner.AND ? '所有条件' : '任一条件'}
+							</span>
 							
 							<span
 								className={styles.addWhere}
@@ -246,6 +244,12 @@ const Conditions: FC = () => {
 								? renderConditions(condition.conditions, condition)
 								: <div className={styles.empty}>（没有限制条件）</div>
 						}
+						<div
+							className={styles.conditionJoiner}
+							onClick={() => condition.whereJoiner = (condition.whereJoiner === SQLWhereJoiner.AND ? SQLWhereJoiner.OR : SQLWhereJoiner.AND)}
+						>
+							{condition.whereJoiner === SQLWhereJoiner.AND ? '并且' : '或'}
+						</div>
 					</div>
 					{parentCondition ? (
 						<span className={`${styles.addWhere} ${styles.icons}`} onClick={() => remove({ index, parentCondition })}>

@@ -39,6 +39,7 @@
       margin: 0 10px;
       color: #8d7a34;
       font-style: normal;
+      cursor: pointer;
     }
   }
 
@@ -100,14 +101,16 @@
       padding: 10px 40px 10px 10px;
       position: relative;
 
-      &:after {
-        content: attr(data-joiner);
-        color: #AAA;
-        font-style: italic;
+      .conditionJoiner {
         position: absolute;
         top: 50%;
         right: 10px;
         transform: translateY(-50%);
+        font-style: italic;
+        color: #AAA;
+        cursor: pointer;
+        width: 24px;
+        text-align: right;
       }
     }
 
