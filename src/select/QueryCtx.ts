@@ -120,7 +120,7 @@ export default class QueryCtx {
 		
 		fields.forEach(field => {
 			const paths = [...field.fromPath, field];
-			let curSchema = this.showPager ? originSchema.properties!.list.items.properties : originSchema.items!.properties as AnyType;
+			let curSchema = this.showPager ? originSchema.properties!.dataSource.items.properties : originSchema.items!.properties as AnyType;
 			
 			for (let i = 0; i < paths.length; i++) {
 				const path = paths[i];
