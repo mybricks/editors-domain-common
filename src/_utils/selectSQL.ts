@@ -238,7 +238,8 @@ export const spliceSelectSQLByConditions = (fnParams: {
 		/** 查询总数语句 */
 		const countSql: string[] = [];
 		const fieldList: string[] = [];
-		const entityNames: string[] = [curEntity.name];
+		const getTableName = table => isEdit ? table : `${table}__VIEW`;
+		const entityNames: string[] = [getTableName(curEntity.name)];
 		const conditionFields: SelectedField[] = [];
 		const formatCondition = (condition: Condition[]) => {
 			condition.forEach(con => {
@@ -296,7 +297,6 @@ export const spliceSelectSQLByConditions = (fnParams: {
 		/** 当前实体中被使用到的字段 ID */
 		const curFieldIds = allFields.filter(field => field.entityId === curEntity.id && !field.fromPath?.length).map(field => field.fieldId);
 		
-		const getTableName = table => isEdit ? table : `${table}__VIEW`;
 		/** 拼接 LEFT JOIN 语句 */
 		const spliceLeftJoinSql = (mappingFields: Field[], depIndex: number, fromPath: Field[], parentEntity: Entity) => {
 			const entityNames: string[] = [];
