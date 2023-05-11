@@ -70,7 +70,7 @@ class DeleteContext {
 				params,
 				entities: entities,
 				conditions: conditions,
-			}, true);
+			});
 
 			let script = `
 			(params)=>{

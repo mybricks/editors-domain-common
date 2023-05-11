@@ -86,7 +86,7 @@ export const spliceSelectSQLByConditions = (fnParams: {
 		if (operator === 'LIKE' || operator === 'NOT LIKE') {
 			return `'%${val}%'`;
 		} else if (operator === 'IN' || operator === 'NOT IN') {
-			return `(${val.split(',').map(item => getValueByFieldType(dbType, item)).join(',')})`;
+			return `(${(Array.isArray(val) ? val : String(val).split(',')).map(item => getValueByFieldType(dbType, item)).join(',')})`;
 		}
 		
 		return getValueByFieldType(dbType, val);
@@ -124,7 +124,7 @@ export const spliceSelectSQLByConditions = (fnParams: {
 							if (!new RegExp(`^${entities.map(e => e.name).join('|')}\\.`).test(curValue)) {
 								let valueKeys = curValue.split('.').slice(1);
 								let preValue: AnyType = params;
-								let value = undefined;
+								let value: AnyType = undefined;
 								for (let idx = 0; idx < valueKeys.length; idx++){
 									const key = valueKeys[idx];
 									preValue = preValue[key];
@@ -135,6 +135,14 @@ export const spliceSelectSQLByConditions = (fnParams: {
 										break;
 									}
 								}
+								if (condition.operator === 'IN' || condition.operator === 'NOT IN') {
+									if (Array.isArray(value) && !value?.length) {
+										return false;
+									} else {
+										return value !== undefined && value !== '';
+									}
+								}
+								
 								return value !== undefined;
 							}
 						} else {

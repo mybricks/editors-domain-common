@@ -87,13 +87,15 @@ export const getValueByFieldType = (dbType: string, val: string) => {
 
 /** 根据字段类型以及操作符号返回拼接 sql 的具体值 */
 export const getValueByOperatorAndFieldType = (dbType: string, operator: string, val: string) => {
+	const value = `\${${val}}`;
 	if (operator === SQLOperator.LIKE || operator === SQLOperator.NOT_LIKE) {
-		return `'%${val}%'`;
+		return `'%${value}%'`;
 	} else if (operator === SQLOperator.IN || operator === SQLOperator.NOT_IN) {
-		return `(${val.split(',').map(item => getValueByFieldType(dbType, item)).join(',')})`;
+		const quote = getQuoteByFieldType(dbType);
+		return `(\${(Array.isArray(${val}) ? ${val} : String(${val}).split(',')).map(item => \`${quote}\${item}${quote}\`).join(',')})`;
 	}
 	
-	return getValueByFieldType(dbType, val);
+	return getValueByFieldType(dbType, value);
 };
 
 export const getSchemaTypeByFieldType = (field: Field) => {
