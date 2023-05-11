@@ -7,7 +7,6 @@ import { AnyType } from '../_types';
 import css from './index.less';
 
 export default function MappingEditor({ editConfig: { value, options } }: AnyType, { domainModel, canvasEle }: AnyType) {
-	const fieldModel = options.fieldModel;
 	const [visible, setVisible] = useState(false);
 	const val = value.get();
 	
@@ -28,7 +27,7 @@ export default function MappingEditor({ editConfig: { value, options } }: AnyTyp
 			{
 				visible ? createPortal(
 					<QueryEditor
-						fieldModel={fieldModel}
+						fieldModel={options.fieldModel}
 						domainModel={domainModel}
 						value={value}
 						close={close}

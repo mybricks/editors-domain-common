@@ -68,7 +68,7 @@ export const spliceSelectSQLByConditions = (fnParams: {
 	entities: Entity[];
 	params: Record<string, unknown>;
 	limit: { type: string; value: number | string };
-	pageIndex?: string;
+	pageNum?: string;
 	showPager?: boolean;
 }, templateMode?) => {
 	/** 根据字段类型返回拼接 sql 的具体指 */
@@ -92,7 +92,7 @@ export const spliceSelectSQLByConditions = (fnParams: {
 		return getValueByFieldType(dbType, val);
 	};
 	
-	let { conditions, entities, params, limit, orders = [], pageIndex, fields, showPager } = fnParams;
+	let { conditions, entities, params, limit, orders = [], pageNum, fields, showPager } = fnParams;
 	const curEntity = entities.find(e => e.selected);
 	
 	if (curEntity && curEntity.fieldAry.length) {
@@ -496,7 +496,7 @@ export const spliceSelectSQLByConditions = (fnParams: {
 		let limitValue: AnyType = limit.value ? String(limit.value) :'';
 		if (limitValue) {
 			if (limitValue.startsWith('{') && limitValue.endsWith('}')) {
-				limitValue = params[limitValue.slice(limitValue.indexOf('.') + 1, -1)];
+				limitValue = params[limitValue.slice(limitValue.indexOf('.') + 1, -1)] || 50;
 
 				if (limitValue) {
 					sql.push(`LIMIT ${limitValue}`);
@@ -506,15 +506,15 @@ export const spliceSelectSQLByConditions = (fnParams: {
 			}
 		}
 
-		if (pageIndex) {
-			if (pageIndex.startsWith('{') && pageIndex.endsWith('}')) {
-				const curValue = params[pageIndex.slice(pageIndex.indexOf('.') + 1, -1)];
+		if (pageNum) {
+			if (pageNum.startsWith('{') && pageNum.endsWith('}')) {
+				const curValue = params[pageNum.slice(pageNum.indexOf('.') + 1, -1)];
 
 				if (curValue) {
 					sql.push(`OFFSET ${(Number(curValue) - 1) * Number(limitValue)}`);
 				}
-			} else if (!Number.isNaN(Number(pageIndex))) {
-				sql.push(`OFFSET ${(Number(pageIndex) - 1) * Number(limitValue)}`);
+			} else if (!Number.isNaN(Number(pageNum))) {
+				sql.push(`OFFSET ${(Number(pageNum) - 1) * Number(limitValue)}`);
 			}
 		}
 		

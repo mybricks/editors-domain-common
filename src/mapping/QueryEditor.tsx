@@ -82,7 +82,7 @@ export default function QueryEditor({ domainModel, fieldModel, value, close }: A
 			value,
 			close
 		});
-	}, { to: "children" });
+	}, { to: 'children' });
 
 	return (
 		<PopView close={close} save={ctx.save} clickView={evt(ctx.blurAll).stop}>

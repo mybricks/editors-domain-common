@@ -68,7 +68,7 @@ export default class QueryCtx {
 		entities: T_Entity[],
 		conditions: T_Condition,
 		limit: { type: SQLLimitType; value: number | string };
-		pageIndex?: string;
+		pageNum?: string;
 		orders: Array<{ fieldId: string; fieldName: string; order: SQLOrder; entityId: string; fromPath: SelectedField[] }>;
 	};
 
@@ -109,7 +109,9 @@ export default class QueryCtx {
 			type: 'object',
 			properties: {
 				list: { type: 'array', items: { type: 'object', properties: {} } },
-				total: { type: 'number' }
+				total: { type: 'number' },
+				pageNum: { type: 'number' },
+				pageSize: { type: 'number' }
 			}
 		} : {
 			type: 'array',
@@ -160,7 +162,7 @@ export default class QueryCtx {
 	}
 
 	save() {
-		const { entities, conditions, orders, limit, pageIndex, fields } = this.nowValue;
+		const { entities, conditions, orders, limit, pageNum, fields } = this.nowValue;
 		let desc = '';
 		const currentEntity = entities.find(entity => entity.fieldAry.length && entity.selected);
 
@@ -174,7 +176,6 @@ export default class QueryCtx {
 				
 				return curField.showFormat && curField.bizType === FieldBizType.DATETIME;
 			});
-			
 			const selectScript = `
 			async (params, executeSql)=>{
 				const FORMAT_MAP = {
@@ -190,12 +191,13 @@ export default class QueryCtx {
 					limit: ${JSON.stringify(limit)},
 					showPager: ${JSON.stringify(this.showPager || false)},
 					orders: (params.orders && Array.isArray(params.orders)) ? params.orders : ${JSON.stringify(orders)},
-					pageIndex: ${JSON.stringify(pageIndex)},
+					pageNum: ${JSON.stringify(pageNum)},
 				});
 				${this.showPager ? `
-					let [{ rows }, { rows: countRows }] = await Promise.all([executeSql(sql), executeSql(countSql)]);
+					let { rows } = await executeSql(sql);
+					const { rows: countRows } = await executeSql(countSql);
 					${needFormatFields.length ? spliceDataFormatString(entityFieldMap, needFormatFields) : ''}
-					return { list: rows, total: countRows[0] ? countRows[0].total : 0 };
+					return { dataSource: rows, total: countRows[0] ? countRows[0].total : 0, pageNum: params.pageNum || 1, pageSize: params.pageSize || 50 };
 				` : `
 					let { rows } = await executeSql(sql);
 					${needFormatFields.length ? spliceDataFormatString(entityFieldMap, needFormatFields) : ''}

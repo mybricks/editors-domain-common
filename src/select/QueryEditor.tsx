@@ -42,7 +42,7 @@ export default function QueryEditor({ domainModel, paramSchema, value, close, sh
 					type: showPager ? SQLLimitType.CUSTOM : SQLLimitType.ENUM,
 					value: showPager ? '{params.pageSize}' : 100
 				},
-				pageIndex: showPager ? '{params.pageIndex}' : '',
+				pageNum: showPager ? '{params.pageNum}' : '',
 			};
 		}
 		
@@ -90,7 +90,9 @@ function SelectFrom() {
 		return nowValue.entities.find(e => e.selected);
 	});
 	const selectedAll = useComputed(() => {
-		return !!currentEntity?.fieldAry.filter(f => !f.isPrivate).every(field => nowValue.fields.some(f => f.fieldId === field.id && !f.fromPath.length));
+		const fields = nowValue.fields;
+		
+		return !!currentEntity?.fieldAry.filter(f => !f.isPrivate).every(field => fields.some(f => f.fieldId === field.id && !f.fromPath.length));
 	});
 	const onSelectAll = useCallback(() => {
 		ctx.onSelectAllFields(selectedAll);
@@ -118,11 +120,13 @@ function SelectFrom() {
 					}
 				</div>
 				<div className={css.fields}>
-					<div className={`${css.field} ${css.allField}`}>
-						<input type="checkbox" checked={selectedAll} onChange={onSelectAll} />
-						<span onClick={onSelectAll}>{selectedAll ? '取消所有字段' : '选中所有字段'}</span>
-						<span></span>
-					</div>
+					{currentEntity ? (
+						<div className={`${css.field} ${css.allField}`}>
+							<input type="checkbox" checked={selectedAll} onChange={onSelectAll}/>
+							<span onClick={onSelectAll}>{selectedAll ? '取消所有字段' : '选中所有字段'}</span>
+							<span></span>
+						</div>
+					): null}
 					{currentEntity ? currentEntity.fieldAry.filter(f => !f.isPrivate).map(field => {
 						return (
 							<SelectFromCollapse
@@ -225,7 +229,7 @@ const Offset = () => {
 	const popEle = useRef<AnyType>(null);
 	
 	const addExpression = useCallback(param => {
-		nowValue.pageIndex = param;
+		nowValue.pageNum = param;
 	}, []);
 	
 	const popParamValues = useMemo(() => {
@@ -264,8 +268,8 @@ const Offset = () => {
 				<input
 					className={css.pageInput}
 					type="text"
-					value={nowValue.pageIndex}
-					onChange={e => nowValue.pageIndex = e.target.value}
+					value={nowValue.pageNum}
+					onChange={e => nowValue.pageNum = e.target.value}
 					onClick={evt((e: Event) => {
 						popEle.current = e.target;
 						setShowPop(true);
