@@ -70,6 +70,7 @@ export const spliceSelectSQLByConditions = (fnParams: {
 	limit: { type: string; value: number | string };
 	pageNum?: string;
 	showPager?: boolean;
+	isEdit?: boolean;
 }) => {
 	/** 根据字段类型返回拼接 sql 的具体指 */
 	const getValueByFieldType = (dbType: string, val: string) => {
@@ -92,7 +93,7 @@ export const spliceSelectSQLByConditions = (fnParams: {
 		return getValueByFieldType(dbType, val);
 	};
 	
-	let { conditions, entities, params, limit, orders = [], pageNum, fields, showPager } = fnParams;
+	let { conditions, entities, params, limit, orders = [], pageNum, fields, showPager, isEdit } = fnParams;
 	const curEntity = entities.find(e => e.selected);
 	
 	if (curEntity && curEntity.fieldAry.length) {
@@ -295,6 +296,7 @@ export const spliceSelectSQLByConditions = (fnParams: {
 		/** 当前实体中被使用到的字段 ID */
 		const curFieldIds = allFields.filter(field => field.entityId === curEntity.id && !field.fromPath?.length).map(field => field.fieldId);
 		
+		const getTableName = table => isEdit ? table : `${table}__VIEW`;
 		/** 拼接 LEFT JOIN 语句 */
 		const spliceLeftJoinSql = (mappingFields: Field[], depIndex: number, fromPath: Field[], parentEntity: Entity) => {
 			const entityNames: string[] = [];
@@ -379,7 +381,7 @@ export const spliceSelectSQLByConditions = (fnParams: {
 									return mappingFieldName;
 								}
 							});
-						entityName = `LEFT JOIN (SELECT id AS MAPPING_${mappingTableName}_id${extraFieldNames.length ? `, ${extraFieldNames.join(', ')}` : ''}${jsonFieldNameList.length ? `, JSON_OBJECT(${jsonFieldNameList.join(', ')}) ${parentField.name}_JSON` : ''} FROM ${originEntity.name} ${leftJoinSqlList.join(' ')} WHERE _STATUS_DELETED = 0) MAPPING_${mappingTableName} ON MAPPING_${mappingTableName}.MAPPING_${mappingTableName}_id = ${(parentEntity.name)}.${(relationField?.name)}`;
+						entityName = `LEFT JOIN (SELECT id AS MAPPING_${mappingTableName}_id${extraFieldNames.length ? `, ${extraFieldNames.join(', ')}` : ''}${jsonFieldNameList.length ? `, JSON_OBJECT(${jsonFieldNameList.join(', ')}) ${parentField.name}_JSON` : ''} FROM ${getTableName(originEntity.name)} ${leftJoinSqlList.join(' ')} WHERE _STATUS_DELETED = 0) MAPPING_${mappingTableName} ON MAPPING_${mappingTableName}.MAPPING_${mappingTableName}_id = ${getTableName(parentEntity.name)}.${(relationField?.name)}`;
 					}
 				} else if (type === 'foreigner') {
 					/** 被关联，当前实体被另一实体关联，即当前实体的主键（id）被另一个实体作为外键相互关联 */
@@ -431,7 +433,7 @@ export const spliceSelectSQLByConditions = (fnParams: {
 								}
 							});
 						
-						entityName = `LEFT JOIN (SELECT GROUP_CONCAT(id SEPARATOR \"${SEPARATOR}\") MAPPING_${mappingTableName}_id, GROUP_CONCAT(${relationField?.name} SEPARATOR \"${SEPARATOR}\") ${curRelationFieldName}${extraFieldNames.length ? `, ${extraFieldNames.join(', ')}` : ''}${jsonFieldNameList.length ? `, JSON_ARRAYAGG(JSON_OBJECT(${jsonFieldNameList.join(', ')})) ${parentField.name}_JSON` : ''} FROM ${originEntity.name} ${leftJoinSqlList.join(' ')} WHERE _STATUS_DELETED = 0 GROUP BY ${relationField?.name}) MAPPING_${mappingTableName} ON MAPPING_${mappingTableName}.${curRelationFieldName} = ${(parentEntity.name)}.id`;
+						entityName = `LEFT JOIN (SELECT GROUP_CONCAT(id SEPARATOR \"${SEPARATOR}\") MAPPING_${mappingTableName}_id, GROUP_CONCAT(${relationField?.name} SEPARATOR \"${SEPARATOR}\") ${curRelationFieldName}${extraFieldNames.length ? `, ${extraFieldNames.join(', ')}` : ''}${jsonFieldNameList.length ? `, JSON_ARRAYAGG(JSON_OBJECT(${jsonFieldNameList.join(', ')})) ${parentField.name}_JSON` : ''} FROM ${getTableName(originEntity.name)} ${leftJoinSqlList.join(' ')} WHERE _STATUS_DELETED = 0 GROUP BY ${relationField?.name}) MAPPING_${mappingTableName} ON MAPPING_${mappingTableName}.${curRelationFieldName} = ${getTableName(parentEntity.name)}.id`;
 					} else if (isMaxCondition) {
 						/** 从条件中提取字段 */
 						const filedName = condition.substr(4, condition.length - 5);
@@ -453,7 +455,7 @@ export const spliceSelectSQLByConditions = (fnParams: {
 								}
 							});
 						
-						entityName = `LEFT JOIN (SELECT GROUP_CONCAT(id SEPARATOR \"${SEPARATOR}\") MAPPING_${mappingTableName}_id, GROUP_CONCAT(${relationField?.name} SEPARATOR \"${SEPARATOR}\") ${curRelationFieldName}${extraFieldNames.length ? `, ${extraFieldNames.join(', ')}` : ''}${jsonFieldNameList.length ? `, JSON_ARRAYAGG(JSON_OBJECT(${jsonFieldNameList.join(', ')})) ${parentField.name}_JSON` : ''} FROM ${originEntity.name} ${leftJoinSqlList.join(' ')} WHERE _STATUS_DELETED = 0 AND ${filedName} IN (SELECT max(${filedName}) FROM ${originEntity.name} WHERE _STATUS_DELETED = 0 GROUP BY ${relationField.name})) MAPPING_${mappingTableName} ON MAPPING_${mappingTableName}.${curRelationFieldName} = ${(parentEntity.name)}.id`;
+						entityName = `LEFT JOIN (SELECT GROUP_CONCAT(id SEPARATOR \"${SEPARATOR}\") MAPPING_${mappingTableName}_id, GROUP_CONCAT(${relationField?.name} SEPARATOR \"${SEPARATOR}\") ${curRelationFieldName}${extraFieldNames.length ? `, ${extraFieldNames.join(', ')}` : ''}${jsonFieldNameList.length ? `, JSON_ARRAYAGG(JSON_OBJECT(${jsonFieldNameList.join(', ')})) ${parentField.name}_JSON` : ''} FROM ${getTableName(originEntity.name)} ${leftJoinSqlList.join(' ')} WHERE _STATUS_DELETED = 0 AND ${filedName} IN (SELECT max(${filedName}) FROM ${getTableName(originEntity.name)} WHERE _STATUS_DELETED = 0 GROUP BY ${relationField.name})) MAPPING_${mappingTableName} ON MAPPING_${mappingTableName}.${curRelationFieldName} = ${getTableName(parentEntity.name)}.id`;
 					}
 				}
 				

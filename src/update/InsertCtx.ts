@@ -112,7 +112,7 @@ export default class InsertCtx {
 			});
 			
 			let script = `
-			(params)=>{
+			(params, context)=>{
         ${generateValidateScript(currentEntity as Entity, conAry)}
 				return \`${sql}\`;
 			}//@ sourceURL=update.js

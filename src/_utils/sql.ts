@@ -45,7 +45,7 @@ export const spliceWhereSQLFragmentByConditions = (fnParams: {
 			const field = entityMapElement?.fieldAry.find(f => f.id === condition.fieldId);
 			
 			if (field) {
-				let fieldName = `${curEntity.name}.${field.name}`;
+				let fieldName = `${field.name}`;
 				
 				/** mapping 字段映射的实体 */
 				if (entityMapElement.id !== curEntity.id) {
@@ -130,7 +130,7 @@ export const spliceUpdateSQLByConditions = (fnParams: {
 		const sql: string[] = [];
 
 		/** 前置 sql */
-		sql.push(`UPDATE ${curEntity.name} SET _UPDATE_USER_ID = \"\", _UPDATE_TIME = \${Date.now()}`);
+		sql.push(`UPDATE ${curEntity.name}\${context.isEdit ? '' : '__VIEW'} SET _UPDATE_USER_ID = \"\", _UPDATE_TIME = \${Date.now()}`);
 		sql.push(spliceUpdateSQLFragmentByConditions({
 			connectors,
 			entity: curEntity,
@@ -162,7 +162,7 @@ export const spliceDeleteSQLByConditions = (fnParams: {
 		const sql: string[] = [];
 
 		/** 前置 sql */
-		sql.push(`UPDATE ${curEntity.name} SET _STATUS_DELETED = 1, _UPDATE_USER_ID = "", _UPDATE_TIME = \${Date.now()}`);
+		sql.push(`UPDATE ${curEntity.name}\${context.isEdit ? '' : '__VIEW'} SET _STATUS_DELETED = 1, _UPDATE_USER_ID = "", _UPDATE_TIME = \${Date.now()}`);
 		sql.push(spliceWhereSQLFragmentByConditions({
 			conditions: [conditions],
 			entities,

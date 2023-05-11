@@ -105,10 +105,10 @@ export default class QueryCtx {
 	getOutputSchema() {
 		const { fields, entities } = this.nowValue;
 		const entityFieldMap: Record<string, Field> = getEntityFieldMap(entities as Entity[]);
-		const originSchema = this.showPager ? {
+		const originSchema: AnyType = this.showPager ? {
 			type: 'object',
 			properties: {
-				list: { type: 'array', items: { type: 'object', properties: {} } },
+				dataSource: { type: 'array', items: { type: 'object', properties: {} } },
 				total: { type: 'number' },
 				pageNum: { type: 'number' },
 				pageSize: { type: 'number' }
@@ -177,7 +177,8 @@ export default class QueryCtx {
 				return curField.showFormat && curField.bizType === FieldBizType.DATETIME;
 			});
 			const selectScript = `
-			async (params, executeSql)=>{
+			async (params, context)=>{
+				const { executeSql, isEdit } = context;
 				const FORMAT_MAP = {
 					formatTime: ${formatTime.toString()},
 				};
@@ -192,14 +193,17 @@ export default class QueryCtx {
 					showPager: ${JSON.stringify(this.showPager || false)},
 					orders: (params.orders && Array.isArray(params.orders)) ? params.orders : ${JSON.stringify(orders)},
 					pageNum: ${JSON.stringify(pageNum)},
+					isEdit,
 				});
 				${this.showPager ? `
 					let { rows } = await executeSql(sql);
+					rows = Array.from(rows || []);
 					const { rows: countRows } = await executeSql(countSql);
 					${needFormatFields.length ? spliceDataFormatString(entityFieldMap, needFormatFields) : ''}
 					return { dataSource: rows, total: countRows[0] ? countRows[0].total : 0, pageNum: params.pageNum || 1, pageSize: params.pageSize || 50 };
 				` : `
 					let { rows } = await executeSql(sql);
+					rows = Array.from(rows || []);
 					${needFormatFields.length ? spliceDataFormatString(entityFieldMap, needFormatFields) : ''}
 					return rows;
 				`}

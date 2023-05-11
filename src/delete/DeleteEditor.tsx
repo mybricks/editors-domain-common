@@ -71,9 +71,9 @@ class DeleteContext {
 				entities: entities,
 				conditions: conditions,
 			});
-
+			
 			let script = `
-			(params)=>{
+			(params, context)=>{
 				return \`${sql}\`;
 			}//@ sourceURL=delete.js
 			`;

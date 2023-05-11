@@ -69,7 +69,7 @@ export default class InsertCtx {
 		if (entities.length && entities[0].fieldAry.length > 0) {
 			desc = `${entities[0].name}`;
 			
-			const sql = `INSERT INTO ${entities[0].name} `;
+			const sql = `INSERT INTO ${entities[0].name}\${isEdit ? '' : '__VIEW'} `;
 			
 			const fieldAry: string[] = [], valueAry: string[] = [];
 			entities[0].fieldAry.forEach(field => {
@@ -109,7 +109,7 @@ export default class InsertCtx {
 			if (this.batch) {
 				script = `
 		      (values, context)=>{
-		        const { genUniqueId } = context;
+		        const { genUniqueId, isEdit } = context;
 		        for (let i = 0; i < values.length; i++) {
 		          const params = values[i];
 		          ${generateValidateScript(entities[0] as Entity, conAry)}
@@ -120,7 +120,7 @@ export default class InsertCtx {
 			} else {
 				script = `
 		      (params, context)=>{
-		        const { genUniqueId } = context;
+		        const { genUniqueId, isEdit } = context;
 		        ${generateValidateScript(entities[0] as Entity, conAry)}
 		        return \`${sql}(${fieldAry.join(',')}) VALUES (${valueAry.join(',')})\`;
 		      }//@ sourceURL=insert.js
