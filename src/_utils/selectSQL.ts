@@ -70,7 +70,7 @@ export const spliceSelectSQLByConditions = (fnParams: {
 	limit: { type: string; value: number | string };
 	pageNum?: string;
 	showPager?: boolean;
-}, templateMode?) => {
+}) => {
 	/** 根据字段类型返回拼接 sql 的具体指 */
 	const getValueByFieldType = (dbType: string, val: string) => {
 		switch (dbType) {
@@ -106,7 +106,7 @@ export const spliceSelectSQLByConditions = (fnParams: {
 			curEntity: Entity;
 			params: Record<string, unknown>;
 			whereJoiner?: AnyType;
-		}, templateMode?) => {
+		}) => {
 			const { conditions, entities, params, whereJoiner, entityMap, curEntity } = fnParams;
 			
 			const curConditions = conditions
@@ -122,7 +122,20 @@ export const spliceSelectSQLByConditions = (fnParams: {
 						
 							/** 非实体字段，即使用的变量，如 params.id */
 							if (!new RegExp(`^${entities.map(e => e.name).join('|')}\\.`).test(curValue)) {
-								return params[curValue.substring(curValue.indexOf('.') + 1)] !== undefined;
+								let valueKeys = curValue.split('.').slice(1);
+								let preValue: AnyType = params;
+								let value = undefined;
+								for (let idx = 0; idx < valueKeys.length; idx++){
+									const key = valueKeys[idx];
+									preValue = preValue[key];
+									
+									if (idx === valueKeys.length - 1) {
+										value = preValue;
+									} else if (typeof preValue !== 'object' || preValue === null) {
+										break;
+									}
+								}
+								return value !== undefined;
 							}
 						} else {
 							return condition?.value !== undefined;
@@ -134,7 +147,7 @@ export const spliceSelectSQLByConditions = (fnParams: {
 			const conditionSqlList: string[] = [];
 			
 			curConditions.forEach(condition => {
-				let curSQL = '';
+				let curSQL;
 				
 				if (condition.conditions) {
 					curSQL = spliceWhereSQLFragmentByConditions({
@@ -144,7 +157,7 @@ export const spliceSelectSQLByConditions = (fnParams: {
 						params,
 						entityMap,
 						curEntity,
-					}, templateMode);
+					});
 				} else {
 					const field = entityFieldMap[condition.entityId + condition.fieldId];
 					/** 变量名拼接 */
@@ -162,17 +175,24 @@ export const spliceSelectSQLByConditions = (fnParams: {
 							value = curValue;
 							isEntityField = true;
 						} else {
-							if (templateMode) {
-								let key = curValue.substring(curValue.indexOf('.') + 1);
-								value = `\${params.${key}}`;
-							} else {
-								value = params[curValue.substring(curValue.indexOf('.') + 1)] as string;
+							let valueKeys = curValue.split('.').slice(1);
+							let preValue: AnyType = params;
+							for (let idx = 0; idx < valueKeys.length; idx++){
+								const key = valueKeys[idx];
+								preValue = preValue[key];
+								
+								if (idx === valueKeys.length - 1) {
+									value = preValue;
+								} else if (typeof preValue !== 'object' || preValue === null) {
+									// @ts-ignore
+									value = undefined;
+									break;
+								}
 							}
 						}
 					}
 					
 					curSQL = `${fieldName} ${condition.operator} ${isEntityField ? value : getValueByOperatorAndFieldType(field.dbType, condition.operator!, value)}`;
-					
 				}
 				
 				curSQL && conditionSqlList.push(curSQL);
@@ -466,7 +486,7 @@ export const spliceSelectSQLByConditions = (fnParams: {
 			params,
 			entityMap,
 			curEntity,
-		}, templateMode);
+		});
 		/** 前置 sql */
 		sql.push(`SELECT ${fieldList.join(', ')} FROM ${entityNames.join(' ')}`);
 		sql.push(whereSql);

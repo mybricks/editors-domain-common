@@ -334,24 +334,19 @@ const Conditions: FC = () => {
 	
 	const popParamValues = useComputed(() => {
 		if (whereContext.popParams) {
-			const params = whereContext.paramSchema?.properties;
 			const po = getPosition(whereContext.popEle, whereContext.whereEle);
-			const popNodes: ReactNode[] = [];
 			
-			/** 获取实体中字段提示项 */
-			nowValue?.entities.forEach(entity => {
-				popNodes.push(...entity.fieldAry.map(field => {
-					return (
-						<div
-							key={field.name}
-							className={styles.item}
-							onClick={() => addExpression(`{${entity.name}.${field.name}}`)}
-						>
-							{entity.name}.{field.name}
-						</div>
-					);
-				}));
-			});
+			let params: string[] = [];
+			const getParams = (schema, preKey = '', paths: string[] = []) => {
+				if ((schema.type === 'object' || schema.type === 'follow') && schema.properties) {
+					Object.entries(schema.properties || {}).forEach(([key, value]: AnyType) => {
+						getParams(value, key, [...paths, preKey]);
+					});
+				} else {
+					params.push([...paths, preKey].join('.'));
+				}
+			};
+			getParams(whereContext.paramSchema, '', []);
 			
 			// @ts-ignore
 			const style = { left: po.x, top: po.y + whereContext.popEle.offsetHeight };
@@ -359,15 +354,14 @@ const Conditions: FC = () => {
 			return (
 				<div className={styles.popMenu} style={style}>
 					{
-						Object.keys((params || {}) as object).map(param => {
+						params.map(path => {
 							return (
-								<div key={param} className={`${styles.item}`} onClick={() => addExpression(`{params.${param}}`)}>
-									params.{param}
+								<div key={path} className={`${styles.item}`} onClick={() => addExpression(`{params${path}}`)}>
+									params{path}
 								</div>
 							);
 						})
 					}
-					{/*{popNodes}*/}
 				</div>
 			);
 		}
