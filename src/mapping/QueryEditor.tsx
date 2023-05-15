@@ -1,4 +1,4 @@
-import React, {useCallback, useState} from 'react';
+import React, { useCallback, useState } from 'react';
 // @ts-ignore
 import { evt, useComputed, useObservable } from '@mybricks/rxui';
 import QueryCtx from './QueryCtx';
@@ -6,10 +6,9 @@ import Where from './Where';
 import { AnyType } from '../_types';
 import PopView from '../_common/pop-view';
 import { Entity } from '../_types/domain';
+import CalcFieldModal from './CalcFieldModal';
 
 import css from './QueryEditor.less';
-import styles from "../_common/select-where/index.less";
-import CalcFieldModal from "./CalcFieldModal";
 
 let ctx: QueryCtx;
 
@@ -151,15 +150,15 @@ function SelectFrom() {
 					}
 				</div>
 				<div className={css.fields}>
-					{false && nowValue.entity ? (
-						<div className={`${css.field} ${css.addCalcField}`} onClick={() => setVisible(true)}>
-							<span className={css.addButton}>
-								+
-							</span>
-							<span>新增计算字段</span>
-							<span></span>
-						</div>
-					) : null}
+					{/*{nowValue.entity ? (*/}
+					{/*	<div className={`${css.field} ${css.addCalcField}`} onClick={() => setVisible(true)}>*/}
+					{/*		<span className={css.addButton}>*/}
+					{/*			+*/}
+					{/*		</span>*/}
+					{/*		<span>新增计算字段</span>*/}
+					{/*		<span></span>*/}
+					{/*	</div>*/}
+					{/*) : null}*/}
 					{fields}
 				</div>
 			</div>
