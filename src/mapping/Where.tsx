@@ -8,7 +8,6 @@ let ctx: QueryCtx;
 
 export default function Where() {
 	ctx = observe(QueryCtx, { from: 'parents' });
-
 	const nowValue = ctx.nowValue;
 
 	if (!nowValue.entity.id || !ctx.isEntityForeigner(nowValue.entity.id)) {
@@ -22,10 +21,7 @@ export default function Where() {
         2. 筛选符合
 				<select className={css.selectDom}
 					value={nowValue.condition}
-					onChange={e => {
-						console.log(e.target.value);
-						nowValue.condition = e.target.value;
-					}}>
+					onChange={e => (nowValue.condition = e.target.value)}>
 					<option value={'-1'}>[全部]</option>
 					<optgroup label="----------"></optgroup>
 					<option value={'max(id)'}>最后一条</option>

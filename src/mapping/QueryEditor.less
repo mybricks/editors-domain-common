@@ -36,14 +36,16 @@
   padding: 15px 10px 3px 15px;
   font-style: italic;
   color: #999;
+  border-top: 1px dashed #ddd;
 }
 
 .select {
   display: flex;
   flex-direction: row;
-  min-height: 200px;
+  min-height: 240px;
   max-height: 300px;
   overflow: hidden;
+  flex-shrink: 0;
 
   .tables {
     width: 250px;
@@ -102,8 +104,9 @@
       padding: 0 10px;
       display: flex;
       align-items: center;
+      line-height: 16px;
 
-      span {
+      span:last-of-type {
         margin-left: 5px;
         color: #AAA;
         font-style: italic;
@@ -135,6 +138,30 @@
         background-color: @color-primary;
         text-align: center;
         padding: 0 2px;
+      }
+    }
+
+    .addButton {
+      position: relative;
+      cursor: pointer;
+      font-style: normal;
+      margin-right: 5px;
+      margin-bottom: 2px;
+      font-size: 18px;
+    }
+
+    .addCalcField {
+      width: 140px;
+      padding: 10px 10px 10px 0;
+      margin-left: 10px;
+      margin-bottom: 10px;
+      height: auto;
+      color: black;
+      border-bottom: 1px dashed #ccc;
+
+      &:hover {
+        color: @color-primary;
+        cursor: pointer;
       }
     }
   }

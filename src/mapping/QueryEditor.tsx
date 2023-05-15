@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useCallback, useState} from 'react';
 // @ts-ignore
 import { evt, useComputed, useObservable } from '@mybricks/rxui';
 import QueryCtx from './QueryCtx';
@@ -8,6 +8,8 @@ import PopView from '../_common/pop-view';
 import { Entity } from '../_types/domain';
 
 import css from './QueryEditor.less';
+import styles from "../_common/select-where/index.less";
+import CalcFieldModal from "./CalcFieldModal";
 
 let ctx: QueryCtx;
 
@@ -94,6 +96,9 @@ export default function QueryEditor({ domainModel, fieldModel, value, close }: A
 
 function SelectFrom() {
 	const nowValue = ctx.nowValue;
+	const [visible, setVisible] = useState(false);
+	const onCancel = useCallback(() => setVisible(false), []);
+	const onOk = useCallback(() => setVisible(false), []);
 
 	const fields = useComputed(() => {
 		const nowEntity = nowValue.entity;
@@ -108,15 +113,9 @@ function SelectFrom() {
 						}
 
 						return (
-							<div key={field.id}
-								className={`${css.field}`}
-								//onClick={e => ctx.setField(field.id)}
-							>
-								<input type={'checkbox'}
-									checked={checked}
-									onChange={() => ctx.setField(field.id)}
-								/>
-								{field.name}
+							<div key={field.id} className={css.field}>
+								<input type="checkbox" checked={checked} onChange={() => ctx.setField(field.id)} />
+								<span onClick={() => ctx.setField(field.id)}>{field.name}</span>
 								<span>{field.desc}</span>
 							</div>
 						);
@@ -126,33 +125,10 @@ function SelectFrom() {
 		}
 	});
 
-	const joiner = useComputed(() => {
-		const nowEntity = nowValue.entity;
-
-		if (nowEntity && ctx.isEntityForeigner(nowEntity.id) && nowValue.condition === '-1') {
-			return (
-				<>
-          ，多条记录以
-					<select className={css.selectDom}
-						value={nowValue.fieldJoiner}
-						onChange={e => {
-							nowValue.fieldJoiner = e.target.value;
-						}}>
-						<option value={','}>,</option>
-						<option value={'、'}>、</option>
-						<option value={' '}>空格</option>
-					</select>
-          连接
-				</>
-			);
-		}
-	});
-
 	return (
 		<>
 			<div className={css.segTitle}>
         1. 选择表与字段
-				{joiner}
 			</div>
 			<div className={css.select}>
 				<div className={css.tables}>
@@ -175,9 +151,20 @@ function SelectFrom() {
 					}
 				</div>
 				<div className={css.fields}>
+					{false && nowValue.entity ? (
+						<div className={`${css.field} ${css.addCalcField}`} onClick={() => setVisible(true)}>
+							<span className={css.addButton}>
+								+
+							</span>
+							<span>新增计算字段</span>
+							<span></span>
+						</div>
+					) : null}
 					{fields}
 				</div>
 			</div>
+			
+			<CalcFieldModal visible={visible} onCancel={onCancel} onOK={onOk} />
 		</>
 	);
 }

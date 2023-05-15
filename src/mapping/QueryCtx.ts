@@ -18,8 +18,6 @@ export type T_Entity = {
 export type T_Condition = string
 
 export default class QueryCtx {
-	editorEle!: HTMLElement;
-
 	paramSchema!: Record<string, unknown>;
 
 	entityInfo!: {

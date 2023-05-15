@@ -1,0 +1,65 @@
+@import "../theme.less";
+
+.calcModal {
+}
+
+.modalContainer {
+  height: 424px;
+  display: flex;
+
+  .leftMenu {
+    width: 400px;
+    border: 1px solid #D8D8D8;
+    background: #F7F7F7;
+
+    :global {
+      .ant-tabs-tab {
+        cursor: pointer;
+        color: #9B9B9B;
+        min-width: 80px;
+        max-width: 180px;
+        text-align: center;
+        padding: 0 12px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        height: 36px;
+        border: none;
+        border-right: 1px solid #D8D8D8;
+        border-radius: 0;
+        background: #EBECEE;
+      }
+
+      .ant-tabs-tab.ant-tabs-tab-active {
+        cursor: inherit;
+        font-weight: 700;
+        background-color: #F7F7F7;
+        position: relative;
+
+        &:after {
+          content: '';
+          position: absolute;
+          background-color: #F7F7F7;
+          bottom: -1px;
+          height: 1px;
+          width: 100%;
+          left: 0;
+        }
+      }
+
+      .ant-tabs-tab.ant-tabs-tab-active .ant-tabs-tab-btn {
+        color: @color-primary;
+        text-shadow: none;
+      }
+
+      .ant-tabs>.ant-tabs-nav .ant-tabs-nav-wrap {
+        border-bottom: 1px solid #D8D8D8;
+        background: #EBECEE;
+      }
+    }
+  }
+}
