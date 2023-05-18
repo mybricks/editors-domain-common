@@ -272,7 +272,7 @@ export const spliceSelectSQLByConditions = (fnParams: {
 						return;
 					}
 					fieldPath.push({ fieldId: curField.id, entityId: nowEntity.id, fieldName: curField.name, fromPath: [] });
-					nowEntity = curField.mapping?.entity;
+					nowEntity = entityMap[curField.mapping?.entity?.id];
 				}
 				
 				if (fieldPath.length) {
