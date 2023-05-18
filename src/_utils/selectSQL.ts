@@ -276,7 +276,7 @@ export const spliceSelectSQLByConditions = (fnParams: {
 				}
 				
 				if (fieldPath.length) {
-					return { ...fieldPath.pop(), fromPath: fieldPath };
+					return { ...fieldPath.pop(), order: order.order, fromPath: fieldPath };
 				}
 			}
 		}).filter(Boolean) as AnyType as Order[];
