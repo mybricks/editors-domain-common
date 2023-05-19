@@ -266,7 +266,8 @@ export const spliceSelectSQLByConditions = (fnParams: {
 						return;
 					}
 					
-					const curField = nowEntity.fieldAry.find(field => field.name === names.shift());
+					const curName = names.shift();
+					const curField = nowEntity.fieldAry.find(field => field.name === curName);
 					
 					if (!curField) {
 						return;
