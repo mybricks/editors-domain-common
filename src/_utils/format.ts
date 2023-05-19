@@ -44,11 +44,11 @@ export const spliceDataFormatString = (entityFieldMap: Record<string, Field>, fi
 				if (Array.isArray(item)) {
 					item.forEach(i => {
 						i['_' + key] = i[key];
-						i[key] = FORMAT_MAP.formatTime(new Date(i[key]), path[0].showFormat);
+						i[key] = i[key] ? FORMAT_MAP.formatTime(new Date(i[key]), path[0].showFormat) : null;
 					})
 				} else {
 					item['_' + key] = item[key];
-					item[key] = FORMAT_MAP.formatTime(new Date(item[key]), path[0].showFormat);
+					item[key] = item[key] ? FORMAT_MAP.formatTime(new Date(item[key]), path[0].showFormat) : null;
 				}
 				
 				return ;
