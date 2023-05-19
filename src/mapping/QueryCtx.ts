@@ -32,7 +32,7 @@ export default class QueryCtx {
 	domainModel: AnyType;
 
 	isEntityForeigner(id: string) {
-		return this.entityInfo[id].type === 'foreigner';
+		return this.entityInfo[id]?.type === 'foreigner';
 	}
 
 	fieldModel: AnyType;

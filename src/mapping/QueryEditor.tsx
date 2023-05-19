@@ -103,7 +103,7 @@ function SelectFrom() {
 		const nowEntity = nowValue.entity;
 		if (nowEntity) {
 			const oriEntity = ctx.entityAry.find(et => et.id === nowEntity.id);
-			return (
+			return oriEntity ? (
 				oriEntity.fieldAry.map(field => {
 					if (!field.isBizTypeOfMapping() && !field.isPrivate) {
 						let checked = false;
@@ -120,7 +120,7 @@ function SelectFrom() {
 						);
 					}
 				}).filter(f => f)
-			);
+			) : null;
 		}
 	});
 
