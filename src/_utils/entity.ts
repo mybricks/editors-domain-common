@@ -1,5 +1,6 @@
 import { Condition, Entity, Field, Order, SelectedField } from '../_types/domain';
 import { AnyType } from '../_types';
+import { FieldBizType } from '../_constants/field';
 
 /**
  * 实体信息可能存在变更，每次使用最新的实体信息
@@ -34,7 +35,13 @@ export const formatFieldsByOriginEntities = (fields: SelectedField[], originEnti
 	const entityFieldMap = getEntityFieldMap(originEntities);
 	
 	return fields.filter(field => {
-		let hasEffect = !!entityFieldMap[field.entityId + field.fieldId];
+		const entityField = entityFieldMap[field.entityId + field.fieldId];
+		let hasEffect = !!entityField;
+		
+		/** 映射类型，且未映射数据，则过滤 */
+		if (entityField && entityField.bizType === FieldBizType.MAPPING && !entityField?.mapping?.entity?.fieldAry?.length) {
+			return false;
+		}
 		
 		if (field.fromPath.length) {
 			for (let idx = 0; idx < field.fromPath.length; idx++) {

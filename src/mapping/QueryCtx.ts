@@ -101,6 +101,12 @@ export default class QueryCtx {
 		const ent = entity.toJSON();
 		ent.field = ent.fieldAry[0];
 		delete ent.fieldAry;
+		
+		if (this.isEntityForeigner(entity.id)) {
+			this.nowValue.condition = '-1';
+		} else {
+			this.nowValue.condition = '';
+		}
 
 		this.nowValue.entity = ent;
 		const info = this.entityInfo[ent.id];

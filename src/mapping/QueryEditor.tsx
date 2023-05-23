@@ -126,7 +126,7 @@ function SelectFrom() {
 
 	return (
 		<>
-			<div className={css.segTitle}>
+			<div className={css.segTitle} style={{ borderTop: 'none' }}>
         1. 选择表与字段
 			</div>
 			<div className={css.select}>
@@ -136,9 +136,11 @@ function SelectFrom() {
 							const info = ctx.entityInfo[et.id];
 
 							return (
-								<div key={et.id}
+								<div
+									key={et.id}
 									className={`${css.table} ${ctx.isEntityForeigner(et.id) ? css.foreigner : ''}  ${nowValue.entity?.id === et.id ? css.selected : ''}`}
-									onClick={() => ctx.setEntity(et)}>
+									onClick={() => ctx.setEntity(et)}
+								>
 									<div className={css.nm}>
 										<span>{et.name}</span>
 										<span>{info.type === 'foreigner' ? 'id' : info.field.name}</span>

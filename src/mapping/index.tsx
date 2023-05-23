@@ -19,7 +19,7 @@ export default function MappingEditor({ editConfig: { value, options } }: AnyTyp
 	
 	/** 切换关联的表，重置映射 */
 	useEffect(() => {
-		if (val?.entity.id && val.entity.id !== options.fieldModel.relationEntityId) {
+		if (val?.entity.id && options.fieldModel.relationEntityId && val.entity.id !== options.fieldModel.relationEntityId) {
 			value.set(void 0);
 		}
 	}, [options.fieldModel.relationEntityId]);

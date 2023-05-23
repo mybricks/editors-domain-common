@@ -5,9 +5,9 @@ import { AnyType } from '../_types';
 import { Entity, Field } from '../_types/domain';
 import { FieldBizType } from '../_constants/field';
 
-import css from './QueryEditor.less';
+import css from './FieldCollapse.less';
 
-interface SelectFromProps {
+interface FieldCollapseProps {
 	field: Field;
 	ctx: QueryCtx;
 	entity: Entity;
@@ -15,43 +15,32 @@ interface SelectFromProps {
 	initialOpen: boolean;
 }
 
-const SelectFromCollapse: FC<SelectFromProps> = props => {
+const FieldCollapse: FC<FieldCollapseProps> = props => {
 	const { ctx, field, fromPath, entity, initialOpen } = props;
 	const [open, setOpen] = useState(initialOpen);
-	const selected = !!ctx.nowValue.fields.find(
-		f2 => f2.fieldId === field.id
-			&& f2.fromPath.map(path => path.fieldId).join('') === (fromPath.map(path => path.id).join(''))
-	);
 	const isMapping = !!field.mapping?.entity?.fieldAry.length;
 	let fieldMappingEntity = field.mapping?.entity as AnyType as Entity;
 	
 	if (isMapping) {
-		fieldMappingEntity = JSON.parse(JSON.stringify(ctx.nowValue.entities.find(en => en.id === fieldMappingEntity.id) as AnyType as Entity) || 'null');
+		fieldMappingEntity = JSON.parse(JSON.stringify(ctx.domainModel.entityAry.find(en => en.id === fieldMappingEntity.id) as AnyType as Entity) || 'null');
 		const oldFieldIds = field.mapping?.entity?.fieldAry.map(f => f.id) || [];
 		fieldMappingEntity.fieldAry = fieldMappingEntity.fieldAry.filter(f => oldFieldIds.includes(f.id));
 	}
+	
 	/** 映射类型，但为设置映射数据 */
 	const disabled = field.bizType === FieldBizType.MAPPING && !isMapping;
 	
-	const onSelect = () => {
+	const clickOpen = useCallback(event => {
+		event.stopPropagation();
+		isMapping && setOpen(open => !open);
+	}, [isMapping]);
+	
+	const onClickField = useCallback(() => {
 		if (disabled) {
 			message.warning(`${field.name}字段未设置对应映射数据`);
 			return;
 		}
-		if (fromPath.length) {
-			ctx.setMappingField({
-				fieldId: field.id,
-				fieldName: field.name,
-				entityId: entity.id,
-				fromPath: fromPath.map(f => ({ fieldId: f.id, fieldName: f.name, entityId: f.entityId, fromPath: [] }))
-			});
-		} else {
-			ctx.setField(entity as AnyType, field.id);
-			setOpen(!selected);
-		}
-	};
-	
-	const clickOpen = useCallback(() => isMapping && setOpen(open => !open), [isMapping]);
+	}, [disabled]);
 	
 	return (
 		<div className={css.selectFromCollapse}>
@@ -59,26 +48,26 @@ const SelectFromCollapse: FC<SelectFromProps> = props => {
 				key={field.id}
 				className={`${css.field} ${disabled ? css.disabled : ''}`}
 				title={`${field.name}(${field.desc ?? ''})`}
+				onClick={onClickField}
 			>
 				<div className={css.collapseIcon} style={open ? { transform: 'rotateZ(90deg)' } : undefined} onClick={clickOpen}>
-					{isMapping && selected ? (
+					{isMapping ? (
 						<svg viewBox="0 0 1024 1024" width="1em" height="1em" fill="#aeafb2">
 							<path d="M715.8 493.5L335 165.1c-14.2-12.2-35-1.2-35 18.5v656.8c0 19.7 20.8 30.7 35 18.5l380.8-328.4c10.9-9.4 10.9-27.6 0-37z"></path>
 						</svg>
 					) : null}
 				</div>
-				<input type="checkbox" checked={selected} onChange={onSelect} />
-				<span onClick={onSelect}>{field.name}</span>
+				<span>{field.name}</span>
 				<span>{field.desc}</span>
 			</div>
-			{open && isMapping && selected ? (
+			{open && isMapping ? (
 				<div className={css.selectFromChildren}>
 					<div className={css.mappingFieldHeader}>
 						所属实体：{field.mapping?.entity?.name}
 					</div>
 					{fieldMappingEntity.fieldAry
 						.map(f => (
-							<SelectFromCollapse
+							<FieldCollapse
 								key={f.id}
 								initialOpen={false}
 								fromPath={[...fromPath, { ...field, entityId: entity.id }]}
@@ -93,4 +82,4 @@ const SelectFromCollapse: FC<SelectFromProps> = props => {
 	);
 };
 
-export default SelectFromCollapse;
+export default FieldCollapse;
