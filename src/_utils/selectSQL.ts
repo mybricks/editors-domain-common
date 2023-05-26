@@ -338,52 +338,50 @@ export const spliceSelectSQLByConditions = (fnParams: {
 				
 				/** 关联，当前实体主动关联另一个实体，即当前实体字段存在一个字段作为外键关联另一个实体的主键（id） */
 				if (type === 'primary') {
-					if (condition === '-1') {
-						const relationField = parentEntity.fieldAry.find(f => ['relation', 'SYS_USER', 'SYS_USER.CREATOR', 'SYS_USER.UPDATER'].includes(f.bizType) && f.relationEntityId === originEntity.id && f.id === parentField.id);
-						const mappingTableName = joinArray(...fromPath.map(p => p.name), parentField.name).join('_');
-						/** 聚合为 json 的字段列表 */
-						let jsonFieldNameList: string[] = [];
-						/** 标识对应的 json 字段是否已被拼接 */
-						const jsonMappingFieldMap = {};
-						fields
-							.filter(f => f.fromPath.find(path => path.fieldId === parentField.id && path.entityId === parentEntity.id))
-							.forEach(f => {
-								const currentField = entityFieldMap[f.entityId + f.fieldId];
-								const index = f.fromPath.findIndex(path => path.fieldId === parentField.id && path.entityId === parentEntity.id);
-								
-								/** 字段来源于当前表中 */
-								if (f.fromPath.length - 1 === index) {
-									/** 判断是否是映射字段，是则加 _ 标识 */
-									const isMapping = allFields.find(p => p.fromPath.length === f.fromPath.length + 1 && p.fromPath[p.fromPath.length - 1].fieldId === currentField.id);
-									jsonFieldNameList.push(`'${isMapping ? '_' : ''}${currentField.name}', ${currentField.name}`);
-								} else {
-									const entityFieldMapElement = entityFieldMap[f.fromPath[index + 1].entityId + f.fromPath[index + 1].fieldId];
-									/** 聚合为 JSON 时，字段取父字段的名称，如 MAPPING_A_B_C，取名称 B */
-									if (!jsonMappingFieldMap[entityFieldMapElement.name]) {
-										jsonFieldNameList.push(`'${entityFieldMapElement.name}', ${entityFieldMapElement.name}_JSON`);
-										jsonMappingFieldMap[entityFieldMapElement.name] = 1;
-									}
-								}
-							});
+					const relationField = parentEntity.fieldAry.find(f => ['relation', 'SYS_USER', 'SYS_USER.CREATOR', 'SYS_USER.UPDATER'].includes(f.bizType) && f.relationEntityId === originEntity.id && f.id === parentField.id);
+					const mappingTableName = joinArray(...fromPath.map(p => p.name), parentField.name).join('_');
+					/** 聚合为 json 的字段列表 */
+					let jsonFieldNameList: string[] = [];
+					/** 标识对应的 json 字段是否已被拼接 */
+					const jsonMappingFieldMap = {};
+					fields
+						.filter(f => f.fromPath.find(path => path.fieldId === parentField.id && path.entityId === parentEntity.id))
+						.forEach(f => {
+							const currentField = entityFieldMap[f.entityId + f.fieldId];
+							const index = f.fromPath.findIndex(path => path.fieldId === parentField.id && path.entityId === parentEntity.id);
 						
-						/** 需要在子查询中返回的字段列表 */
-						const extraFieldNames = allFields
-							.filter(f => f.fromPath.find(path => path.fieldId === parentField.id && path.entityId === parentEntity.id) && (f.entityId === originEntity.id ? !entityFieldMap[f.entityId + f.fieldId].isPrimaryKey : true))
-							.map(f => {
-								const currentField = entityFieldMap[f.entityId + f.fieldId];
-								const index = f.fromPath.findIndex(path => path.fieldId === parentField.id && path.entityId === parentEntity.id);
-								const mappingFieldName = `MAPPING_${joinArray(...(f.fromPath.map(path => entityFieldMap[path.entityId + path.fieldId].name)), currentField.name).join('_')}`;
-								
-								/** 字段来源于当前表中 */
-								if (f.fromPath.length - 1 === index) {
-									return `${currentField.name} AS ${mappingFieldName}`;
-								} else {
-									/** 字段来源于子查询 */
-									return mappingFieldName;
+							/** 字段来源于当前表中 */
+							if (f.fromPath.length - 1 === index) {
+							/** 判断是否是映射字段，是则加 _ 标识 */
+								const isMapping = allFields.find(p => p.fromPath.length === f.fromPath.length + 1 && p.fromPath[p.fromPath.length - 1].fieldId === currentField.id);
+								jsonFieldNameList.push(`'${isMapping ? '_' : ''}${currentField.name}', ${currentField.name}`);
+							} else {
+								const entityFieldMapElement = entityFieldMap[f.fromPath[index + 1].entityId + f.fromPath[index + 1].fieldId];
+								/** 聚合为 JSON 时，字段取父字段的名称，如 MAPPING_A_B_C，取名称 B */
+								if (!jsonMappingFieldMap[entityFieldMapElement.name]) {
+									jsonFieldNameList.push(`'${entityFieldMapElement.name}', ${entityFieldMapElement.name}_JSON`);
+									jsonMappingFieldMap[entityFieldMapElement.name] = 1;
 								}
-							});
-						entityName = `LEFT JOIN (SELECT id AS MAPPING_${mappingTableName}_id${extraFieldNames.length ? `, ${extraFieldNames.join(', ')}` : ''}${jsonFieldNameList.length ? `, JSON_OBJECT(${jsonFieldNameList.join(', ')}) ${parentField.name}_JSON` : ''} FROM ${getTableName(originEntity.name)} ${leftJoinSqlList.join(' ')} WHERE _STATUS_DELETED = 0) MAPPING_${mappingTableName} ON MAPPING_${mappingTableName}.MAPPING_${mappingTableName}_id = ${getTableName(parentEntity.name)}.${(relationField?.name)}`;
-					}
+							}
+						});
+					
+					/** 需要在子查询中返回的字段列表 */
+					const extraFieldNames = allFields
+						.filter(f => f.fromPath.find(path => path.fieldId === parentField.id && path.entityId === parentEntity.id) && (f.entityId === originEntity.id ? !entityFieldMap[f.entityId + f.fieldId].isPrimaryKey : true))
+						.map(f => {
+							const currentField = entityFieldMap[f.entityId + f.fieldId];
+							const index = f.fromPath.findIndex(path => path.fieldId === parentField.id && path.entityId === parentEntity.id);
+							const mappingFieldName = `MAPPING_${joinArray(...(f.fromPath.map(path => entityFieldMap[path.entityId + path.fieldId].name)), currentField.name).join('_')}`;
+						
+							/** 字段来源于当前表中 */
+							if (f.fromPath.length - 1 === index) {
+								return `${currentField.name} AS ${mappingFieldName}`;
+							} else {
+							/** 字段来源于子查询 */
+								return mappingFieldName;
+							}
+						});
+					entityName = `LEFT JOIN (SELECT id AS MAPPING_${mappingTableName}_id${extraFieldNames.length ? `, ${extraFieldNames.join(', ')}` : ''}${jsonFieldNameList.length ? `, JSON_OBJECT(${jsonFieldNameList.join(', ')}) ${parentField.name}_JSON` : ''} FROM ${getTableName(originEntity.name)} ${leftJoinSqlList.join(' ')} WHERE _STATUS_DELETED = 0) MAPPING_${mappingTableName} ON MAPPING_${mappingTableName}.MAPPING_${mappingTableName}_id = ${getTableName(parentEntity.name)}.${(relationField?.name)}`;
 				} else if (type === 'foreigner') {
 					/** 被关联，当前实体被另一实体关联，即当前实体的主键（id）被另一个实体作为外键相互关联 */
 					const mappingTableName = joinArray(...fromPath.map(p => p.name), parentField.name).join('_');
@@ -482,7 +480,7 @@ export const spliceSelectSQLByConditions = (fnParams: {
 					return;
 				}
 				
-				const isMapping = allFields.find(p => p.fromPath[0]?.fieldId === field.fieldId);
+				const isMapping = fields.find(p => p.fromPath[0]?.fieldId === field.fieldId);
 				
 				if (isMapping) {
 					fieldList.push(`${entityField.name} AS _${entityField.name}`, `${entityField.name}_JSON AS ${entityField.name}`);
