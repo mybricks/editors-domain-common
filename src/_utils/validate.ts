@@ -51,7 +51,13 @@ export const generateValidateScript = (entity: Entity, conAry: Array<{ from: str
 								throw new Error("请求参数字段 " + key + " 必须为字符串或数字类型");
 							}
 						} else {
-							if (!enumValues.includes(String(params[key]))) {
+							if (Array.isArray(params[key])) {
+								for (let i = 0, i < params[key].length; i++) {
+									if (!enumValues.includes(params[key][i])) {
+										throw new Error("请求参数字段 " + key + " 中每一项必须为枚举值 " + enumValues.join("/") + " 其中之一");
+									}
+								}
+							} else if (!enumValues.includes(String(params[key]))) {
 								throw new Error("请求参数字段 " + key + " 必须为枚举值 " + enumValues.join("/") + " 其中之一");
 							}
 						}

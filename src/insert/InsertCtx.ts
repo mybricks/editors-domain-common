@@ -83,7 +83,7 @@ export default class InsertCtx {
 						const value = ['params', ...fromNames.map(key => key)].join('.');
 						const q = getQuoteByFieldType(field.dbType);
 						
-						valueAry.push(`\${(${value} === undefined || ${value} === null) ? null : \`${q}\${${value}}${q}\`}`);
+						valueAry.push(`\${(${value} === undefined || ${value} === null) ? null : \`${q}\${Array.isArray(${value}) || (typeof ${value} === 'object' && ${value} !== null) ? JSON.stringify(${value}) : ${value}}${q}\`}`);
 					} else {
 						if (field.isPrimaryKey) {
 							valueAry.push('${genUniqueId()}');
