@@ -23,7 +23,15 @@ export default function Where() {
 			const oriEntity = ctx.domainModel.entityAry.find(e => e.id === nowValue.entity.id);
 			const primaryField = oriEntity.fieldAry.find(f => f.name === 'id');
 
-			nowValue.entity.fieldAry = primaryField ? [primaryField.toJSON()] : [];
+			if (primaryField) {
+				const field = primaryField.toJSON();
+				field.name = '总数';
+				field.desc = '查询数据总数';
+				
+				nowValue.entity.fieldAry = [field];
+			} else {
+				nowValue.entity.fieldAry = [];
+			}
 		}
 	};
 

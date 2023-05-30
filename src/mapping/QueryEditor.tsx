@@ -156,8 +156,8 @@ function SelectFrom() {
 					<div className={css.fields}>
 						<div className={`${css.field} ${css.disabled}`}>
 							<input type="checkbox" checked />
-							<span>id</span>
 							<span>总数</span>
+							<span>查询数据总数</span>
 						</div>
 					</div>
 				) : (

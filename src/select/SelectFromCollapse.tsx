@@ -4,6 +4,7 @@ import QueryCtx from './QueryCtx';
 import { AnyType } from '../_types';
 import { Entity, Field } from '../_types/domain';
 import { FieldBizType } from '../_constants/field';
+import { CountCondition } from '../mapping/constant';
 
 import css from './QueryEditor.less';
 
@@ -29,6 +30,15 @@ const SelectFromCollapse: FC<SelectFromProps> = props => {
 		fieldMappingEntity = JSON.parse(JSON.stringify(ctx.nowValue.entities.find(en => en.id === fieldMappingEntity.id) as AnyType as Entity) || 'null');
 		const oldFieldIds = field.mapping?.entity?.fieldAry.map(f => f.id) || [];
 		fieldMappingEntity.fieldAry = fieldMappingEntity.fieldAry.filter(f => oldFieldIds.includes(f.id));
+		
+		if (field.mapping?.condition === CountCondition) {
+			const primaryField = fieldMappingEntity.fieldAry.find(f => f.name === 'id');
+			
+			if (primaryField) {
+				primaryField.name = '总数';
+				primaryField.desc = '查询数据总数';
+			}
+		}
 	}
 	/** 映射类型，但为设置映射数据 */
 	const disabled = field.bizType === FieldBizType.MAPPING && !isMapping;
