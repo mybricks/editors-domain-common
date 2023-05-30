@@ -505,6 +505,7 @@ export const spliceSelectSQLByConditions = (fnParams: {
 			countSql.push(whereSql);
 		}
 		
+		
 		if (orders.length) {
 			const orderList: string[] = [];
 			orders.forEach(order => {
@@ -516,7 +517,7 @@ export const spliceSelectSQLByConditions = (fnParams: {
 				if (order.fromPath.length) {
 					orderList.push(`MAPPING_${joinArray(...order.fromPath.map(path => entityFieldMap[path.entityId + path.fieldId].name), entityField.name).join('_')} ${order.order}`);
 				} else {
-					fieldList.push(`${entityField.name} ${order.order}`);
+					orderList.push(`${entityField.name} ${order.order}`);
 				}
 			});
 			orderList.length && sql.push(`ORDER BY ${orderList.join(', ')}`);

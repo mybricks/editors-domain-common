@@ -46,11 +46,7 @@ export const generateValidateScript = (entity: Entity, conAry: Array<{ from: str
 			
 				validateScript += `if (key === "${fromPropName}") {
 						const enumValues = ${JSON.stringify(field.enumValues ?? [])};
-						if (enumValues.length <= 0) {
-							if (typeof params[key] !== "string" && typeof params[key] !== "number") {
-								throw new Error("请求参数字段 " + key + " 必须为字符串或数字类型");
-							}
-						} else {
+						if (enumValues.length) {
 							let parsedValue = params[key];
 							try {
 								parsedValue = JSON.parse(parsedValue);
