@@ -456,7 +456,7 @@ export const spliceSelectSQLByConditions = (fnParams: {
 						
 						entityName = `LEFT JOIN (SELECT GROUP_CONCAT(id SEPARATOR \"${SEPARATOR}\") MAPPING_${mappingTableName}_id, GROUP_CONCAT(${relationField?.name} SEPARATOR \"${SEPARATOR}\") ${curRelationFieldName}${extraFieldNames.length ? `, ${extraFieldNames.join(', ')}` : ''}${jsonFieldNameList.length ? `, JSON_ARRAYAGG(JSON_OBJECT(${jsonFieldNameList.join(', ')})) ${parentField.name}_JSON` : ''} FROM ${getTableName(originEntity.name)} ${leftJoinSqlList.join(' ')} WHERE _STATUS_DELETED = 0 AND ${filedName} IN (SELECT max(${filedName}) FROM ${getTableName(originEntity.name)} WHERE _STATUS_DELETED = 0 GROUP BY ${relationField.name})) MAPPING_${mappingTableName} ON MAPPING_${mappingTableName}.${curRelationFieldName} = ${getTableName(parentEntity.name)}.id`;
 					} else if (condition.startsWith('count(') && condition.endsWith(')')) {
-						entityName = `LEFT JOIN (SELECT ${relationField?.name} AS ${curRelationFieldName}, JSON_OBJECT('总数', COUNT(id)) ${parentField.name}_JSON FROM ${getTableName(originEntity.name)} ${leftJoinSqlList.join(' ')} WHERE _STATUS_DELETED = 0 GROUP BY ${relationField?.name}) MAPPING_${mappingTableName} ON MAPPING_${mappingTableName}.${curRelationFieldName} = ${getTableName(parentEntity.name)}.id`;
+						entityName = `LEFT JOIN (SELECT ${relationField?.name} AS ${curRelationFieldName}, COUNT(id) AS MAPPING_${mappingTableName}_总数, JSON_OBJECT('总数', COUNT(id)) ${parentField.name}_JSON FROM ${getTableName(originEntity.name)} ${leftJoinSqlList.join(' ')} WHERE _STATUS_DELETED = 0 GROUP BY ${relationField?.name}) MAPPING_${mappingTableName} ON MAPPING_${mappingTableName}.${curRelationFieldName} = ${getTableName(parentEntity.name)}.id`;
 					}
 				}
 				

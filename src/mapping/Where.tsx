@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React from 'react';
 import { observe } from '@mybricks/rxui';
 import QueryCtx from './QueryCtx';
 import { CountCondition } from './constant';
@@ -26,6 +26,7 @@ export default function Where() {
 			if (primaryField) {
 				const field = primaryField.toJSON();
 				field.name = '总数';
+				field.isPrimaryKey = false;
 				field.desc = '查询数据总数';
 				
 				nowValue.entity.fieldAry = [field];

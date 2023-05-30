@@ -6,7 +6,8 @@ export type T_Field = {
   isPrimaryKey,
   name,
   desc,
-  dbType
+  dbType,
+	bizType
 }
 
 export type T_Entity = {

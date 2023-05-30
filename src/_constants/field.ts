@@ -25,6 +25,8 @@ export enum FieldBizType {
 	SYS_USER_CREATOR = 'SYS_USER.CREATOR',
 	/** 系统表 */
 	SYS_USER_UPDATER = 'SYS_USER.UPDATER',
+	/** 计算字段 */
+	CALC = 'calc'
 }
 
 /** 数据库字段类型 */
