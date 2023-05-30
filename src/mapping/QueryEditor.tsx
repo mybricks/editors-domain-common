@@ -162,15 +162,15 @@ function SelectFrom() {
 					</div>
 				) : (
 					<div className={css.fields}>
-						{nowValue.entity ? (
-							<div className={`${css.field} ${css.addCalcField}`} onClick={() => setVisible(true)}>
-								<span className={css.addButton}>
-								+
-								</span>
-								<span>新增计算字段</span>
-								<span></span>
-							</div>
-						) : null}
+						{/*{nowValue.entity ? (*/}
+						{/*	<div className={`${css.field} ${css.addCalcField}`} onClick={() => setVisible(true)}>*/}
+						{/*		<span className={css.addButton}>*/}
+						{/*		+*/}
+						{/*		</span>*/}
+						{/*		<span>新增计算字段</span>*/}
+						{/*		<span></span>*/}
+						{/*	</div>*/}
+						{/*) : null}*/}
 						{fields}
 					</div>
 				)}
