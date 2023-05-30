@@ -108,7 +108,8 @@ export const spliceUpdateSQLFragmentByConditions = (fnParams: {
 			});
 			
 			const q = getQuoteByFieldType(field?.dbType as string);
-			return field ? `\${${value} === undefined ? "" : \`, ${toFieldName} = \${${value} === null ? null : \`${q}\${${value}}${q}\`}\`}` : undefined;
+			/** 值为 undefined 时，返回空字符串 */
+			return field ? `\${${value} === undefined ? "" : \`, ${toFieldName} = \${${value} === null ? null : \`${q}\${Array.isArray(${value}) || (typeof ${value} === 'object' && ${value} !== null) ? JSON.stringify(${value}) : ${value}}${q}\`}\`}` : undefined;
 		})
 		.filter(Boolean)
 		.join('');

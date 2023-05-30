@@ -51,13 +51,17 @@ export const generateValidateScript = (entity: Entity, conAry: Array<{ from: str
 								throw new Error("请求参数字段 " + key + " 必须为字符串或数字类型");
 							}
 						} else {
-							if (Array.isArray(params[key])) {
-								for (let enumIndex = 0; enumIndex < params[key].length; enumIndex++) {
-									if (!enumValues.includes(params[key][enumIndex])) {
+							let parsedValue = params[key];
+							try {
+								parsedValue = JSON.parse(parsedValue);
+							} catch (e) {}
+							if (Array.isArray(parsedValue)) {
+								for (let enumIndex = 0; enumIndex < parsedValue.length; enumIndex++) {
+									if (!enumValues.includes(parsedValue[enumIndex])) {
 										throw new Error("请求参数字段 " + key + " 中每一项必须为枚举值 " + enumValues.join("/") + " 其中之一");
 									}
 								}
-							} else if (!enumValues.includes(String(params[key]))) {
+							} else if (!enumValues.includes(String(parsedValue))) {
 								throw new Error("请求参数字段 " + key + " 必须为枚举值 " + enumValues.join("/") + " 其中之一");
 							}
 						}

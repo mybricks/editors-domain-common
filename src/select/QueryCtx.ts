@@ -171,11 +171,23 @@ export default class QueryCtx {
 			desc = `${currentEntity.name} 的 ${currentEntity.fieldAry.filter(f => currentFieldIds.includes(f.id)).map(f => f.name).join(', ')}`;
 			/** 实体 + 字段的 Map */
 			const entityFieldMap: Record<string, Field> = getEntityFieldMap(entities as Entity[]);
-			const needFormatFields = fields.filter(f => {
+			const needFormatFields = fields.map(f => {
 				const curField = entityFieldMap[f.entityId + f.fieldId];
 				
-				return curField.showFormat && curField.bizType === FieldBizType.DATETIME;
-			});
+				if (curField.showFormat && curField.bizType === FieldBizType.DATETIME) {
+					return [
+						...f.fromPath.map(p => ({ key: entityFieldMap[p.entityId + p.fieldId].name })),
+						{ key: curField.name, showFormat: curField.showFormat }
+					];
+				} else if (curField.bizType === FieldBizType.ENUM) {
+					return [
+						...f.fromPath.map(p => ({ key: entityFieldMap[p.entityId + p.fieldId].name })),
+						{ key: curField.name, showFormat: 'JSON' }
+					];
+				}
+				
+				return undefined;
+			}).filter(Boolean) as AnyType[];
 			const selectScript = `
 			async (params, context)=>{
 				const { executeSql, isEdit } = context;

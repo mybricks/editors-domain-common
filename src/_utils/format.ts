@@ -35,7 +35,7 @@ export const formatTime = (date, format) => {
 		.replace(/s/g, second);
 };
 
-export const spliceDataFormatString = (entityFieldMap: Record<string, Field>, fields: SelectedField[] = []) => {
+export const spliceDataFormatString = (entityFieldMap: Record<string, Field>, fields: Array<{ key: string; showFormat?: string }> = []) => {
 	const deepFormatCodeString = `
 		const deepFormat = (item, path) => {
 			if (!path.length || !item) { return; }
@@ -43,12 +43,24 @@ export const spliceDataFormatString = (entityFieldMap: Record<string, Field>, fi
 			if (path.length === 1) {
 				if (Array.isArray(item)) {
 					item.forEach(i => {
-						i['_' + key] = i[key];
-						i[key] = i[key] ? FORMAT_MAP.formatTime(new Date(i[key]), path[0].showFormat) : null;
+						if (path[0].showFormat === 'JSON') {
+							try {
+								i[key] = i[key] ? JSON.parse(i[key]) : i[key];
+							} catch (e) {}
+						} else {
+							i['_' + key] = i[key];
+							i[key] = i[key] ? FORMAT_MAP.formatTime(new Date(i[key]), path[0].showFormat) : null;
+						}
 					})
 				} else {
-					item['_' + key] = item[key];
-					item[key] = item[key] ? FORMAT_MAP.formatTime(new Date(item[key]), path[0].showFormat) : null;
+					if (path[0].showFormat === 'JSON') {
+						try {
+							item[key] = item[key] ? JSON.parse(item[key]) : item[key];
+						} catch (e) {}
+					} else {
+						item['_' + key] = item[key];
+						item[key] = item[key] ? FORMAT_MAP.formatTime(new Date(item[key]), path[0].showFormat) : null;
+					}
 				}
 				
 				return ;
@@ -64,11 +76,10 @@ export const spliceDataFormatString = (entityFieldMap: Record<string, Field>, fi
 		};
 	`;
 	
-	const needFormatPaths = fields.map(field => [...field.fromPath.map(p => ({ key: entityFieldMap[p.entityId + p.fieldId].name })), { key: entityFieldMap[field.entityId + field.fieldId].name, showFormat: entityFieldMap[field.entityId + field.fieldId].showFormat }]);
 	return `
 		${deepFormatCodeString}
 		rows = Array.from(rows || []).map(item => {
-			${JSON.stringify(needFormatPaths)}.forEach(path => {
+			${JSON.stringify(fields)}.forEach(path => {
 				deepFormat(item, path)
 			});
 
