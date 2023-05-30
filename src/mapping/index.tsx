@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { createPortal } from 'react-dom';
 import QueryEditor from './QueryEditor';
 import { Clear } from './Icons';
@@ -16,13 +16,6 @@ export default function MappingEditor({ editConfig: { value, options } }: AnyTyp
 		event.stopPropagation();
 		value.set(void 0);
 	}, []);
-	
-	/** 切换关联的表，重置映射 */
-	useEffect(() => {
-		if (val?.entity.id && options.fieldModel.relationEntityId && val.entity.id !== options.fieldModel.relationEntityId) {
-			value.set(void 0);
-		}
-	}, [options.fieldModel.relationEntityId]);
 
 	return (
 		<>
