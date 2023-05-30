@@ -1,4 +1,5 @@
 import { AnyType } from '../_types';
+import { CountCondition } from './constant';
 
 export type T_Field = {
   id,
@@ -72,7 +73,9 @@ export default class QueryCtx {
 		let desc;
 
 		if (entity && entity.fieldAry) {
-			desc = `${nowValue.entity.name} 的 ${entity.fieldAry.map(field => field.name).join(',')}`;
+			desc = nowValue.condition !== CountCondition
+				? `${nowValue.entity.name} 的 ${entity.fieldAry.map(field => field.name).join(',')}`
+				: `${nowValue.entity.name} 的 数据总数`;
 		} else {
 			this.nowValue.sql = void 0;
 		}

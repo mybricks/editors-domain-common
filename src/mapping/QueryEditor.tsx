@@ -7,6 +7,7 @@ import { AnyType } from '../_types';
 import PopView from '../_common/pop-view';
 import { Entity } from '../_types/domain';
 import CalcFieldModal from './CalcFieldModal';
+import { CountCondition } from './constant';
 
 import css from './QueryEditor.less';
 
@@ -151,18 +152,28 @@ function SelectFrom() {
 						})
 					}
 				</div>
-				<div className={css.fields}>
-					{/*{nowValue.entity ? (*/}
-					{/*	<div className={`${css.field} ${css.addCalcField}`} onClick={() => setVisible(true)}>*/}
-					{/*		<span className={css.addButton}>*/}
-					{/*			+*/}
-					{/*		</span>*/}
-					{/*		<span>新增计算字段</span>*/}
-					{/*		<span></span>*/}
-					{/*	</div>*/}
-					{/*) : null}*/}
-					{fields}
-				</div>
+				{nowValue.condition === CountCondition ? (
+					<div className={css.fields}>
+						<div className={`${css.field} ${css.disabled}`}>
+							<input type="checkbox" checked />
+							<span>id</span>
+							<span>总数</span>
+						</div>
+					</div>
+				) : (
+					<div className={css.fields}>
+						{nowValue.entity ? (
+							<div className={`${css.field} ${css.addCalcField}`} onClick={() => setVisible(true)}>
+								<span className={css.addButton}>
+								+
+								</span>
+								<span>新增计算字段</span>
+								<span></span>
+							</div>
+						) : null}
+						{fields}
+					</div>
+				)}
 			</div>
 			
 			<CalcFieldModal visible={visible} onCancel={onCancel} onOK={onOk} />

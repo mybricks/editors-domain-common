@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { observe } from '@mybricks/rxui';
 import QueryCtx from './QueryCtx';
+import { CountCondition } from './constant';
 
 import css from './Where.less';
 
@@ -14,17 +15,30 @@ export default function Where() {
 		return null;
 	}
 	const oriEntity = ctx.entityAry.find(et => et.id === nowValue.entity.id);
+	
+	const onChangeCondition = (event) => {
+		nowValue.condition = event.target.value;
+		
+		if (event.target.value === CountCondition) {
+			const oriEntity = ctx.domainModel.entityAry.find(e => e.id === nowValue.entity.id);
+			const primaryField = oriEntity.fieldAry.find(f => f.name === 'id');
+
+			nowValue.entity.fieldAry = primaryField ? [primaryField.toJSON()] : [];
+		}
+	};
 
 	return (
 		<div className={css.where}>
 			<div className={css.segTitle}>
         2. 筛选符合
-				<select className={css.selectDom}
+				<select
+					className={css.selectDom}
 					value={nowValue.condition}
-					onChange={e => (nowValue.condition = e.target.value)}>
+					onChange={onChangeCondition}
+				>
 					<option value={'-1'}>[全部]</option>
 					{/* TODO: 选择总数则只能选中 id 字段 */}
-					<option value="count(id)">[总数]</option>
+					<option value={CountCondition}>[总数]</option>
 					<optgroup label="----------"></optgroup>
 					<option value={'max(id)'}>最后一条</option>
 					{
