@@ -170,9 +170,15 @@ export const spliceSelectSQLByConditions = (fnParams: {
 				} else {
 					const field = entityFieldMap[condition.entityId + condition.fieldId];
 					/** 变量名拼接 */
-					const fieldName = condition.fromPath.length
-						? `MAPPING_${joinArray(...condition.fromPath.map(p => entityFieldMap[p.entityId + p.fieldId].name), field.name).join('_')}`
-						: field.name;
+					let fieldName = field.name;
+					
+					if (condition.fromPath.length) {
+						const lastPath = condition.fromPath[condition.fromPath.length - 1];
+						const parentField = entityFieldMap[lastPath.entityId + lastPath.fieldId];
+						const isCountCondition = parentField.mapping?.condition?.startsWith('count(') && parentField.mapping?.condition?.endsWith(')');
+						
+						fieldName = `MAPPING_${joinArray(...condition.fromPath.map(p => entityFieldMap[p.entityId + p.fieldId].name), isCountCondition ? '总数' : field.name).join('_')}`;
+					}
 					
 					let value = condition.value || '';
 					let isEntityField = false;
@@ -221,10 +227,10 @@ export const spliceSelectSQLByConditions = (fnParams: {
 		};
 		/** 实体 Map */
 		const entityMap = {};
-		entities.forEach(e => entityMap[e.id] = e);
 		/** 实体 + 字段的 Map */
 		const entityFieldMap: Record<string, Field> = {};
 		entities.forEach(entity => {
+			entityMap[entity.id] = entity;
 			entity.fieldAry.forEach(field => {
 				entityFieldMap[entity.id + field.id] = field;
 				
@@ -538,7 +544,11 @@ export const spliceSelectSQLByConditions = (fnParams: {
 				}
 				
 				if (order.fromPath.length) {
-					orderList.push(`MAPPING_${joinArray(...order.fromPath.map(path => entityFieldMap[path.entityId + path.fieldId].name), entityField.name).join('_')} ${order.order}`);
+					const lastPath = order.fromPath[order.fromPath.length - 1];
+					const parentField = entityFieldMap[lastPath.entityId + lastPath.fieldId];
+					const isCountCondition = parentField.mapping?.condition?.startsWith('count(') && parentField.mapping?.condition?.endsWith(')');
+					
+					orderList.push(`MAPPING_${joinArray(...order.fromPath.map(path => entityFieldMap[path.entityId + path.fieldId].name), isCountCondition ? '总数' : entityField.name).join('_')} ${order.order}`);
 				} else {
 					orderList.push(`${entityField.name} ${order.order}`);
 				}
