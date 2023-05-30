@@ -52,7 +52,7 @@ export const generateValidateScript = (entity: Entity, conAry: Array<{ from: str
 							}
 						} else {
 							if (Array.isArray(params[key])) {
-								for (let enumIndex = 0, enumIndex < params[key].length; enumIndex++) {
+								for (let enumIndex = 0; enumIndex < params[key].length; enumIndex++) {
 									if (!enumValues.includes(params[key][enumIndex])) {
 										throw new Error("请求参数字段 " + key + " 中每一项必须为枚举值 " + enumValues.join("/") + " 其中之一");
 									}
