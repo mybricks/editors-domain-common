@@ -472,9 +472,32 @@ export const spliceSelectSQLByConditions = (fnParams: {
 				return curFieldIds.includes(field.id) && field.mapping?.entity?.fieldAry?.length && entityMap[field.mapping.entity.id];
 			}), 1, [], curEntity));
 		
+		/** 字段去重 */
+		const newFieldIds: string[] = [];
+		const newFields = fields.map(field => {
+			let curField: SelectedField = field;
+			
+			if (!field.fromPath.length) {
+				const entityField = entityFieldMap[field.entityId + field.fieldId];
+				
+				/** 如果映射类型，没有选择内部的字段，则忽略映射类型字段 */
+				if (entityField.bizType === 'mapping' && !fields.find(f => f.fromPath[0]?.fieldId === field.fieldId)) {
+					return undefined;
+				}
+			} else {
+				curField = field.fromPath[0];
+			}
+			
+			if (newFieldIds.includes(curField.fieldId)) {
+				return undefined;
+			} else {
+				newFieldIds.push(curField.fieldId);
+				
+				return curField;
+			}
+		}).filter(Boolean) as SelectedField[];
 		/** 字段列表 */
-		fields
-			.filter(field => !field.fromPath.length)
+		newFields
 			.map(field => {
 				const entityField = entityFieldMap[field.entityId + field.fieldId];
 				if (entityField.bizType === 'mapping') {
@@ -482,9 +505,7 @@ export const spliceSelectSQLByConditions = (fnParams: {
 					return;
 				}
 				
-				const isMapping = fields.find(p => p.fromPath[0]?.fieldId === field.fieldId);
-				
-				if (isMapping) {
+				if (entityField.bizType === 'relation' && fields.find(p => p.fromPath[0]?.fieldId === field.fieldId)) {
 					fieldList.push(`${entityField.name} AS _${entityField.name}`, `${entityField.name}_JSON AS ${entityField.name}`);
 				} else {
 					fieldList.push(entityField.name);
