@@ -122,9 +122,9 @@ export const getSchemaTypeByFieldType = (field: Field) => {
 		return 'number';
 	case FieldBizType.SYS_USER:
 		return 'number';
-	case FieldBizType.SYS_USER_CREATOR:
+	case FieldBizType.SYS_ROLE:
 		return 'number';
-	case FieldBizType.SYS_USER_UPDATER:
+	case FieldBizType.SYS_ROLE_RELATION:
 		return 'number';
 	case FieldBizType.MAPPING:
 		return 'any';

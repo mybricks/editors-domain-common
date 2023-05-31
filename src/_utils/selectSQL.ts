@@ -344,7 +344,7 @@ export const spliceSelectSQLByConditions = (fnParams: {
 				
 				/** 关联，当前实体主动关联另一个实体，即当前实体字段存在一个字段作为外键关联另一个实体的主键（id） */
 				if (type === 'primary') {
-					const relationField = parentEntity.fieldAry.find(f => ['relation', 'SYS_USER', 'SYS_USER.CREATOR', 'SYS_USER.UPDATER'].includes(f.bizType) && f.relationEntityId === originEntity.id && (parentField.bizType === 'mapping' ? true : f.id === parentField.id));
+					const relationField = parentEntity.fieldAry.find(f => ['relation', 'SYS_USER', 'SYS_ROLE', 'SYS_ROLE_RELATION'].includes(f.bizType) && f.relationEntityId === originEntity.id && (parentField.bizType === 'mapping' ? true : f.id === parentField.id));
 					const mappingTableName = joinArray(...fromPath.map(p => p.name), parentField.name).join('_');
 					/** 聚合为 json 的字段列表 */
 					let jsonFieldNameList: string[] = [];

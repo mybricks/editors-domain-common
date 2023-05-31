@@ -22,9 +22,9 @@ export enum FieldBizType {
 	/** 系统表 */
 	SYS_USER = 'SYS_USER',
 	/** 系统表 */
-	SYS_USER_CREATOR = 'SYS_USER.CREATOR',
+	SYS_ROLE = 'SYS_ROLE',
 	/** 系统表 */
-	SYS_USER_UPDATER = 'SYS_USER.UPDATER',
+	SYS_ROLE_RELATION = 'SYS_ROLE_RELATION',
 	/** 计算字段 */
 	CALC = 'calc'
 }
