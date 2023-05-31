@@ -49,8 +49,8 @@ export default function QueryEditor({ domainModel, paramSchema, value, close, sh
 		/** 实体信息可能存在变更，每次使用最新的实体信息 */
 		val.entities = formatEntitiesByOriginEntities(val.entities, domainModel.entityAry.map((entity: AnyType) => entity.toJSON()));
 		val.fields = formatFieldsByOriginEntities(val.fields ?? [], domainModel.entityAry);
-		val.orders = formatOrderByOriginEntities(val.fields ?? [], val.orders ?? [], domainModel.entityAry);
-		val.conditions = formatConditionByOriginEntities(val.fields ?? [], val.conditions, domainModel.entityAry);
+		val.orders = formatOrderByOriginEntities(val.orders ?? [], val.entities);
+		val.conditions = formatConditionByOriginEntities(val.conditions, val.entities);
 
 		next({
 			domainModel,

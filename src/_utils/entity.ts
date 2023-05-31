@@ -64,30 +64,29 @@ export const formatFieldsByOriginEntities = (fields: SelectedField[], originEnti
 	});
 };
 
-export const formatConditionByOriginEntities = (fields: SelectedField[], condition: Condition, originEntities: AnyType[]) => {
+export const formatConditionByOriginEntities = (condition: Condition, originEntities: AnyType[]) => {
 	const entityFieldMap = getEntityFieldMap(originEntities);
+	const curEntity = originEntities.find(e => e.selected);
 	
 	const formatCondition = (condition: Condition[]) => {
 		condition.forEach(con => {
 			if (con.conditions) {
 				formatCondition(con.conditions);
 			} else {
-				let hasEffect = !!entityFieldMap[con.entityId + con.fieldId];
+				let hasEffect = curEntity && !!entityFieldMap[con.entityId + con.fieldId];
 				
-				if (con.fromPath?.length) {
-					const fromPath = JSON.parse(JSON.stringify(con.fromPath));
-					const parentPath = fromPath.pop();
-					parentPath.fromPath = fromPath;
-					
-					const parentField = fields.find(f => {
-						return f.fieldId === parentPath.fieldId
-							&& f.entityId === parentPath.entityId
-							&& f.fromPath.map(p => p.fieldId).join('') === parentPath.fromPath.map(p => p.fieldId).join('');
-					});
-					const entityField = entityFieldMap[parentPath.entityId + parentPath.fieldId];
-					
-					if (!parentField || !entityField || !entityField.mapping?.entity?.fieldAry.find(f => f.id === con.fieldId)) {
-						hasEffect = false;
+				if (hasEffect) {
+					if (con.fromPath?.length) {
+						let startEntity = curEntity;
+						const fromPath = [...con.fromPath, con];
+						
+						while (fromPath.length && hasEffect) {
+							const path = fromPath.shift() as SelectedField;
+							hasEffect = startEntity && path.entityId === startEntity.id && !!entityFieldMap[path.entityId + path.fieldId];
+							startEntity = entityFieldMap[path.entityId + path.fieldId]?.mapping?.entity;
+						}
+					} else {
+						hasEffect = con.entityId === curEntity?.id;
 					}
 				}
 				
@@ -108,26 +107,25 @@ export const formatConditionByOriginEntities = (fields: SelectedField[], conditi
 };
 
 /** 打开面板时格式化排序项，存在不匹配变更即置为失效 */
-export const formatOrderByOriginEntities = (fields: SelectedField[], orders: Order[], originEntities: AnyType[]) => {
+export const formatOrderByOriginEntities = (orders: Order[], originEntities: AnyType[]) => {
 	const entityFieldMap = getEntityFieldMap(originEntities);
+	const curEntity = originEntities.find(e => e.selected);
 	
 	return orders.map(order => {
-		let hasEffect = !!entityFieldMap[order.entityId + order.fieldId];
+		let hasEffect = curEntity && !!entityFieldMap[order.entityId + order.fieldId];
 		
-		if (order.fromPath?.length) {
-			const fromPath = JSON.parse(JSON.stringify(order.fromPath));
-			const parentPath = fromPath.pop();
-			parentPath.fromPath = fromPath;
-			
-			const parentField = fields.find(f => {
-				return f.fieldId === parentPath.fieldId
-					&& f.entityId === parentPath.entityId
-					&& f.fromPath.map(p => p.fieldId).join('') === parentPath.fromPath.map(p => p.fieldId).join('');
-			});
-			const entityField = entityFieldMap[parentPath.entityId + parentPath.fieldId];
-			
-			if (!parentField || !entityField || !entityField.mapping?.entity?.fieldAry.find(f => f.id === order.fieldId)) {
-				hasEffect = false;
+		if (hasEffect) {
+			if (order.fromPath?.length) {
+				let startEntity = curEntity;
+				const fromPath = [...order.fromPath, order];
+				
+				while (fromPath.length && hasEffect) {
+					const path = fromPath.shift() as SelectedField;
+					hasEffect = startEntity && path.entityId === startEntity.id && !!entityFieldMap[path.entityId + path.fieldId];
+					startEntity = entityFieldMap[path.entityId + path.fieldId]?.mapping?.entity;
+				}
+			} else {
+				hasEffect = order.entityId === curEntity?.id;
 			}
 		}
 		
