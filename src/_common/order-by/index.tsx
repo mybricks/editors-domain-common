@@ -80,25 +80,35 @@ const OrderItem: FC<OrderItemProps> = props => {
 	const selectedMappingFields = useComputed(() => {
 		const res: AnyType[] = [];
 		let depIndex = 0;
-		let selectedField = orderContext.nowValue.fields.filter(f => f.fromPath.length === depIndex);
+		const currentEntity = orderContext.nowValue.entities.find(e => e.selected);
+		let selectedField = (currentEntity?.fieldAry.filter(field => field.mapping?.entity?.fieldAry?.length) ?? []).map(field => {
+			return { ...field, entityId: currentEntity?.id, fromPath: [] };
+		}) as AnyType[];
 		
 		while (selectedField.length) {
-			const mappingFields = selectedField.filter(f => entityFieldMap[f.entityId + f.fieldId]?.mapping?.entity?.fieldAry.length);
-			
-			if (mappingFields.length) {
-				const curMappings = mappingFields.map(f => ({ ...entityFieldMap[f.entityId + f.fieldId], entityId: f.entityId, fromPath: f.fromPath }));
-				
-				if (!res[depIndex]) {
-					res[depIndex] = [...curMappings];
-				} else {
-					res[depIndex].push(...curMappings);
-				}
+			if (!res[depIndex]) {
+				res[depIndex] = [...selectedField];
 			} else {
-				break;
+				res[depIndex].push(...selectedField);
 			}
 			
+			selectedField = (res[depIndex] || [])
+				.filter(f => f.mapping?.entity?.fieldAry?.length)
+				.reduce((pre, field) => {
+					return [
+						...pre,
+						...field.mapping.entity.fieldAry
+							.filter(f => entityFieldMap[field.mapping.entity.id + f.id]?.mapping?.entity?.fieldAry.length)
+							.map(f => {
+								return {
+									...entityFieldMap[field.mapping.entity.id + f.id],
+									entityId: field.mapping.entity.id,
+									fromPath: [...field.fromPath, { fieldId: field.id, fieldName: field.name, entityId: field.entityId, fromPath: [] }]
+								};
+							})
+					];
+				}, []);
 			depIndex++;
-			selectedField = orderContext.nowValue.fields.filter(f => f.fromPath.length === depIndex);
 		}
 		
 		return res;
