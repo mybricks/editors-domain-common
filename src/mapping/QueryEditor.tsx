@@ -8,6 +8,7 @@ import PopView from '../_common/pop-view';
 import { Entity } from '../_types/domain';
 import CalcFieldModal from './CalcFieldModal';
 import { CountCondition } from './constant';
+import { FieldBizType } from '../_constants/field';
 
 import css from './QueryEditor.less';
 
@@ -31,45 +32,27 @@ export default function QueryEditor({ domainModel, fieldModel, value, close }: A
 		const entityInfo = {};
 		const entityAry: Entity[] = [];
 		domainModel.entityAry.forEach(et => {
-			if (fieldModel.isBizTypeOfSystem()) {
+			if ([FieldBizType.SYS_USER, FieldBizType.SYS_ROLE, FieldBizType.SYS_ROLE_RELATION].includes(fieldModel.bizType)) {
 				if (et.id === fieldModel.relationEntityId) {
-					const primaryField = myEntity.searchRelationFieldByForeignerId(et.id);
-					if (primaryField) {
-						entityAry.push(et);
-						entityInfo[et.id] = {
-							type: 'primary',
-							field: primaryField
-						};
-					}
+					entityAry.push(et);
+					entityInfo[et.id] = { type: 'primary', field: fieldModel.toJSON() };
 				}
-			} else if (fieldModel.isBizTypeOfRelation()) {
+			} else if (FieldBizType.RELATION === fieldModel.bizType) {
 				if (et.id === fieldModel.relationEntityId) {
-					const primaryField = myEntity.searchRelationFieldByForeignerId(et.id);
-					if (primaryField) {
-						entityAry.push(et);
-						entityInfo[et.id] = {
-							type: 'primary',
-							field: primaryField
-						};
-					}
+					entityAry.push(et);
+					entityInfo[et.id] = { type: 'primary', field: fieldModel.toJSON() };
 				}
 			} else if (!et.isSystem) {//忽略系统表
 				//主键关联
 				const foreignerField = et.searchRelationFieldByForeignerId(myEntity.id);
 				if (foreignerField) {
 					entityAry.push(et);
-					entityInfo[et.id] = {
-						type: 'foreigner',
-						field: foreignerField
-					};
+					entityInfo[et.id] = { type: 'foreigner', field: foreignerField };
 				} else {
 					const primaryField = myEntity.searchRelationFieldByForeignerId(et.id);
 					if (primaryField) {
 						entityAry.push(et);
-						entityInfo[et.id] = {
-							type: 'primary',
-							field: primaryField
-						};
+						entityInfo[et.id] = { type: 'primary', field: primaryField };
 					}
 				}
 			}
