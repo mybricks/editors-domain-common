@@ -20,7 +20,7 @@ import css from './QueryEditor.less';
 
 let ctx: QueryCtx;
 
-export default function QueryEditor({ domainModel, paramSchema, value, close, showPager }: AnyType) {
+export default function QueryEditor({ domainModel, paramSchema, value, close, showPager, selectCount }: AnyType) {
 	ctx = useObservable(QueryCtx, next => {
 		const oriVal = value.get();
 		let val;
@@ -58,7 +58,8 @@ export default function QueryEditor({ domainModel, paramSchema, value, close, sh
 			nowValue: val,
 			value,
 			close,
-			showPager
+			showPager,
+			selectCount
 		});
 	}, { to: 'children' });
 
@@ -74,8 +75,8 @@ export default function QueryEditor({ domainModel, paramSchema, value, close, sh
 						  paramSchema={ctx.paramSchema}
 						  domainModal={ctx.domainModel}
 					  />
-					  <OrderBy nowValue={ctx.nowValue} domainModal={ctx.domainModel} />
-					  {showPager ? null : <Limit/>}
+					  {selectCount ? null : <OrderBy nowValue={ctx.nowValue} domainModal={ctx.domainModel}/>}
+					  {showPager || selectCount ? null : <Limit/>}
 					  {/*{showPager ? <Offset /> : null}*/}
 				  </>
 			  ) : null
@@ -121,24 +122,34 @@ function SelectFrom() {
 				</div>
 				<div className={css.fields}>
 					{currentEntity ? (
-						<div className={`${css.field} ${css.allField}`}>
-							<input type="checkbox" checked={selectedAll} onChange={onSelectAll}/>
-							<span onClick={onSelectAll}>{selectedAll ? '取消所有字段' : '选中所有字段'}</span>
-							<span></span>
-						</div>
-					): null}
-					{currentEntity ? currentEntity.fieldAry.filter(f => !f.isPrivate).map(field => {
-						return (
-							<SelectFromCollapse
-								key={field.id}
-								initialOpen
-								entity={currentEntity as Entity}
-								ctx={ctx}
-								fromPath={[]}
-								field={field as Field}
-							/>
-						);
-					}) : []}
+						ctx.selectCount ? (
+							<div className={`${css.field} ${css.disabled}`}>
+								<input type="checkbox" checked/>
+								<span>总数</span>
+								<span>查询总数</span>
+							</div>
+						) : (
+							<>
+								<div className={`${css.field} ${css.allField}`}>
+									<input type="checkbox" checked={selectedAll} onChange={onSelectAll}/>
+									<span onClick={onSelectAll}>{selectedAll ? '取消所有字段' : '选中所有字段'}</span>
+									<span></span>
+								</div>
+								{currentEntity.fieldAry.filter(f => !f.isPrivate).map(field => {
+									return (
+										<SelectFromCollapse
+											key={field.id}
+											initialOpen
+											entity={currentEntity as Entity}
+											ctx={ctx}
+											fromPath={[]}
+											field={field as Field}
+										/>
+									);
+								})}
+							</>
+						)
+					) : []}
 				</div>
 			</div>
 		</>

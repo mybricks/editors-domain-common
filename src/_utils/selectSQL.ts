@@ -70,6 +70,7 @@ export const spliceSelectSQLByConditions = (fnParams: {
 	limit: { type: string; value: number | string };
 	pageNum?: string;
 	showPager?: boolean;
+	selectCount?: boolean;
 	isEdit?: boolean;
 }) => {
 	/** 根据字段类型返回拼接 sql 的具体指 */
@@ -93,7 +94,7 @@ export const spliceSelectSQLByConditions = (fnParams: {
 		return getValueByFieldType(dbType, val);
 	};
 	
-	let { conditions, entities, params, limit, orders = [], pageNum, fields, showPager, isEdit } = fnParams;
+	let { conditions, entities, params, limit, orders = [], pageNum, fields, showPager, selectCount, isEdit } = fnParams;
 	const curEntity = entities.find(e => e.selected);
 	
 	if (curEntity && curEntity.fieldAry.length) {
@@ -302,7 +303,15 @@ export const spliceSelectSQLByConditions = (fnParams: {
 			return true;
 		});
 		/** 当前实体中被使用到的字段 ID */
-		const curFieldIds = allFields.filter(field => field.entityId === curEntity.id && !field.fromPath?.length).map(field => field.fieldId);
+		const curFieldIds = allFields
+			.map(field => {
+				if (field.entityId === curEntity.id && !field.fromPath?.length) {
+					return field.fieldId;
+				} else if (field.fromPath[0]?.entityId === curEntity.id) {
+					return field.fromPath[0]?.fieldId;
+				}
+			})
+			.filter(Boolean);
 		
 		/** 拼接 LEFT JOIN 语句 */
 		const spliceLeftJoinSql = (mappingFields: Field[], depIndex: number, fromPath: Field[], parentEntity: Entity) => {
@@ -529,11 +538,15 @@ export const spliceSelectSQLByConditions = (fnParams: {
 		sql.push(`SELECT ${fieldList.join(', ')} FROM ${entityNames.join(' ')}`);
 		sql.push(whereSql);
 		
-		if (showPager) {
+		if (showPager || selectCount) {
 			countSql.push(`SELECT count(*) as total FROM ${entityNames.join(' ')}`);
 			countSql.push(whereSql);
 		}
 		
+		/** 单独查询总数 */
+		if (selectCount) {
+			return ['', countSql.join(' ')];
+		}
 		
 		if (orders.length) {
 			const orderList: string[] = [];

@@ -46,7 +46,6 @@ export default function Where() {
 					onChange={onChangeCondition}
 				>
 					<option value={'-1'}>[全部]</option>
-					{/* TODO: 选择总数则只能选中 id 字段 */}
 					<option value={CountCondition}>[总数]</option>
 					<optgroup label="----------"></optgroup>
 					<option value={'max(id)'}>最后一条</option>

@@ -21,10 +21,7 @@ export default function QueryEditor({ domainModel, fieldModel, value, close }: A
 		if (oriVal) {
 			val = JSON.parse(JSON.stringify(oriVal));//深度复制
 		} else {
-			val = {
-				condition: '-1',
-				fieldJoiner: ','
-			};
+			val = { condition: '-1', fieldJoiner: ',' };
 		}
 
 		const myEntity = fieldModel.parent;

@@ -60,6 +60,7 @@ export default class QueryCtx {
 	};
 
 	showPager!: boolean;
+	selectCount!: boolean;
 
 	nowValue!: {
 		desc: string
@@ -105,6 +106,9 @@ export default class QueryCtx {
 	getOutputSchema() {
 		const { fields, entities } = this.nowValue;
 		const entityFieldMap: Record<string, Field> = getEntityFieldMap(entities as Entity[]);
+		if (this.selectCount) {
+			return { type: 'object', properties: { total: { type: 'number' } } };
+		}
 		const originSchema: AnyType = this.showPager ? {
 			type: 'object',
 			properties: {
@@ -168,7 +172,7 @@ export default class QueryCtx {
 
 		if (currentEntity) {
 			const currentFieldIds = fields.filter(f => f.entityId === currentEntity.id && !f.fromPath.length).map(f => f.fieldId);
-			desc = `${currentEntity.name} 的 ${currentEntity.fieldAry.filter(f => currentFieldIds.includes(f.id)).map(f => f.name).join(', ')}`;
+			desc = `${currentEntity.name} 的 ${this.selectCount ? '数据总数' : currentEntity.fieldAry.filter(f => currentFieldIds.includes(f.id)).map(f => f.name).join(', ')}`;
 			/** 实体 + 字段的 Map */
 			const entityFieldMap: Record<string, Field> = getEntityFieldMap(entities as Entity[]);
 			const needFormatFields = fields.map(f => {
@@ -203,6 +207,7 @@ export default class QueryCtx {
 					entities: ${JSON.stringify(entities)},
 					limit: ${JSON.stringify(limit)},
 					showPager: ${JSON.stringify(this.showPager || false)},
+					selectCount: ${JSON.stringify(this.selectCount || false)},
 					orders: (params.orders && Array.isArray(params.orders)) ? params.orders : ${JSON.stringify(orders)},
 					pageNum: ${JSON.stringify(pageNum)},
 					isEdit,
@@ -213,12 +218,15 @@ export default class QueryCtx {
 					const { rows: countRows } = await executeSql(countSql);
 					${needFormatFields.length ? spliceDataFormatString(entityFieldMap, needFormatFields) : ''}
 					return { dataSource: rows, total: countRows[0] ? countRows[0].total : 0, pageNum: params.pageNum || 1, pageSize: params.pageSize || 50 };
+				` : (this.selectCount ? `
+					const { rows: countRows } = await executeSql(countSql);
+					return { total: countRows[0] ? countRows[0].total : 0 };
 				` : `
 					let { rows } = await executeSql(sql);
 					rows = Array.from(rows || []);
 					${needFormatFields.length ? spliceDataFormatString(entityFieldMap, needFormatFields) : ''}
 					return rows;
-				`}
+				`)}
 			}//@ sourceURL=select.js
 			`;
 			
@@ -238,7 +246,7 @@ export default class QueryCtx {
 			en.selected = false;
 		});
 		entity.selected = true;
-		this.nowValue.fields = [{ fieldId: entity.fieldAry[0].id, fieldName: entity.fieldAry[0].name, entityId: entity.id, fromPath: [] }];
+		this.nowValue.fields = this.selectCount ? [] : [{ fieldId: entity.fieldAry[0].id, fieldName: entity.fieldAry[0].name, entityId: entity.id, fromPath: [] }];
 	}
 
 	setField(entity: T_Entity, fieldId: string) {
