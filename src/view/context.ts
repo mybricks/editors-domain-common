@@ -26,5 +26,6 @@ export default class ViewCtx {
 	}
 	
 	save() {
+		this.close?.();
 	}
 }
