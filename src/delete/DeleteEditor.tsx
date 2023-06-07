@@ -113,7 +113,8 @@ const DeleteEditor: FC<DeleteEditorProps> = props => {
 			const currentEntity = format.find(e => e.selected) ?? format[0];
 			val.entities = currentEntity ? [currentEntity] : [];
 		} else {
-			const entity = domainModel.entityAry.filter(e => !e.isSystem)[0];
+			const entities = [...domainModel.entityAry.filter(e => !e.isSystem), ...domainModel.entityAry.filter(e => e.isSystem)];
+			const entity = entities[0];
 			
 			val = {
 				conAry: [],
@@ -155,7 +156,7 @@ const DeleteEditor: FC<DeleteEditorProps> = props => {
 							}}
 						>
 							{
-								deleteContext.domainModel.entityAry.filter(e => !e.isSystem).map((et: Entity) => {
+								deleteContext.domainModel.entityAry.map((et: Entity) => {
 									return <option key={et.id} value={et.id}>{et.name}</option>;
 								})
 							}

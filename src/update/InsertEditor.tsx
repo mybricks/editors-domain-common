@@ -30,7 +30,8 @@ export default function InsertEditor({ domainModel, paramSchema, value, close }:
 			val.entities = currentEntity ? [currentEntity] : [];
 			val.conAry = formatConAryByEntity(val.conAry, currentEntity, paramSchema);
 		} else {
-			const entity = domainModel.entityAry.filter(e => !e.isSystem)[0];
+			const entities = [...domainModel.entityAry.filter(e => !e.isSystem), ...domainModel.entityAry.filter(e => e.isSystem)];
+			const entity = entities[0];
 			
 			val = {
 				conAry: [],
@@ -82,12 +83,8 @@ export default function InsertEditor({ domainModel, paramSchema, value, close }:
 					onChange={e => ctx.setEntity(e.target.value)}
 				>
 					{
-						ctx.domainModel.entityAry.filter(e => !e.isSystem).map((et) => {
-							return (
-								<option key={et.id} value={et.id}>
-									{et.name}
-								</option>
-							);
+						ctx.domainModel.entityAry.map((et) => {
+							return <option key={et.id} value={et.id}>{et.name}</option>;
 						})
 					}
 				</select>
