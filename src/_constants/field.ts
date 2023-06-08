@@ -3,18 +3,9 @@ export enum FieldBizType {
 	STRING = 'string',
 	NUMBER = 'number',
 	DATETIME = 'datetime',
-	/** 超链接 */
-	HREF = 'href',
-	/** 电话 */
-	PHONE = 'phone',
-	/** 邮箱 */
-	EMAIL = 'email',
-	/** 图片 */
-	IMAGE = 'image',
-	/** 附件 */
-	APPEND_FILE = 'appendFile',
 	/** 枚举 */
 	ENUM = 'enum',
+	JSON = 'json',
 	/** 外键，关联其他表 */
 	RELATION = 'relation',
 	/** 映射其他表 */

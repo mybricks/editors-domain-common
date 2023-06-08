@@ -183,7 +183,7 @@ export default class QueryCtx {
 						...f.fromPath.map(p => ({ key: entityFieldMap[p.entityId + p.fieldId].name })),
 						{ key: curField.name, showFormat: curField.showFormat }
 					];
-				} else if (curField.bizType === FieldBizType.ENUM) {
+				} else if (curField.bizType === FieldBizType.ENUM || curField.bizType === FieldBizType.JSON) {
 					return [
 						...f.fromPath.map(p => ({ key: entityFieldMap[p.entityId + p.fieldId].name })),
 						{ key: curField.name, showFormat: 'JSON' }
