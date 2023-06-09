@@ -109,7 +109,7 @@ export const getSchemaTypeByFieldType = (field: Field) => {
 	case FieldBizType.NUMBER:
 		return 'number';
 	case FieldBizType.JSON:
-		return 'object';
+		return 'any';
 	case FieldBizType.RELATION:
 		return 'number';
 	case FieldBizType.SYS_USER:

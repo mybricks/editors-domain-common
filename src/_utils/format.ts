@@ -37,6 +37,9 @@ export const formatTime = (date, format) => {
 
 export const spliceDataFormatString = (entityFieldMap: Record<string, Field>, fields: Array<{ key: string; showFormat?: string }> = []) => {
 	const deepFormatCodeString = `
+		const formatSafeParse = (value) => {
+			try { return JSON.parse(value) } catch { return value; }
+		};
 		const deepFormat = (item, path) => {
 			if (!path.length || !item) { return; }
 			const key = path[0].key;
@@ -45,7 +48,7 @@ export const spliceDataFormatString = (entityFieldMap: Record<string, Field>, fi
 					item.forEach(i => {
 						if (path[0].showFormat === 'JSON') {
 							try {
-								i[key] = i[key] ? JSON.parse(i[key]) : i[key];
+								i[key] = i[key] ? formatSafeParse(i[key]) : i[key];
 							} catch (e) {}
 						} else {
 							i['_' + key] = i[key];
@@ -55,7 +58,7 @@ export const spliceDataFormatString = (entityFieldMap: Record<string, Field>, fi
 				} else {
 					if (path[0].showFormat === 'JSON') {
 						try {
-							item[key] = item[key] ? JSON.parse(item[key]) : item[key];
+							item[key] = item[key] ? formatSafeParse(item[key]) : item[key];
 						} catch (e) {}
 					} else {
 						item['_' + key] = item[key];
