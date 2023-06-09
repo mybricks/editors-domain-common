@@ -55,29 +55,7 @@ const DefaultValue: FC = ({ editConfig: { value, options } }: AnyType) => {
 				{fieldModel.enumValues?.map((em, index) => <Select.Option key={index} value={em}>{em}</Select.Option>)}
 			</Select>
 		);
-	} else if (fieldModel.bizType === FieldBizType.PHONE) {
-		const onBlur = (event) => {
-			const targetValue = event.target.value.trim();
-			
-			if (/^(\+86)?1[3-9]\d{9}$/.test(targetValue)) {
-				value.set(targetValue);
-			} else {
-				setError('请输入正确的电话号码');
-			}
-		};
-		formItem = <Input size="small" value={curValue} onChange={e => setCurValue(e.target.value.trim())} onBlur={onBlur} />;
-	} else if (fieldModel.bizType === FieldBizType.EMAIL) {
-		const onBlur = (event) => {
-			const targetValue = event.target.value.trim();
-			
-			if (/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(targetValue)) {
-				value.set(targetValue);
-			} else {
-				setError('请输入正确的邮箱');
-			}
-		};
-		formItem = <Input size="small" value={curValue} onChange={e => setCurValue(e.target.value.trim())} onBlur={onBlur} />;
-	} else if (fieldModel.bizType === FieldBizType.STRING && fieldModel.dbType === FieldDBType.MEDIUMTEXT) {
+	} else if (fieldModel.dbType === FieldDBType.MEDIUMTEXT) {
 		formItem = (
 			<Input.TextArea
 				rows={4}

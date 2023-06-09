@@ -108,16 +108,8 @@ export const getSchemaTypeByFieldType = (field: Field) => {
 		return 'string';
 	case FieldBizType.NUMBER:
 		return 'number';
-	case FieldBizType.HREF:
-		return 'string';
-	case FieldBizType.PHONE:
-		return 'string';
-	case FieldBizType.EMAIL:
-		return 'string';
-	case FieldBizType.IMAGE:
-		return 'string';
-	case FieldBizType.APPEND_FILE:
-		return 'string';
+	case FieldBizType.JSON:
+		return 'object';
 	case FieldBizType.RELATION:
 		return 'number';
 	case FieldBizType.SYS_USER:
