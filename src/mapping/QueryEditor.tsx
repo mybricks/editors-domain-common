@@ -104,6 +104,27 @@ function SelectFrom() {
 			) : null;
 		}
 	});
+	const selectedAll = useComputed(() => {
+		const oriEntity = ctx.entityAry.find(et => et.id === nowValue.entity?.id);
+		if (!oriEntity) {
+			return false;
+		}
+		
+		return !!oriEntity?.fieldAry
+			.filter(f => !f.isPrivate && f.bizType !== FieldBizType.MAPPING)
+			.every(field => nowValue.entity.fieldAry?.find(f => f.name === field.name));
+	});
+	
+	const onSelectAll = useCallback(() => {
+		if (selectedAll) {
+			nowValue.entity.fieldAry = [];
+		} else {
+			const oriEntity = ctx.entityAry.find(et => et.id === nowValue.entity?.id);
+			nowValue.entity.fieldAry = oriEntity?.fieldAry
+				.filter(f => !f.isPrivate && f.bizType !== FieldBizType.MAPPING)
+				.map(f => f.toJSON())?? [];
+		}
+	}, [selectedAll]);
 
 	return (
 		<>
@@ -151,6 +172,13 @@ function SelectFrom() {
 						{/*		<span></span>*/}
 						{/*	</div>*/}
 						{/*) : null}*/}
+						{nowValue.entity ? (
+							<div className={`${css.field} ${css.allField}`}>
+								<input type="checkbox" checked={selectedAll} onChange={onSelectAll}/>
+								<span onClick={onSelectAll}>{selectedAll ? '取消所有字段' : '选中所有字段'}</span>
+								<span></span>
+							</div>
+						) : null}
 						{fields}
 					</div>
 				)}
