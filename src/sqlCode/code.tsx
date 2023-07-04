@@ -53,6 +53,7 @@ const OPTIONS = {
 const CodeEditor: FC<CodeEditorProps> = props => {
 	const { value, paramSchema, domainModel, popView } = props;
 	const [showCodeBox, setShowCodeBox] = useState(false);
+	const monacoEditor = useRef<AnyType>(null);
 	const sqlCodeContext = useObservable(SQLCodeCtx, next => {
 		next({
 			domainModel,
@@ -73,7 +74,7 @@ const CodeEditor: FC<CodeEditorProps> = props => {
 			popView(
 				'编辑SQL',
 				() => {
-					return (<Code className={styles.codeBoxModal} sqlCodeContext={sqlCodeContext}/>);
+					return (<Code className={styles.codeBoxModal} onChange={sql => monacoEditor.current?.setValue(sql)} sqlCodeContext={sqlCodeContext}/>);
 				},
 				{ onClose: () => setShowCodeBox(false) }
 			);
@@ -103,7 +104,7 @@ const CodeEditor: FC<CodeEditorProps> = props => {
 					</div>
 				</div>
 			</div>
-			<Code sqlCodeContext={sqlCodeContext} className={styles.sqlCode} />
+			<Code sqlCodeContext={sqlCodeContext} onMounted={ref => monacoEditor.current = ref} className={styles.sqlCode} />
 		</div>
 	);
 };
@@ -111,9 +112,11 @@ const CodeEditor: FC<CodeEditorProps> = props => {
 type CodeProps = {
 	className: string;
 	sqlCodeContext: SQLCodeCtx;
+	onMounted?(monacoEditor: AnyType): void;
+	onChange?(sql: string): void;
 };
 const Code: FC<CodeProps> = props => {
-	const { className, sqlCodeContext } = props;
+	const { className, sqlCodeContext, onMounted, onChange } = props;
 	const monacoEditor = useRef<AnyType>(null);
 	const monacoDOMRef = useRef(null);
 
@@ -122,9 +125,11 @@ const Code: FC<CodeProps> = props => {
 			monacoEditor.current = monaco.editor.create(monacoDOMRef.current, OPTIONS);
 		}
 
+		onMounted?.(monacoEditor.current);
 		monacoEditor.current.setValue(safeDecodeURIComponent(sqlCodeContext.sql || ''));
 		monacoEditor.current.onDidChangeModelContent(() => {
 			const sql = safeEncodeURIComponent(monacoEditor.current.getValue());
+			onChange?.(monacoEditor.current.getValue());
 			sqlCodeContext.sql = sql;
 			sqlCodeContext.value.set(sql);
 			setVarDecorations(monacoEditor.current);
