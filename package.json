@@ -1,6 +1,6 @@
 {
   "name": "@mybricks/editors-domain-common",
-  "version": "1.0.79",
+  "version": "1.0.80",
   "description": "",
   "main": "lib/index.js",
   "scripts": {
@@ -53,7 +53,7 @@
     "babel-plugin-import": "1.13.3",
     "clean-webpack-plugin": "^4.0.0",
     "css-loader": "6.2.0",
-    "eslint": "^8.0.1",
+    "eslint": "8.22.0",
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-prettier": "^4.0.0",
     "eslint-plugin-react": "^7.30.1",

@@ -7,6 +7,7 @@ import EditorMapping from './mapping';
 import EditorView from './view';
 import { AnyType } from './_types';
 import DefaultValue from './defaultValue';
+import SQLCode from './sqlCode';
 
 
 const EditorMap: Record<string, unknown> = {
@@ -17,6 +18,7 @@ const EditorMap: Record<string, unknown> = {
 	'DOMAIN.MAPPING': EditorMapping,
 	'DOMAIN.DEFAULTVALUE': DefaultValue,
 	'DOMAIN.SELECT': EditorView,
+	'DOMAIN.DBCUSTOMSQL': SQLCode,
 };
 
 function Editors(editConfig: { type: string; render: AnyType; }, extOpts: Record<string, unknown>): AnyType {
