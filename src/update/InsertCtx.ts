@@ -4,7 +4,7 @@ import { AnyType } from '../_types';
 import { Condition, Entity } from '../_types/domain';
 import { safeEncodeURIComponent } from '../_utils/util';
 import { FieldBizType } from '../_constants/field';
-import { generateValidateScript } from "../_utils/validate";
+import { generateValidateScript } from '../_utils/validate';
 
 export type T_Field = {
 	id,
