@@ -20,7 +20,7 @@ import css from './QueryEditor.less';
 
 let ctx: QueryCtx;
 
-export default function QueryEditor({ domainModel, paramSchema, value, close, showPager, selectCount }: AnyType) {
+export default function QueryEditor({ domainModel, paramSchema, value, close, showPager, selectCount, single }: AnyType) {
 	ctx = useObservable(QueryCtx, next => {
 		const oriVal = value.get();
 		let val;
@@ -59,7 +59,8 @@ export default function QueryEditor({ domainModel, paramSchema, value, close, sh
 			value,
 			close,
 			showPager,
-			selectCount
+			selectCount,
+			single
 		});
 	}, { to: 'children' });
 
@@ -75,8 +76,8 @@ export default function QueryEditor({ domainModel, paramSchema, value, close, sh
 						  paramSchema={ctx.paramSchema}
 						  domainModal={ctx.domainModel}
 					  />
-					  {selectCount ? null : <OrderBy nowValue={ctx.nowValue} domainModal={ctx.domainModel}/>}
-					  {showPager || selectCount ? null : <Limit/>}
+					  {selectCount || single ? null : <OrderBy nowValue={ctx.nowValue} domainModal={ctx.domainModel}/>}
+					  {showPager || selectCount || single ? null : <Limit/>}
 					  {/*{showPager ? <Offset /> : null}*/}
 				  </>
 			  ) : null

@@ -31,6 +31,7 @@ const ServiceSelect = ({ editConfig: { value, options } }: AnyType, { domainMode
 				    paramSchema={options.paramSchema}
 				    showPager={options.showPager}
 				    selectCount={options.selectCount}
+						single={options.single}
 				    value={value}
 				    close={close}
 			    />,
