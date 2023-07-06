@@ -9,12 +9,12 @@ export const generateValidateScript = (entity: Entity, conAry: Array<{ from: str
 	const needValueFields = entity.fieldAry
 		.filter(field => field.bizType !== FieldBizType.MAPPING && !field.isPrimaryKey && !field.isPrivate);
 	const stringFieldNames = needValueFields
-		.filter(field => (field.dbType === FieldDBType.VARCHAR || field.dbType === FieldDBType.MEDIUMTEXT) && field.bizType !== FieldBizType.ENUM)
+		.filter(field => (field.dbType === FieldDBType.VARCHAR || field.dbType === FieldDBType.MEDIUMTEXT) && field.bizType !== FieldBizType.ENUM && field.bizType !== FieldBizType.JSON)
 		.map(field => conAry.find(con => con.to === `/${field.name}`))
 		.filter(Boolean)
 		.map((con: AnyType) => `"${con.from.substring(con.from.indexOf('/') + 1)}"`)
 		.join(', ');
-	
+
 	if (stringFieldNames) {
 		validateScript += `if ([${stringFieldNames}].includes(key)) {
 					if (typeof params[key] !== "string" && typeof params[key] !== "number") {
