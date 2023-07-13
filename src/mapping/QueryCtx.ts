@@ -94,13 +94,6 @@ export default class QueryCtx {
 		}
 	}
 
-	getOriField(fieldId) {
-		const oriEntity = this.getOriEntity();
-		if (oriEntity) {
-			return oriEntity.fieldAry.find(e => e.id === fieldId);
-		}
-	}
-
 	setEntity(entity) {
 		const ent = entity.toJSON();
 		delete ent.fieldAry;
