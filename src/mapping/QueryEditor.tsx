@@ -122,7 +122,18 @@ function SelectFrom() {
 			const oriEntity = ctx.entityAry.find(et => et.id === nowValue.entity?.id);
 			nowValue.entity.fieldAry = oriEntity?.fieldAry
 				.filter(f => !f.isPrivate && f.bizType !== FieldBizType.MAPPING)
-				.map(f => f.toJSON())?? [];
+				.map(f => {
+					const curField = f.toJSON();
+
+					return {
+						id: curField.id,
+						name: curField.name,
+						bizType: curField.bizType,
+						dbType: curField.dbType,
+						isPrimaryKey: curField.isPrimaryKey,
+						relationEntityId: curField.relationEntityId,
+					};
+				})?? [];
 		}
 	}, [selectedAll]);
 
@@ -136,12 +147,13 @@ function SelectFrom() {
 					{
 						ctx.entityAry.map(et => {
 							const info = ctx.entityInfo[et.id];
+							const selected = nowValue.entity?.id === et.id;
 
 							return (
 								<div
 									key={et.id}
-									className={`${css.table} ${ctx.isEntityForeigner(et.id) ? css.foreigner : ''}  ${nowValue.entity?.id === et.id ? css.selected : ''}`}
-									onClick={() => ctx.setEntity(et)}
+									className={`${css.table} ${ctx.isEntityForeigner(et.id) ? css.foreigner : ''}  ${selected ? css.selected : ''}`}
+									onClick={selected ? undefined : () => ctx.setEntity(et)}
 								>
 									<div className={css.nm}>
 										<span>{et.name}</span>

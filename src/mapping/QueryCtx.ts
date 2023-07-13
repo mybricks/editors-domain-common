@@ -103,9 +103,11 @@ export default class QueryCtx {
 
 	setEntity(entity) {
 		const ent = entity.toJSON();
-		ent.field = ent.fieldAry[0];
 		delete ent.fieldAry;
-		
+		delete ent.createTime;
+		delete ent.updateTime;
+		delete ent.updated;
+
 		if (this.isEntityForeigner(entity.id)) {
 			this.nowValue.condition = '-1';
 		} else {
@@ -134,7 +136,16 @@ export default class QueryCtx {
 				if (field) {//exits
 					return field;
 				} else if (oriF.id === fieldId) {
-					return oriEntity.fieldAry.find(f => f.id === fieldId).toJSON() as any;
+					const curField = oriEntity.fieldAry.find(f => f.id === fieldId).toJSON();
+
+					return curField ? {
+						id: curField.id,
+						name: curField.name,
+						bizType: curField.bizType,
+						dbType: curField.dbType,
+						isPrimaryKey: curField.isPrimaryKey,
+						relationEntityId: curField.relationEntityId,
+					} : undefined;
 				}
 			}).filter(f => f);
 		}
