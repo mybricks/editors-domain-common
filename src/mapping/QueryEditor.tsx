@@ -28,6 +28,13 @@ export default function QueryEditor({ domainModel, fieldModel, value, close }: A
 
 		const entityInfo = {};
 		const entityAry: Entity[] = [];
+
+		if (fieldModel.bizType === FieldBizType.MAPPING) {
+			const parentEntity = fieldModel.parent;
+			entityAry.push(parentEntity);
+			entityInfo[fieldModel.parent.id] = { type: 'primary', field: parentEntity.fieldAry[0]?.toJSON() };
+		}
+
 		domainModel.entityAry.forEach(et => {
 			if ([FieldBizType.SYS_USER, FieldBizType.SYS_ROLE, FieldBizType.SYS_ROLE_RELATION].includes(fieldModel.bizType)) {
 				if (et.id === fieldModel.relationEntityId) {
@@ -82,11 +89,11 @@ function SelectFrom() {
 
 	const fields = useComputed(() => {
 		const nowEntity = nowValue.entity;
-		if (nowEntity) {
+		if (nowEntity && nowEntity.id !== ctx.fieldModel.parent.id) {
 			const oriEntity = ctx.entityAry.find(et => et.id === nowEntity.id);
 			return oriEntity ? (
 				oriEntity.fieldAry.map(field => {
-					if (!field.isBizTypeOfMapping() && !field.isPrivate) {
+					if (!field.isPrivate) {
 						let checked = false;
 						if (nowEntity.fieldAry) {
 							checked = !!nowEntity.fieldAry.find(f => f.name === field.name);
@@ -103,6 +110,8 @@ function SelectFrom() {
 				}).filter(f => f)
 			) : null;
 		}
+
+		return null;
 	});
 	const selectedAll = useComputed(() => {
 		const oriEntity = ctx.entityAry.find(et => et.id === nowValue.entity?.id);
@@ -111,7 +120,7 @@ function SelectFrom() {
 		}
 		
 		return !!oriEntity?.fieldAry
-			.filter(f => !f.isPrivate && f.bizType !== FieldBizType.MAPPING)
+			.filter(f => !f.isPrivate)
 			.every(field => nowValue.entity.fieldAry?.find(f => f.name === field.name));
 	});
 	
@@ -121,7 +130,7 @@ function SelectFrom() {
 		} else {
 			const oriEntity = ctx.entityAry.find(et => et.id === nowValue.entity?.id);
 			nowValue.entity.fieldAry = oriEntity?.fieldAry
-				.filter(f => !f.isPrivate && f.bizType !== FieldBizType.MAPPING)
+				.filter(f => !f.isPrivate)
 				.map(f => {
 					const curField = f.toJSON();
 
@@ -156,7 +165,7 @@ function SelectFrom() {
 									onClick={selected ? undefined : () => ctx.setEntity(et)}
 								>
 									<div className={css.nm}>
-										<span>{et.name}</span>
+										<span>{et.name}{et.id === ctx.fieldModel.parent.id ? ' (当前实体)' : ''}</span>
 										<span>{info.type === 'foreigner' ? 'id' : info.field.name}</span>
 									</div>
 									<div className={css.desc}>{et.desc}</div>
@@ -184,7 +193,7 @@ function SelectFrom() {
 						{/*		<span></span>*/}
 						{/*	</div>*/}
 						{/*) : null}*/}
-						{nowValue.entity ? (
+						{nowValue.entity && nowValue.entity.id !== ctx.fieldModel.parent.id ? (
 							<div className={`${css.field} ${css.allField}`}>
 								<input type="checkbox" checked={selectedAll} onChange={onSelectAll}/>
 								<span onClick={onSelectAll}>{selectedAll ? '取消所有字段' : '选中所有字段'}</span>

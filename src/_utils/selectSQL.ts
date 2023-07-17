@@ -339,7 +339,7 @@ export const spliceSelectSQLByConditions = (fnParams: {
 				if (type === 'primary') {
 					relationField = originEntity.fieldAry.find(f => f.isPrimaryKey) ?? null;
 				} else if (type === 'foreigner') {
-					relationField = originEntity.fieldAry.find(f => f.bizType === 'relation' && f.relationEntityId === curEntity.id) ?? null;
+					relationField = originEntity.fieldAry.find(f => f.bizType === 'relation' && f.relationEntityId === parentEntity.id) ?? null;
 				}
 				
 				if (!relationField) {
@@ -367,9 +367,11 @@ export const spliceSelectSQLByConditions = (fnParams: {
 						
 							/** 字段来源于当前表中 */
 							if (f.fromPath.length - 1 === index) {
-							/** 判断是否是映射字段，是则加 _ 标识 */
-								const isMapping = allFields.find(p => p.fromPath.length === f.fromPath.length + 1 && p.fromPath[p.fromPath.length - 1].fieldId === currentField.id);
-								jsonFieldNameList.push(`'${isMapping ? '_' : ''}${currentField.name}', ${currentField.name}`);
+								if (currentField.bizType !== 'mapping') {
+									/** 判断是否是映射字段，是则加 _ 标识 */
+									const isMapping = allFields.find(p => p.fromPath.length === f.fromPath.length + 1 && p.fromPath[p.fromPath.length - 1].fieldId === currentField.id);
+									jsonFieldNameList.push(`'${isMapping ? '_' : ''}${currentField.name}', ${currentField.name}`);
+								}
 							} else {
 								const entityFieldMapElement = entityFieldMap[f.fromPath[index + 1].entityId + f.fromPath[index + 1].fieldId];
 								/** 聚合为 JSON 时，字段取父字段的名称，如 MAPPING_A_B_C，取名称 B */
@@ -386,16 +388,25 @@ export const spliceSelectSQLByConditions = (fnParams: {
 						.map(f => {
 							const currentField = entityFieldMap[f.entityId + f.fieldId];
 							const index = f.fromPath.findIndex(path => path.fieldId === parentField.id && path.entityId === parentEntity.id);
-							const mappingFieldName = `MAPPING_${joinArray(...(f.fromPath.map(path => entityFieldMap[path.entityId + path.fieldId].name)), currentField.name).join('_')}`;
+							const mappingFieldName = `MAPPING_${
+								joinArray(
+									...(f.fromPath.map(path => entityFieldMap[path.entityId + path.fieldId].name)),
+									/** 查询总数逻辑定制 */
+									currentField.isPrimaryKey && f.fieldName === '总数' ? f.fieldName : currentField.name
+								).join('_')
+							}`;
 						
 							/** 字段来源于当前表中 */
 							if (f.fromPath.length - 1 === index) {
-								return `${currentField.name} AS ${mappingFieldName}`;
+								if (currentField.bizType !== 'mapping') {
+									return `${currentField.name} AS ${mappingFieldName}`;
+								}
 							} else {
 							/** 字段来源于子查询 */
 								return mappingFieldName;
 							}
-						});
+						})
+						.filter(Boolean);
 					entityName = `LEFT JOIN (SELECT id AS MAPPING_${mappingTableName}_id${extraFieldNames.length ? `, ${extraFieldNames.join(', ')}` : ''}${jsonFieldNameList.length ? `, JSON_OBJECT(${jsonFieldNameList.join(', ')}) ${parentField.name}_JSON` : ''} FROM ${getTableName(originEntity.name)} ${leftJoinSqlList.join(' ')} WHERE _STATUS_DELETED = 0) MAPPING_${mappingTableName} ON MAPPING_${mappingTableName}.MAPPING_${mappingTableName}_id = ${getTableName(parentEntity.name)}.${(relationField?.name)}`;
 				} else if (type === 'foreigner') {
 					/** 被关联，当前实体被另一实体关联，即当前实体的主键（id）被另一个实体作为外键相互关联 */

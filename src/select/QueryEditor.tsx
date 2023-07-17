@@ -45,7 +45,7 @@ export default function QueryEditor({ domainModel, paramSchema, value, close, sh
 				pageNum: showPager ? '{params.pageNum}' : '',
 			};
 		}
-		
+
 		/** 实体信息可能存在变更，每次使用最新的实体信息 */
 		val.entities = formatEntitiesByOriginEntities(val.entities, domainModel.entityAry.map((entity: AnyType) => entity.toJSON()));
 		val.fields = formatFieldsByOriginEntities(val.fields ?? [], domainModel.entityAry);
@@ -141,6 +141,7 @@ function SelectFrom() {
 										<SelectFromCollapse
 											key={field.id}
 											initialOpen
+											entityIdChain={[currentEntity.id]}
 											entity={currentEntity as Entity}
 											ctx={ctx}
 											fromPath={[]}

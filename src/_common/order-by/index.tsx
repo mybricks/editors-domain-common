@@ -81,6 +81,9 @@ const OrderItem: FC<OrderItemProps> = props => {
 		const res: AnyType[] = [];
 		let depIndex = 0;
 		const currentEntity = orderContext.nowValue.entities.find(e => e.selected);
+		if (!currentEntity) {
+			return [];
+		}
 		let selectedField = (currentEntity?.fieldAry.filter(field => field.mapping?.entity?.fieldAry?.length) ?? []).map(field => {
 			return { ...field, entityId: currentEntity?.id, fromPath: [] };
 		}) as AnyType[];
@@ -93,7 +96,15 @@ const OrderItem: FC<OrderItemProps> = props => {
 			}
 			
 			selectedField = (res[depIndex] || [])
-				.filter(f => f.mapping?.entity?.fieldAry?.length)
+				.filter(f => {
+					/** 解决实体之间循环嵌套问题 */
+					const entityIdChain = [...f.fromPath.map(path => path.entityId), f.entityId, f.mapping?.entity.id];
+					const lastEntityId = entityIdChain[entityIdChain.length - 1];
+					const preEntityId = entityIdChain[entityIdChain.length - 3];
+
+					return f.mapping?.entity?.fieldAry?.length
+						&& (preEntityId && lastEntityId ? lastEntityId !== preEntityId : true);
+				})
 				.reduce((pre, field) => {
 					return [
 						...pre,
@@ -132,10 +143,10 @@ const OrderItem: FC<OrderItemProps> = props => {
 		
 		selectedMappingFields.forEach(mapping => {
 			mapping.forEach(mappingField => {
-				if (mappingField.mapping.entity?.fieldAry.filter(field => !field.isPrimaryKey).length) {
+				if (mappingField.mapping.entity?.fieldAry.filter(field => !field.isPrimaryKey && field.bizType !== FieldBizType.MAPPING).length) {
 					fieldSelectOptions.push(
 						<optgroup label={`来自实体：${mappingField.mapping.entity?.name}`}>
-							{mappingField.mapping.entity?.fieldAry.filter(field => !field.isPrimaryKey).map(field => {
+							{mappingField.mapping.entity?.fieldAry.filter(field => !field.isPrimaryKey && field.bizType !== FieldBizType.MAPPING).map(field => {
 								const pathName = [...mappingField.fromPath.map(path => entityFieldMap[path.entityId + path.fieldId]?.name || ''), mappingField.name].join('.');
 								const dataValue = JSON.stringify({
 									fieldId: field.id,
