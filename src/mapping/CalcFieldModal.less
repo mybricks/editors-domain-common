@@ -6,9 +6,11 @@
 .modalContainer {
   height: 424px;
   display: flex;
+  padding: 12px 0;
 
   .leftMenu {
-    width: 400px;
+    flex-shrink: 0;
+    width: 380px;
     border: 1px solid #D8D8D8;
     background: #F7F7F7;
     height: 100%;
@@ -75,14 +77,49 @@
         overflow: visible;
       }
 
-      .ant-tabs-card.ant-tabs-top>.ant-tabs-nav .ant-tabs-tab+.ant-tabs-tab {
-        margin-left: 0;
+      .ant-tabs-card > .ant-tabs-nav {
+        .ant-tabs-tab {
+          border: none;
+          border-right: 1px solid #D8D8D8;
+        }
+
+        .ant-tabs-tab + .ant-tabs-tab {
+          margin-left: 0!important;
+        }
       }
 
-      .ant-tabs>.ant-tabs-nav .ant-tabs-nav-wrap {
+      .ant-tabs > .ant-tabs-nav .ant-tabs-nav-wrap {
         border-bottom: 1px solid #D8D8D8;
         background: #EBECEE;
+        overflow: unset;
       }
+
+      .ant-tabs-top > .ant-tabs-nav .ant-tabs-ink-bar {
+        bottom: -1px;
+      }
+
+      .ant-tabs-card.ant-tabs-top > .ant-tabs-nav .ant-tabs-tab {
+        border-radius: 0;
+      }
+    }
+  }
+
+  .rightCode {
+    margin-left: 16px;
+    flex: 1;
+
+    .fieldName {
+      margin-bottom: 12px;
+    }
+
+    & label {
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    .code {
+      height: calc(100% - 160px);
+      max-width: 100%;
     }
   }
 }

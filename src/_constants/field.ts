@@ -20,6 +20,17 @@ export enum FieldBizType {
 	CALC = 'calc'
 }
 
+export const FieldBizTypeMap = {
+	[FieldBizType.STRING]: '字符',
+	[FieldBizType.NUMBER]: '数字',
+	[FieldBizType.DATETIME]: '日期时间',
+	[FieldBizType.ENUM]: '枚举',
+	[FieldBizType.JSON]: 'JSON',
+	[FieldBizType.MAPPING]: '计算字段',
+	[FieldBizType.CALC]: '未知类型',
+	[FieldBizType.RELATION]: '关联',
+};
+
 /** 数据库字段类型 */
 export enum FieldDBType {
 	VARCHAR = 'varchar',

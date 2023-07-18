@@ -36,12 +36,7 @@ export default function QueryEditor({ domainModel, fieldModel, value, close }: A
 		}
 
 		domainModel.entityAry.forEach(et => {
-			if ([FieldBizType.SYS_USER, FieldBizType.SYS_ROLE, FieldBizType.SYS_ROLE_RELATION].includes(fieldModel.bizType)) {
-				if (et.id === fieldModel.relationEntityId) {
-					entityAry.push(et);
-					entityInfo[et.id] = { type: 'primary', field: fieldModel.toJSON() };
-				}
-			} else if (FieldBizType.RELATION === fieldModel.bizType) {
+			if (FieldBizType.RELATION === fieldModel.bizType) {
 				if (et.id === fieldModel.relationEntityId) {
 					entityAry.push(et);
 					entityInfo[et.id] = { type: 'primary', field: fieldModel.toJSON() };
@@ -83,7 +78,8 @@ export default function QueryEditor({ domainModel, fieldModel, value, close }: A
 
 function SelectFrom() {
 	const nowValue = ctx.nowValue;
-	const [visible, setVisible] = useState(false);
+	const [visible, setVisible] = useState(true);
+	const [curEditField, setCurEditField] = useState<AnyType>(null);
 	const onCancel = useCallback(() => setVisible(false), []);
 	const onOk = useCallback(() => setVisible(false), []);
 
@@ -123,7 +119,10 @@ function SelectFrom() {
 			.filter(f => !f.isPrivate)
 			.every(field => nowValue.entity.fieldAry?.find(f => f.name === field.name));
 	});
-	
+	const addCalcField = useCallback(() => {
+		setCurEditField(null);
+		setVisible(true);
+	}, []);
 	const onSelectAll = useCallback(() => {
 		if (selectedAll) {
 			nowValue.entity.fieldAry = [];
@@ -184,15 +183,15 @@ function SelectFrom() {
 					</div>
 				) : (
 					<div className={css.fields}>
-						{/*{nowValue.entity ? (*/}
-						{/*	<div className={`${css.field} ${css.addCalcField}`} onClick={() => setVisible(true)}>*/}
-						{/*		<span className={css.addButton}>*/}
-						{/*		+*/}
-						{/*		</span>*/}
-						{/*		<span>新增计算字段</span>*/}
-						{/*		<span></span>*/}
-						{/*	</div>*/}
-						{/*) : null}*/}
+						{nowValue.entity ? (
+							<div className={`${css.field} ${css.addCalcField}`} onClick={addCalcField}>
+								<span className={css.addButton}>
+								+
+								</span>
+								<span>新增计算字段</span>
+								<span></span>
+							</div>
+						) : null}
 						{nowValue.entity && nowValue.entity.id !== ctx.fieldModel.parent.id ? (
 							<div className={`${css.field} ${css.allField}`}>
 								<input type="checkbox" checked={selectedAll} onChange={onSelectAll}/>
@@ -205,7 +204,7 @@ function SelectFrom() {
 				)}
 			</div>
 			
-			<CalcFieldModal visible={visible} onCancel={onCancel} onOK={onOk} />
+			<CalcFieldModal field={curEditField} visible={visible} onCancel={onCancel} onOK={onOk} />
 		</>
 	);
 }

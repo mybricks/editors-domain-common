@@ -1,5 +1,5 @@
 /* eslint-disable no-useless-escape */
-import { Field, SelectedField } from '../_types/domain';
+import { Field } from '../_types/domain';
 
 /** 转化时间 */
 export const formatTime = (date, format) => {

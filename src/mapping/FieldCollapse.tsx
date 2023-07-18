@@ -3,7 +3,8 @@ import { message } from 'antd';
 import QueryCtx from './QueryCtx';
 import { AnyType } from '../_types';
 import { Entity, Field } from '../_types/domain';
-import { FieldBizType } from '../_constants/field';
+import { FieldBizType, FieldBizTypeMap } from '../_constants/field';
+import { CountCondition } from './constant';
 
 import css from './FieldCollapse.less';
 
@@ -11,20 +12,41 @@ interface FieldCollapseProps {
 	field: Field;
 	ctx: QueryCtx;
 	entity: Entity;
+	entityIdChain: string[];
 	fromPath: Array<Field & { entityId: string; }>;
 	initialOpen: boolean;
+	/** 指定下一层级不允许映射 */
+	notMapping?: boolean;
+	clickField(field: AnyType): void;
 }
 
 const FieldCollapse: FC<FieldCollapseProps> = props => {
-	const { ctx, field, fromPath, entity, initialOpen } = props;
+	const { ctx, field, fromPath, entity, initialOpen, notMapping, entityIdChain, clickField } = props;
 	const [open, setOpen] = useState(initialOpen);
-	const isMapping = !!field.mapping?.entity?.fieldAry.length;
+
+	const isMapping = !notMapping && !!field.mapping?.entity?.fieldAry.length;
 	let fieldMappingEntity = field.mapping?.entity as AnyType as Entity;
-	
+
 	if (isMapping) {
-		fieldMappingEntity = JSON.parse(JSON.stringify(ctx.domainModel.entityAry.find(en => en.id === fieldMappingEntity.id) as AnyType as Entity) || 'null');
 		const oldFieldIds = field.mapping?.entity?.fieldAry.map(f => f.id) || [];
-		fieldMappingEntity.fieldAry = fieldMappingEntity.fieldAry.filter(f => oldFieldIds.includes(f.id));
+		let curEntity = ctx.domainModel.entityAry.find(en => en.id === fieldMappingEntity.id);
+
+		if (curEntity) {
+			curEntity = JSON.parse(JSON.stringify(curEntity));
+			fieldMappingEntity = { ...curEntity as AnyType as Entity };
+			fieldMappingEntity.fieldAry = fieldMappingEntity.fieldAry.filter(f => oldFieldIds.includes(f.id));
+		} else {
+			fieldMappingEntity.fieldAry = [];
+		}
+
+		if (field.mapping?.condition === CountCondition) {
+			const primaryField = fieldMappingEntity.fieldAry.find(f => f.name === 'id');
+
+			if (primaryField) {
+				primaryField.name = '总数';
+				primaryField.desc = '查询数据总数';
+			}
+		}
 	}
 	
 	/** 映射类型，但为设置映射数据 */
@@ -37,9 +59,11 @@ const FieldCollapse: FC<FieldCollapseProps> = props => {
 	
 	const onClickField = useCallback(() => {
 		if (disabled) {
-			message.warning(`${field.name}字段未设置对应映射数据`);
+			message.warning(notMapping ? '不允许选择循环嵌套字段' : `${field.name}字段未设置对应映射数据`);
 			return;
 		}
+
+		clickField({ ...field, fromPath });
 	}, [disabled]);
 	
 	return (
@@ -58,7 +82,7 @@ const FieldCollapse: FC<FieldCollapseProps> = props => {
 					) : null}
 				</div>
 				<span>{field.name}</span>
-				<span>{field.desc}</span>
+				<span>{field.desc}{field.bizType === FieldBizType.MAPPING ? '' : `（${FieldBizTypeMap[field.bizType]}）`}</span>
 			</div>
 			{open && isMapping ? (
 				<div className={css.selectFromChildren}>
@@ -69,11 +93,14 @@ const FieldCollapse: FC<FieldCollapseProps> = props => {
 						.map(f => (
 							<FieldCollapse
 								key={f.id}
+								entityIdChain={[...entityIdChain, fieldMappingEntity.id]}
 								initialOpen={false}
 								fromPath={[...fromPath, { ...field, entityId: entity.id }]}
 								field={f}
 								entity={fieldMappingEntity}
 								ctx={ctx}
+								clickField={clickField}
+								notMapping={entityIdChain[entityIdChain.length - 2] === fieldMappingEntity.id}
 							/>
 						))}
 				</div>

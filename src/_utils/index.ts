@@ -6,3 +6,13 @@ export function typeCheck(variable: AnyType, type: string): boolean {
 
 	return Object.prototype.toString.call(variable) === checkType;
 }
+
+export function uuid(len = 6) {
+	const seed = 'abcdefghijklmnopqrstuvwxyz';
+	const maxPos = seed.length;
+	let rtn = '';
+	for (let i = 0; i < len; i++) {
+		rtn += seed.charAt(Math.floor(Math.random() * maxPos));
+	}
+	return 'u_' + rtn;
+}
