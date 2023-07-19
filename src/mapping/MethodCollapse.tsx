@@ -1,5 +1,5 @@
 import React, { FC, useCallback, useState } from 'react';
-import {Popover, Space} from 'antd';
+import { Popover, Space } from 'antd';
 import { MethodList } from '../_constants/method';
 import { FieldBizTypeMap } from '../_constants/field';
 

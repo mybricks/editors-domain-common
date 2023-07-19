@@ -22,8 +22,9 @@ interface CalcFieldModalProps {
 }
 export type SuggestionType = {
 	label: string;
-	insertText: string;
+	apply?: string;
 	detail?: string;
+	type?: string;
 	docs?: string;
 	properties?: Array<SuggestionType>;
 };
@@ -47,7 +48,7 @@ const getEntityCompletions = (params: {
 			}
 			const suggestion: SuggestionType = {
 				label: field.name,
-				insertText: field.name,
+				apply: field.name,
 				docs: field.name,
 				detail: field.name
 			};
@@ -58,6 +59,8 @@ const getEntityCompletions = (params: {
 					entityAry,
 					entityIdChain: [...entityIdChain, curEntity.id],
 				});
+			} else {
+				suggestion.apply = field.name + '$';
 			}
 			_prop.push(suggestion);
 		});
@@ -67,6 +70,23 @@ const getEntityCompletions = (params: {
 
 	return _prop;
 };
+const getMethodCompletions = () => {
+	const _prop: SuggestionType[] = [];
+	MethodList.forEach(category => {
+		category.methods.forEach(method => {
+			_prop.push({
+				type: 'function',
+				label: method.method,
+				apply: method.method + method.suffix,
+				detail: method.description
+			});
+		});
+	});
+
+	return _prop;
+};
+/** TODO: 获取规则中的字段 */
+const getFieldsFromCalcRule = (calcRule: string, entity: Entity, entityAry: Entity[]) => {};
 
 let ctx: QueryCtx;
 const CalcFieldModal: FC<CalcFieldModalProps> = props => {
@@ -86,7 +106,7 @@ const CalcFieldModal: FC<CalcFieldModalProps> = props => {
 	const clickField = useCallback((field) => {
 		const name = [...field.fromPath, field].map(f => f.name).join('.');
 
-		codeEditor.current?.insertDoc(` $.${name}`);
+		codeEditor.current?.insertDoc(` $.${name}$`);
 	}, []);
 	const clickMethod = useCallback((method: MethodItem) => {
 		codeEditor.current?.insertDoc(' ' + method.method + method.suffix);
@@ -154,14 +174,15 @@ const CalcFieldModal: FC<CalcFieldModalProps> = props => {
 						ref={codeEditor}
 						className={styles.code}
 						value={field?.calcRule ?? ''}
-						completions={
-							getEntityCompletions({
+						completions={[
+							...getEntityCompletions({
 								entity: currentEntity,
 								entityAry: ctx.domainModel.entityAry,
 								entityIdChain: [],
 								isRoot: true,
-							}) as AnyType[]
-						}
+							}) as AnyType[],
+							...getMethodCompletions()
+						]}
 						theme={{
 							focused: {
 								outline: '1px solid #fa6400',
