@@ -1,8 +1,5 @@
 import { AnyType } from '../_types';
 import { FieldBizType, SQLLimitType, SQLOrder, SQLWhereJoiner } from '../_constants/field';
-import { spliceSelectSQLByConditions } from '../_utils/selectSQL';
-import { safeEncodeURIComponent } from '../_utils/util';
-import { formatTime, spliceDataFormatString } from '../_utils/format';
 import { Entity, Field, SelectedField } from '../_types/domain';
 import { getSchemaTypeByFieldType } from '../_utils/field';
 import { getEntityFieldMap } from '../_utils/entity';
@@ -166,75 +163,16 @@ export default class QueryCtx {
 	}
 
 	save() {
-		const { entities, conditions, orders, limit, pageNum, fields } = this.nowValue;
+		const { entities, fields } = this.nowValue;
 		let desc = '';
 		const currentEntity = entities.find(entity => entity.fieldAry.length && entity.selected);
 
 		if (currentEntity) {
 			const currentFieldIds = fields.filter(f => f.entityId === currentEntity.id && !f.fromPath.length).map(f => f.fieldId);
 			desc = `${currentEntity.name} 的 ${this.selectCount ? '数据总数' : currentEntity.fieldAry.filter(f => currentFieldIds.includes(f.id)).map(f => f.name).join(', ')}`;
-			/** 实体 + 字段的 Map */
-			const entityFieldMap: Record<string, Field> = getEntityFieldMap(entities as Entity[]);
-			const needFormatFields = fields.map(f => {
-				const curField = entityFieldMap[f.entityId + f.fieldId];
-				
-				if (curField.showFormat && curField.bizType === FieldBizType.DATETIME) {
-					return [
-						...f.fromPath.map(p => ({ key: entityFieldMap[p.entityId + p.fieldId].name })),
-						{ key: curField.name, showFormat: curField.showFormat }
-					];
-				} else if (curField.bizType === FieldBizType.ENUM || curField.bizType === FieldBizType.JSON) {
-					return [
-						...f.fromPath.map(p => ({ key: entityFieldMap[p.entityId + p.fieldId].name })),
-						{ key: curField.name, showFormat: 'JSON' }
-					];
-				}
-				
-				return undefined;
-			}).filter(Boolean) as AnyType[];
-			const selectScript = `
-			async (params, context)=>{
-				const { executeSql, isEdit } = context;
-				const FORMAT_MAP = {
-					formatTime: ${formatTime.toString()},
-				};
-				const spliceSelectSQLByConditions = ${spliceSelectSQLByConditions.toString()};
-				params = params || {};
-				const [sql, countSql] = spliceSelectSQLByConditions({
-					params: params || {},
-					fields: ${JSON.stringify(fields)} || [],
-					conditions: ${JSON.stringify(conditions)} || [],
-					entities: ${JSON.stringify(entities)},
-					limit: ${JSON.stringify(limit)},
-					showPager: ${JSON.stringify(this.showPager || false)},
-					selectCount: ${JSON.stringify(this.selectCount || false)},
-					orders: (params.orders && Array.isArray(params.orders)) ? params.orders : ${JSON.stringify(orders)},
-					pageNum: ${JSON.stringify(pageNum)},
-					isEdit,
-				});
-				${this.showPager ? `
-					let { rows } = await executeSql(sql);
-					rows = Array.from(rows || []);
-					const { rows: countRows } = await executeSql(countSql);
-					${needFormatFields.length ? spliceDataFormatString(entityFieldMap, needFormatFields) : ''}
-					return { dataSource: rows, total: countRows[0] ? countRows[0].total : 0, pageNum: params.pageNum || 1, pageSize: params.pageSize || 50 };
-				` : (this.selectCount ? `
-					const { rows: countRows } = await executeSql(countSql);
-					return { total: countRows[0] ? countRows[0].total : 0 };
-				` : `
-					let { rows } = await executeSql(sql);
-					rows = Array.from(rows || []);
-					${needFormatFields.length ? spliceDataFormatString(entityFieldMap, needFormatFields) : ''}
-					return rows;
-				`)}
-			}//@ sourceURL=select.js
-			`;
-			
-			this.nowValue.script = safeEncodeURIComponent(selectScript);
-		} else {
-			this.nowValue.script = void 0;
 		}
-		
+
+		this.nowValue.script = void 0;
 		this.nowValue.desc = desc;
 		this.value.set({ ...this.nowValue, outputSchema: this.getOutputSchema() });
 
