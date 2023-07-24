@@ -122,3 +122,21 @@ export const getSchemaTypeByFieldType = (field: Field) => {
 		return 'any';
 	}
 };
+
+export const getDBTypeByFieldBizType = (bizType: FieldBizType) => {
+	switch (bizType) {
+	case FieldBizType.ENUM:
+		return FieldDBType.VARCHAR;
+	case FieldBizType.DATETIME:
+		return FieldDBType.BIGINT;
+	case FieldBizType.STRING:
+		return FieldDBType.VARCHAR;
+	case FieldBizType.NUMBER:
+		return FieldDBType.BIGINT;
+	case FieldBizType.JSON:
+		return FieldDBType.MEDIUMTEXT;
+	case FieldBizType.RELATION:
+		return FieldDBType.BIGINT;
+	default: return FieldDBType.VARCHAR;
+	}
+};

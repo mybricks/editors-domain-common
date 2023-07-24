@@ -78,10 +78,13 @@ export default function QueryEditor({ domainModel, fieldModel, value, close }: A
 
 function SelectFrom() {
 	const nowValue = ctx.nowValue;
-	const [visible, setVisible] = useState(true);
+	const [visible, setVisible] = useState(false);
 	const [curEditField, setCurEditField] = useState<AnyType>(null);
 	const onCancel = useCallback(() => setVisible(false), []);
-	const onOk = useCallback(() => setVisible(false), []);
+	const onOk = useCallback(field => {
+		console.log(field);
+		setVisible(false);
+	}, []);
 
 	const fields = useComputed(() => {
 		const nowEntity = nowValue.entity;
@@ -183,15 +186,15 @@ function SelectFrom() {
 					</div>
 				) : (
 					<div className={css.fields}>
-						{nowValue.entity ? (
-							<div className={`${css.field} ${css.addCalcField}`} onClick={addCalcField}>
-								<span className={css.addButton}>
-								+
-								</span>
-								<span>新增计算字段</span>
-								<span></span>
-							</div>
-						) : null}
+						{/*{nowValue.entity ? (*/}
+						{/*	<div className={`${css.field} ${css.addCalcField}`} onClick={addCalcField}>*/}
+						{/*		<span className={css.addButton}>*/}
+						{/*		+*/}
+						{/*		</span>*/}
+						{/*		<span>新增计算字段</span>*/}
+						{/*		<span></span>*/}
+						{/*	</div>*/}
+						{/*) : null}*/}
 						{nowValue.entity && nowValue.entity.id !== ctx.fieldModel.parent.id ? (
 							<div className={`${css.field} ${css.allField}`}>
 								<input type="checkbox" checked={selectedAll} onChange={onSelectAll}/>

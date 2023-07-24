@@ -1,4 +1,4 @@
-import { Input, message, Modal, Tabs } from 'antd';
+import { Input, Modal, Tabs } from 'antd';
 import React, { FC, useCallback, useRef, useState } from 'react';
 import { observe, useComputed } from '@mybricks/rxui';
 import { CodeEditor } from '@astii/code-editor';
@@ -10,6 +10,14 @@ import { uuid } from '../_utils';
 import { FieldBizType } from '../_constants/field';
 import { MethodList } from '../_constants/method';
 import MethodCollapse, { MethodItem } from './MethodCollapse';
+import { getDBTypeByFieldBizType } from '../_utils/field';
+import {
+	formatSQLByCalcRule,
+	getEntityCompletions,
+	getFieldsFromCalcRule,
+	getFieldTypeFromCalcRule,
+	getMethodCompletions
+} from './util';
 
 import styles from './CalcFieldModal.less';
 import css from './FieldCollapse.less';
@@ -20,82 +28,17 @@ interface CalcFieldModalProps {
 	onOK(field: AnyType): void;
 	field: AnyType;
 }
-export type SuggestionType = {
-	label: string;
-	apply?: string;
-	detail?: string;
-	type?: string;
-	docs?: string;
-	properties?: Array<SuggestionType>;
-};
-
-const getEntityCompletions = (params: {
-	entity: Entity;
-	entityAry: Entity[];
-	entityIdChain: string[];
-	isRoot?: boolean;
-}) => {
-	const { entity, entityAry, isRoot, entityIdChain } = params;
-	const _prop: SuggestionType[] = [];
-	const curEntity = entityAry.find(e => e.id === entity.id);
-
-	if (curEntity) {
-		const notMapping = entityIdChain[entityIdChain.length - 2] === curEntity.id;
-		const fieldAry = curEntity.fieldAry.filter(field => entity.fieldAry.some(f => f.id === field.id && !f.isPrivate));
-		fieldAry.forEach(field => {
-			if (notMapping && field.bizType === FieldBizType.MAPPING) {
-				return;
-			}
-			const suggestion: SuggestionType = {
-				label: field.name,
-				apply: field.name,
-				docs: field.name,
-				detail: field.name
-			};
-
-			if (field?.mapping?.entity?.fieldAry?.length && !notMapping) {
-				suggestion.properties = getEntityCompletions({
-					entity: field.mapping.entity,
-					entityAry,
-					entityIdChain: [...entityIdChain, curEntity.id],
-				});
-			} else {
-				suggestion.apply = field.name + '$';
-			}
-			_prop.push(suggestion);
-		});
-
-		return isRoot ? [{ label: '$', insertText: '$', docs: '实体字段', detail: '实体字段', properties: _prop }] : _prop;
-	}
-
-	return _prop;
-};
-const getMethodCompletions = () => {
-	const _prop: SuggestionType[] = [];
-	MethodList.forEach(category => {
-		category.methods.forEach(method => {
-			_prop.push({
-				type: 'function',
-				label: method.method,
-				apply: method.method + method.suffix,
-				detail: method.description
-			});
-		});
-	});
-
-	return _prop;
-};
-/** TODO: 获取规则中的字段 */
-const getFieldsFromCalcRule = (calcRule: string, entity: Entity, entityAry: Entity[]) => {};
 
 let ctx: QueryCtx;
 const CalcFieldModal: FC<CalcFieldModalProps> = props => {
 	const { visible, onCancel, onOK, field } = props;
 	const [fieldName, setFieldName] = useState(field?.name ?? '');
+	const [error, setError] = useState('');
 	const calcRuleRef = useRef(field?.calcRule ?? '');
 	const codeEditor = useRef<AnyType>(null);
 	ctx = observe(QueryCtx, { from: 'parents' });
 	const currentEntity = useComputed(() => ctx.fieldModel.parent);
+
 	const onChangeCode = useCallback(code => {
 		calcRuleRef.current = code;
 	}, []);
@@ -114,14 +57,30 @@ const CalcFieldModal: FC<CalcFieldModalProps> = props => {
 
 	const onModalOK = useCallback(() => {
 		if (!fieldName) {
-			message.warning('字段名称不能为空');
+			setError('字段名称不能为空');
 			return;
 		} else if (!calcRuleRef.current) {
-			message.warning('计算规则不能为空');
+			setError('计算规则不能为空');
+			return;
+		}
+		const curCalcRule = calcRuleRef.current?.trim();
+		const filedType = getFieldTypeFromCalcRule(curCalcRule, currentEntity, ctx.domainModel.entityAry);
+		if (!filedType) {
+			setError('计算字段存在语法错误，请检查计算规则');
 			return;
 		}
 
-		onOK({ id: field?.id || uuid(), name: fieldName, calcRule: calcRuleRef.current?.trim() });
+		setError('');
+		onOK({
+			id: field?.id || uuid(),
+			name: fieldName,
+			calcRule: curCalcRule,
+			bizType: FieldBizType.CALC,
+			filedBizType: filedType || FieldBizType.STRING,
+			dbType: getDBTypeByFieldBizType(filedType),
+			sql: formatSQLByCalcRule(curCalcRule),
+			fields: getFieldsFromCalcRule(curCalcRule, currentEntity, ctx.domainModel.entityAry)
+		});
 	}, [field, fieldName]);
 
 	return (
@@ -190,6 +149,7 @@ const CalcFieldModal: FC<CalcFieldModalProps> = props => {
 						}}
 						onChange={onChangeCode}
 					/>
+					<div className={styles.error}>{error}</div>
 				</div>
 			</div>
 		</Modal>
