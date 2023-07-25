@@ -1,9 +1,5 @@
-import { getQuoteByFieldType } from '../_utils/field';
-import { DefaultValueWhenCreate, FieldBizType } from '../_constants/field';
-import { safeEncodeURIComponent } from '../_utils/util';
+import { FieldBizType } from '../_constants/field';
 import { AnyType } from '../_types';
-import { generateValidateScript } from '../_utils/validate';
-import { Entity } from '../_types/domain';
 
 export type T_Field = {
   id,
@@ -63,75 +59,14 @@ export default class InsertCtx {
 	}
 
 	save() {
-		const { entities, conAry } = this.nowValue;
+		const { entities } = this.nowValue;
 		let desc = '';
 
 		if (entities.length && entities[0].fieldAry.length > 0) {
 			desc = `${entities[0].name}`;
-			
-			const sql = `INSERT INTO ${entities[0].name}\${isEdit ? '' : '__VIEW'} `;
-			
-			const fieldAry: string[] = [], valueAry: string[] = [];
-			entities[0].fieldAry.forEach(field => {
-				if (field.bizType !== FieldBizType.MAPPING) {
-					fieldAry.push(field.name);
-					
-					const con = conAry.find(con => con.to === `/${field.name}`);
-					if (con) {
-						/** 多级结构 */
-						const fromNames = con.from.split('/').filter(Boolean);
-						const value = ['params', ...fromNames.map(key => key)].join('.');
-						const q = getQuoteByFieldType(field.dbType);
-						
-						valueAry.push(`\${(${value} === undefined || ${value} === null) ? null : \`${q}\${Array.isArray(${value}) || (typeof ${value} === 'object' && ${value} !== null) ? JSON.stringify(${value}) : ${value}}${q}\`}`);
-					} else {
-						if (field.isPrimaryKey) {
-							valueAry.push('${genUniqueId()}');
-						} else if (field.name === '_STATUS_DELETED') {
-							valueAry.push('0');
-						} else if (
-							['_UPDATE_TIME', '_CREATE_TIME'].includes(field.name)
-							|| (field.bizType === FieldBizType.DATETIME && field.defaultValueWhenCreate === DefaultValueWhenCreate.CURRENT_TIME)
-						) {
-							valueAry.push('${Date.now()}');
-						} else if (field.defaultValueWhenCreate !== undefined && field.defaultValueWhenCreate !== null) {
-							const q = getQuoteByFieldType(field.dbType);
-							
-							valueAry.push(`${q}${field.defaultValueWhenCreate}${q}`);
-						} else {
-							valueAry.push('null');
-						}
-					}
-				}
-			});
-			
-			let script: string;
-			if (this.batch) {
-				script = `
-		      (values, context)=>{
-		        const { genUniqueId, isEdit } = context;
-		        for (let i = 0; i < values.length; i++) {
-		          const params = values[i];
-		          ${generateValidateScript(entities[0] as Entity, conAry)}
-		        }
-		        return \`${sql}(${fieldAry.join(',')}) VALUES \${values.map(params => \`(${valueAry.join(',')})\`).join(', ')}\`;
-		      }//@ sourceURL=batchInsert.js
-		      `;
-			} else {
-				script = `
-		      (params, context)=>{
-		        const { genUniqueId, isEdit } = context;
-		        ${generateValidateScript(entities[0] as Entity, conAry)}
-		        return \`${sql}(${fieldAry.join(',')}) VALUES (${valueAry.join(',')})\`;
-		      }//@ sourceURL=insert.js
-		      `;
-			}
-			
-			this.nowValue.script = safeEncodeURIComponent(script);
-		} else {
-			this.nowValue.script = void 0;
 		}
-
+		
+		this.nowValue.script = void 0;
 		this.nowValue.desc = desc;
 		this.value.set(this.nowValue);
 
