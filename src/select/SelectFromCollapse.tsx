@@ -26,7 +26,7 @@ const SelectFromCollapse: FC<SelectFromProps> = props => {
 		f2 => f2.fieldId === field.id
 			&& f2.fromPath.map(path => path.fieldId).join('') === (fromPath.map(path => path.id).join(''))
 	);
-	const isMapping = !notMapping && !!field.mapping?.entity?.fieldAry.length;
+	const isMapping = !notMapping && !!field.mapping?.entity?.fieldAry?.length;
 	let fieldMappingEntity = field.mapping?.entity as AnyType as Entity;
 	
 	if (isMapping) {

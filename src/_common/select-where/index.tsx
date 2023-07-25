@@ -152,7 +152,7 @@ const Conditions: FC = () => {
 					return [
 						...pre,
 						...field.mapping.entity.fieldAry
-							.filter(f => entityFieldMap[field.mapping.entity.id + f.id]?.mapping?.entity?.fieldAry.length)
+							.filter(f => entityFieldMap[field.mapping.entity.id + f.id]?.mapping?.entity?.fieldAry?.length)
 							.map(f => {
 								return {
 									...entityFieldMap[field.mapping.entity.id + f.id],
