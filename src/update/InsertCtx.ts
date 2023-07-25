@@ -1,10 +1,6 @@
-import { spliceUpdateSQLByConditions } from '../_utils/sql';
-import { getParamsByConditions } from '../_utils/params';
 import { AnyType } from '../_types';
-import { Condition, Entity } from '../_types/domain';
-import { safeEncodeURIComponent } from '../_utils/util';
+import { Condition } from '../_types/domain';
 import { FieldBizType } from '../_constants/field';
-import { generateValidateScript } from '../_utils/validate';
 
 export type T_Field = {
 	id,
@@ -55,9 +51,6 @@ export default class InsertCtx {
 
 	blurAry: Array<() => void> = [];
 
-
-	//------------------------------------------------------------
-
 	addBlur(fn: () => void) {
 		this.blurAry.push(fn);
 	}
@@ -102,30 +95,11 @@ export default class InsertCtx {
 				}
 			});
 			this.filterConditionByEffectFieldIds([conditions], allowUseFields);
-
-			let params = getParamsByConditions(conditions.conditions);
-			const sql = spliceUpdateSQLByConditions({
-				params,
-				conditions: conditions,
-				connectors: conAry,
-				entities: entities as AnyType[],
-			});
-			
-			let script = `
-			(params, context)=>{
-        ${generateValidateScript(currentEntity as Entity, conAry)}
-				return \`${sql}\`;
-			}//@ sourceURL=update.js
-			`;
-			
-			this.nowValue.script = safeEncodeURIComponent(script);
-		} else {
-			this.nowValue.script = void 0;
 		}
 
+		this.nowValue.script = void 0;
 		this.nowValue.desc = desc;
 		this.value.set(this.nowValue);
-
 		this.close();
 	}
 

@@ -45,9 +45,6 @@ export default class InsertCtx {
 	blurAry: AnyType[] = [];
 	batch?: boolean;
 
-
-	//------------------------------------------------------------
-
 	addBlur(fn) {
 		this.blurAry.push(fn);
 	}
@@ -69,7 +66,6 @@ export default class InsertCtx {
 		this.nowValue.script = void 0;
 		this.nowValue.desc = desc;
 		this.value.set(this.nowValue);
-
 		this.close();
 	}
 

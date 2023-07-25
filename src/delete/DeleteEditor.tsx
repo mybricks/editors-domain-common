@@ -7,9 +7,6 @@ import Where from '../_common/where';
 import { FieldBizType, SQLWhereJoiner } from '../_constants/field';
 import { formatEntitiesByOriginEntities } from '../_utils/entity';
 import { Condition, Entity } from '../_types/domain';
-import { spliceDeleteSQLByConditions } from '../_utils/sql';
-import { getParamsByConditions } from '../_utils/params';
-import { safeEncodeURIComponent } from '../_utils/util';
 
 import styles from './index.less';
 
@@ -64,28 +61,11 @@ class DeleteContext {
 				}
 			});
 			this.filterConditionByEffectFieldIds([conditions], allowUseFields);
-
-			let params = getParamsByConditions(conditions.conditions);
-			let sql = spliceDeleteSQLByConditions({
-				params,
-				entities: entities,
-				conditions: conditions,
-			});
-			
-			let script = `
-			(params, context)=>{
-				return \`${sql}\`;
-			}//@ sourceURL=delete.js
-			`;
-			
-			this.nowValue.script = safeEncodeURIComponent(script);
-		} else {
-			this.nowValue.script = void 0;
 		}
 
+		this.nowValue.script = void 0;
 		this.nowValue.desc = desc;
 		this.value.set(this.nowValue);
-
 		this.close();
 	}
 }
