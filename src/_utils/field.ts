@@ -14,7 +14,7 @@ export const getFieldSchema = (field: Field) => {
 		break;
 	}
 	case FieldDBType.MEDIUMTEXT: {
-		type = 'string';
+		type = field.bizType === FieldBizType.JSON ? 'any' : 'string';
 		break;
 	}
 	}
@@ -120,6 +120,9 @@ export const getSchemaTypeByFieldType = (field: Field) => {
 		return 'number';
 	case FieldBizType.MAPPING:
 		return 'any';
+	case FieldBizType.CALC:
+		return getSchemaTypeByFieldType({ ...field, bizType: field.filedBizType as FieldBizType });
+	default: return 'any';
 	}
 };
 

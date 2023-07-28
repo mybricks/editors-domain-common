@@ -30,13 +30,16 @@ const SelectFromCollapse: FC<SelectFromProps> = props => {
 	let fieldMappingEntity = field.mapping?.entity as AnyType as Entity;
 	
 	if (isMapping) {
-		const oldFieldIds = field.mapping?.entity?.fieldAry.map(f => f.id) || [];
+		const oldFieldIds = field.mapping!.entity!.fieldAry.map(f => f.id) || [];
 		let curEntity = ctx.nowValue.entities.find(en => en.id === fieldMappingEntity.id);
 
 		if (curEntity) {
 			curEntity = JSON.parse(JSON.stringify(curEntity));
 			fieldMappingEntity = { ...curEntity as AnyType as Entity };
-			fieldMappingEntity.fieldAry = fieldMappingEntity.fieldAry.filter(f => oldFieldIds.includes(f.id));
+			fieldMappingEntity.fieldAry = [
+				...fieldMappingEntity.fieldAry.filter(f => oldFieldIds.includes(f.id)),
+				...field.mapping!.entity!.fieldAry.filter(f => f.bizType === FieldBizType.CALC)
+			];
 		} else {
 			fieldMappingEntity.fieldAry = [];
 		}

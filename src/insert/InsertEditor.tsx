@@ -72,7 +72,7 @@ const InsertEditor = ({ domainModel, paramSchema, value, close, batch }: AnyType
 		}
 	});
 	const curParmaSchema = useComputed(() => {
-		return batch ? paramSchema.items || { type: 'object', properties: {} } : paramSchema;
+		return { ...(batch ? paramSchema.items : paramSchema) || { type: 'object', properties: {} }, root: true };
 	});
 
 	return (

@@ -92,7 +92,7 @@ export default function InsertEditor({ domainModel, paramSchema, value, close }:
 			</div>
 			<FromTo
 				conAry={nowValue.conAry}
-				from={{ title: '参数', schema: paramSchema }}
+				from={{ title: '参数', schema: { ...(paramSchema || { type: 'object', properties: {} }), root: true } }}
 				to={{ title: nowValue.entities[0]?.name, schema: fieldSchema }}
 				addBlurFn={ctx.addBlur}
 			/>

@@ -46,6 +46,8 @@ export interface Field {
 	showFormat: string;
 	/** 枚举值 */
 	enumValues?: string[]
+	/** 计算字段的真实字段类型 */
+	filedBizType?: FieldBizType;
 }
 
 export interface Condition {

@@ -1,5 +1,5 @@
 import { Input, Modal, Tabs } from 'antd';
-import React, { FC, useCallback, useRef, useState } from 'react';
+import React, { FC, useCallback, useEffect, useRef, useState } from 'react';
 import { observe, useComputed } from '@mybricks/rxui';
 import { CodeEditor } from '@astii/code-editor';
 import QueryCtx from './QueryCtx';
@@ -36,6 +36,7 @@ const CalcFieldModal: FC<CalcFieldModalProps> = props => {
 	const [error, setError] = useState('');
 	const calcRuleRef = useRef(field?.calcRule ?? '');
 	const codeEditor = useRef<AnyType>(null);
+	const codeEditorKey = useRef(Date.now());
 	ctx = observe(QueryCtx, { from: 'parents' });
 	const currentEntity = useComputed(() => ctx.fieldModel.parent);
 
@@ -82,6 +83,14 @@ const CalcFieldModal: FC<CalcFieldModalProps> = props => {
 			fields: getFieldsFromCalcRule(curCalcRule, currentEntity, ctx.domainModel.entityAry)
 		});
 	}, [field, fieldName]);
+
+	useEffect(() => {
+		if (visible) {
+			setFieldName(field?.name ?? '');
+			calcRuleRef.current = field?.calcRule ?? '';
+			codeEditorKey.current = Date.now();
+		}
+	}, [visible]);
 
 	return (
 		<Modal
@@ -131,6 +140,7 @@ const CalcFieldModal: FC<CalcFieldModalProps> = props => {
 					<label>计算规则</label>
 					<CodeEditor
 						ref={codeEditor}
+						key={codeEditorKey.current}
 						className={styles.code}
 						value={field?.calcRule ?? ''}
 						completions={[

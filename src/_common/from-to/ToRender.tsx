@@ -1,10 +1,10 @@
 // @ts-ignore
-import { dragable, IgnoreObservable, observe, useComputed, useObservable } from "@mybricks/rxui";
-import React, { useCallback, useEffect, useState } from "react";
-import { getPinTypeStyle, getTypeTitleBySchema } from "./utils";
-import Ctx from "./Ctx";
-import { XPATH_ARRAY } from "./constants";
-import { AnyType } from "../../_types";
+import { dragable, IgnoreObservable, observe, useComputed, useObservable } from '@mybricks/rxui';
+import React, { useCallback, useEffect, useState } from 'react';
+import { getPinTypeStyle, getTypeTitleBySchema } from './utils';
+import Ctx from './Ctx';
+import { XPATH_ARRAY } from './constants';
+import { AnyType } from '../../_types';
 
 import css from './ToRender.less';
 
@@ -62,14 +62,10 @@ function ProItem({ val, keyName, xpath, root }: { val, keyName?, xpath?, root? }
 	const mouseDown = useCallback((e) => {
 		const point = e.target as HTMLElement;
 
-		let ox, oy, nx, ny;
-		dragable(e, ({ po: { x, y }, epo: { ex, ey }, dpo: { dx, dy } }, state) => {
+		dragable(e, ({ epo: { ex, ey }, dpo: { dx, dy } }, state) => {
 			if (state == 'start') {
-				nx = ox = parseInt(point.style.left);
-				ny = oy = parseInt(point.style.top);
 
 				point.style.visibility = 'hidden';
-				//point.style.pointerEvents = 'none'
 
 				edtCtx.mover = {
 					x: ex + 3,
@@ -80,19 +76,11 @@ function ProItem({ val, keyName, xpath, root }: { val, keyName?, xpath?, root? }
 				};
 			}
 			if (state == 'moving') {
-				// point.style.left = (nx += dx) + 'px'
-				// point.style.top = (ny += dy) + 'px'
-
 				edtCtx.mover.x += dx;
 				edtCtx.mover.y += dy;
 			}
 			if (state == 'finish') {
 				point.style.visibility = 'visible';
-
-				//point.style.left = ox + 'px'
-				// point.style.top = oy + 'px'
-				// point.style.pointerEvents = 'auto'
-				//
 				edtCtx.finishMover();
 			}
 		});
@@ -101,32 +89,24 @@ function ProItem({ val, keyName, xpath, root }: { val, keyName?, xpath?, root? }
 	const [_hasCon, hasChildrenCon, hasParentCon] = useComputed(() => {
 		const hasCon = edtCtx.conAry.find(con => con.to === xpath);
 
-		// if(keyName==='solution'){
-		//   debugger
-		// }
-
 		const hasChildrenCon = edtCtx.conAry.find(con => {
 			if (!hasCon && con.to.indexOf(xpath + '/') === 0) {
 				return true;
 			}
 		});
 
-		const hasParentCon = edtCtx.conAry.find(con => {
+		const hasParentCon = edtCtx.conAry.find(() => {
 			if (!hasCon) {
 				const ary = xpath.split('/');
 
 				let tPath = '';
-				const has = ary.find(now => {
-					//if(now!==''){
+				return ary.find(now => {
 					tPath += `/${now}`;
 					tPath = tPath.replace(/\/\//, '/');
 					if (edtCtx.conAry.find(con => con.to === tPath)) {
 						return true;
 					}
-					//}
 				});
-
-				return has;
 			}
 		});
 

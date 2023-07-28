@@ -24,6 +24,12 @@ export const getEntityFieldMap = (entities: Entity[]) => {
 			if (entity.isSystem && !field.isPrivate) {
 				entityFieldMap[entity.id + field.name] = field;
 			}
+
+			if (field.mapping?.entity?.fieldAry?.length) {
+				field.mapping.entity.fieldAry
+					.filter(f => f.bizType === FieldBizType.CALC)
+					.forEach(f => entityFieldMap[field.mapping!.entity!.id + f.id] = f);
+			}
 		});
 	});
 	

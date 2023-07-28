@@ -19,6 +19,7 @@ export default function FromTo({ conAry, from, to, addBlurFn }: AnyType) {
 
 	useEffect(() => {
 		addBlurFn(() => {
+			// @ts-ignore
 			ctx.focusCon = void 0;
 		});
 	}, []);

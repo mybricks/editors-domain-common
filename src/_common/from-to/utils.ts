@@ -1,71 +1,12 @@
-import { XPATH_ARRAY,C_TYPES_INFO } from "./constants";
+import { XPATH_ARRAY,C_TYPES_INFO } from './constants';
+import { AnyType } from '../../_types';
 
 export const getPinTypeStyle = function (type): { strokeColor, fillColor } | undefined {
 	return C_TYPES_INFO.find(ty => ty.type == (type || 'unknown'));
 };
 
-export function getAutoChangeScript(schema0, schema1) {
-	if (isTypeEqual(schema0, schema1) || schema1.type === 'any') {
-		return `
-      function(val){
-         return val
-      }
-    `;
-	} else {
-		if (schema0.type === 'string') {
-			switch (schema1.type) {
-			case 'boolean': {
-				return `function(val){
-            return true
-          }`;
-			}
-			default: {
-				return;
-			}
-			}
-		} else if (schema0.type === 'number') {
-			switch (schema1.type) {
-			case 'string': {
-				return `function(val){
-            return String(val)
-          }`;
-			}
-			case 'boolean': {
-				return `function(val){
-            return val>0
-          }`;
-			}
-			default: {
-				return;
-			}
-			}
-		} else if (schema0.type === 'boolean') {
-			switch (schema1.type) {
-			case 'string': {
-				return `function(val){
-            return val?'true'|'false'
-          }`;
-			}
-			case 'number': {
-				return `function(val){
-            return val?1:0
-          }`;
-			}
-			default: {
-				return;
-			}
-			}
-		} else {
-			return;
-		}
-	}
-}
-
 export function isXpathMatch(xpath0: string, xpath1: string) {
 	const ia0 = xpath0.indexOf(XPATH_ARRAY), ia1 = xpath1.indexOf(XPATH_ARRAY);
-	// if(xpath0.endsWith('/merchantCode')){
-	//   debugger
-	// }
 	if (ia0 < 0 && ia1 < 0) {//not in array
 		return true;
 	}
@@ -93,12 +34,7 @@ export function isXpathMatch(xpath0: string, xpath1: string) {
 		return false;
 	}
 
-
 	const ary0 = xpath0.split('/'), ary1 = xpath1.split('/');
-	// if (ary0.length !== ary1.length) {
-	//
-	// }
-
 
 	const notFoundArray = ary0.find((now, idx) => {
 		if (now === XPATH_ARRAY) {
@@ -108,32 +44,14 @@ export function isXpathMatch(xpath0: string, xpath1: string) {
 		}
 	});
 
-	if (notFoundArray) {
-		return false;
-	}
-
-	return true;
-}
-
-export function isTypeEqual(schema0, schema1) {
-	if (schema0.type === schema1.type) {
-		if (schema0.type === 'object') {
-			if (!ifTypeObjMatch(schema0, schema1)) {
-				return false;
-			}
-		} else if (schema0.type === 'array') {
-			if (!isTypeAryMatch(schema0, schema1)) {
-				return false;
-			}
-		}
-		return true;
-	}
-	return false;
+	return !notFoundArray;
 }
 
 /** schema0 入参字段类型，schema1 实体字段类型 */
 export function isTypeMatch(schema0, schema1) {
-	if (isTypeEqual(schema0, schema1)) {
+	if (schema0.root) {
+		return false;
+	} else if (schema0.type === schema1.type) {
 		return true;
 	} else if (schema1.type === 'any') {
 		return true;
@@ -150,90 +68,29 @@ export function isTypeMatch(schema0, schema1) {
 	}
 }
 
-export function isTypeAryMatch(schema0, schema1) {
-	if (schema0.type === 'array' && schema1.type === 'array') {
-		const item0 = schema0.items;
-		const item1 = schema1.items;
-
-		if (item0 && item1 === void 0) {
-			return true;
-		}
-
-		if (item0 === void 0 && item1) {
-			return false;
-		}
-
-		return isTypeMatch(item0, item1);
-
-		// if (item0.type === item1.type) {
-		//   if (item0.type === 'object') {
-		//     if (!ifTypeObjMatch(item0, item1)) {
-		//       return false
-		//     }
-		//   } else if (item0.type === 'array') {
-		//     if (!isTypeAryMatch(item0, item1)) {
-		//       return false
-		//     }
-		//   }
-		//   return true
-		// }
-	} else {
-		return false;
-	}
-}
-
-export function ifTypeObjMatch(schema0, schema1) {
-	if (schema0.type === 'object' && schema1.type === 'object') {
-		const pro0 = schema0.properties;
-		const pro1 = schema1.properties;
-
-		if (pro0 && (pro1 === void 0 || pro1 && Object.keys(pro1).length === 0)) {
-			return true;
-		}
-
-		if (pro0 === void 0 && pro1) {
-			return false;
-		}
-
-		const pk0 = Object.keys(pro0);
-		const pk1 = Object.keys(pro1);
-		if (pk0.sort().toString() === pk1.sort().toString()) {
-			if (pk0.find(key => {
-				return pro0[key].type !== pro1[key].type;
-			})) {
-				return false;
-			} else {
-				return true;
-			}
-		}
-	}
-
-	return false;
-}
-
-export function getTypeTitleBySchema(schema: { type: string }) {
+export function getTypeTitleBySchema(schema: AnyType) {
 	if (!schema || typeof schema !== 'object' || typeof schema.type !== 'string') {
 		return '错误类型';
 	}
 
 	switch (schema.type) {
-	case "number":
+	case 'number':
 		return '数字';
-	case "string":
+	case 'string':
 		return '字符';
-	case "boolean":
+	case 'boolean':
 		return '布尔';
-	case "enum":
+	case 'enum':
 		return '枚举';
-	case "object":
+	case 'object':
 		return `${!schema.properties ? '任意对象' : '对象'}`;
-	case "array":
+	case 'array':
 		return `${!schema.items ? '任意列表' : '列表'}`;
-	case "any":
+	case 'any':
 		return '任意';
-	case "follow":
+	case 'follow':
 		return '跟随';
-	case "unknown":
+	case 'unknown':
 		return '未知';
 	default: {
 		return '未定义';
