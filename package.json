@@ -1,6 +1,6 @@
 {
   "name": "@mybricks/editors-domain-common",
-  "version": "1.0.86",
+  "version": "1.0.87",
   "description": "",
   "main": "lib/index.js",
   "scripts": {
@@ -26,7 +26,7 @@
   "homepage": "https://github.com/mybricks/editors-pc-common#readme",
   "dependencies": {
     "@ant-design/icons": "^5.0.1",
-    "@astii/code-editor": "^1.0.5",
+    "@astii/code-editor": "^1.0.7",
     "@mybricks/code-editor": "1.1.1",
     "@mybricks/rxui": "^1.0.86",
     "antd": "^4.21.6",

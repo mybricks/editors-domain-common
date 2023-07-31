@@ -38,7 +38,9 @@ const CalcFieldModal: FC<CalcFieldModalProps> = props => {
 	const codeEditor = useRef<AnyType>(null);
 	const codeEditorKey = useRef(Date.now());
 	ctx = observe(QueryCtx, { from: 'parents' });
-	const currentEntity = useComputed(() => ctx.fieldModel.parent);
+	const currentEntity = useComputed(() => {
+		return ctx.domainModel.entityAry.find(e => e.id === ctx.nowValue?.entity?.id);
+	});
 
 	const onChangeCode = useCallback(code => {
 		calcRuleRef.current = code;
@@ -57,14 +59,18 @@ const CalcFieldModal: FC<CalcFieldModalProps> = props => {
 	}, []);
 
 	const onModalOK = useCallback(() => {
+		const curCalcRule = calcRuleRef.current?.trim();
 		if (!fieldName) {
 			setError('字段名称不能为空');
 			return;
-		} else if (!calcRuleRef.current) {
+		} else if (currentEntity?.fieldAry.find(f => f.name === fieldName)) {
+			setError('字段名称不能重复');
+			return;
+		} else if (!curCalcRule) {
 			setError('计算规则不能为空');
 			return;
 		}
-		const curCalcRule = calcRuleRef.current?.trim();
+
 		const filedType = getFieldTypeFromCalcRule(curCalcRule, currentEntity, ctx.domainModel.entityAry);
 		if (!filedType) {
 			setError('计算字段存在语法错误，请检查计算规则');
@@ -79,16 +85,33 @@ const CalcFieldModal: FC<CalcFieldModalProps> = props => {
 			bizType: FieldBizType.CALC,
 			filedBizType: filedType || FieldBizType.STRING,
 			dbType: getDBTypeByFieldBizType(filedType),
-			sql: formatSQLByCalcRule(curCalcRule),
-			fields: getFieldsFromCalcRule(curCalcRule, currentEntity, ctx.domainModel.entityAry)
+			sql: formatSQLByCalcRule(curCalcRule, ctx.fieldModel),
+			fields: getFieldsFromCalcRule(curCalcRule, currentEntity, ctx.domainModel.entityAry, ctx.fieldModel)
 		});
-	}, [field, fieldName]);
+	}, [field, fieldName, currentEntity]);
+
+	const onCodeBlur = useCallback(() => {
+		const curCalcRule = calcRuleRef.current?.trim();
+		if (!curCalcRule) {
+			setError('计算规则不能为空');
+			return;
+		}
+
+		const filedType = getFieldTypeFromCalcRule(curCalcRule, currentEntity, ctx.domainModel.entityAry);
+		if (!filedType) {
+			setError('计算字段存在语法错误，请检查计算规则');
+			return;
+		}
+
+		setError('');
+	}, [currentEntity]);
 
 	useEffect(() => {
 		if (visible) {
 			setFieldName(field?.name ?? '');
 			calcRuleRef.current = field?.calcRule ?? '';
 			codeEditorKey.current = Date.now();
+			setError('');
 		}
 	}, [visible]);
 
@@ -143,6 +166,7 @@ const CalcFieldModal: FC<CalcFieldModalProps> = props => {
 						key={codeEditorKey.current}
 						className={styles.code}
 						value={field?.calcRule ?? ''}
+						events={{ blur: onCodeBlur } as AnyType}
 						completions={[
 							...getEntityCompletions({
 								entity: currentEntity,

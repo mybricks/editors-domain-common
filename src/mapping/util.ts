@@ -84,6 +84,16 @@ const getFieldByFieldNames = (filedName: string[], entity: Entity, entityAry: En
 	}
 	curEntity = { ...curEntity, fieldAry: curEntity.fieldAry.filter(f => entity.fieldAry.find(ff => ff.id === f.id)) };
 	const name = filedName.shift();
+	const originField = entity.fieldAry.find(f => f.name === name);
+
+	if (!originField) {
+		return;
+	}
+	/** Hack 逻辑，判断是否是总数字段 */
+	if (originField?.name === '总数' && originField?.desc === '查询数据总数') {
+		return originField;
+	}
+
 	const field = curEntity.fieldAry.find(f => f.name === name);
 
 	if (filedName.length && !field?.mapping?.entity?.fieldAry?.length) {
@@ -112,7 +122,18 @@ const getFieldPathByFieldNames = (filedName: string[], entity: Entity, entityAry
 		}
 
 		curEntity = { ...curEntity, fieldAry: curEntity.fieldAry.filter(f => mappingEntity.fieldAry.find(ff => ff.id === f.id)) };
-		const field = curEntity.fieldAry.find(f => f.name === filedName[index]) as Field;
+		const originField = mappingEntity.fieldAry.find(f => f.name === filedName[index]);
+
+		if (!originField) {
+			return;
+		}
+		let field;
+		/** Hack 逻辑，判断是否是总数字段 */
+		if (originField?.name === '总数' && originField?.desc === '查询数据总数') {
+			field = originField;
+		} else {
+			field = curEntity.fieldAry.find(f => f.name === filedName[index]) as Field;
+		}
 
 		if (!field) {
 			return;
@@ -133,13 +154,26 @@ const getFieldPathByFieldNames = (filedName: string[], entity: Entity, entityAry
 };
 
 /** 提取所有计算字段使用到的实体字段 */
-export const getFieldsFromCalcRule = (calcRule: string, entity: Entity, entityAry: Entity[]) => {
+export const getFieldsFromCalcRule = (calcRule: string, entity: Entity, entityAry: Entity[], parentField: Field) => {
 	const fieldNames = calcRule.match(/(\$\.[^$\s\t]+\$)/g) ?? [];
 	return fieldNames
 		.map(name => {
 			return getFieldPathByFieldNames(name.match(/^\$\.([^$\s\t]+)\$$/)?.[1]?.split('.') ?? [], entity, entityAry);
 		})
-		.filter(Boolean);
+		.filter(Boolean)
+		.reduce(
+			(pre, field) => {
+				return [
+					...pre,
+					field,
+					...field.fromPath.map((path, index) => {
+						return { ...path, fromPath: field.fromPath.slice(0, index) };
+					})
+				];
+			},
+			[]
+		)
+		.map(field => ({ ...field, fromPath: [{ fieldId: parentField.id, fieldName: parentField.name, entityId: (parentField as AnyType).parent.id, fromPath: [] }, ...field.fromPath] }));
 };
 
 /** 获取计算字段类型 */
@@ -183,11 +217,11 @@ export const getFieldTypeFromCalcRule = (calcRule: string, entity: Entity, entit
 	}
 };
 
-export const formatSQLByCalcRule = (calcRule: string) => {
+export const formatSQLByCalcRule = (calcRule: string, parentField: Field) => {
 	return calcRule.replace(/(\$\.[^$\s\t]+\$)/g, ($0) => {
 		return $0
-			.replace(/^\$\./, 'MAPPING_')
+			.replace(/^\$\./, `MAPPING_${parentField.name}_`)
 			.replace(/\$$/, '')
-			.replace(/\./, '_');
+			.replace(/\./g, '_');
 	});
 };

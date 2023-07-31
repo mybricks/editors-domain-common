@@ -40,34 +40,45 @@ export const getEntityFieldMap = (entities: Entity[]) => {
 export const formatFieldsByOriginEntities = (fields: SelectedField[], originEntities: AnyType[]) => {
 	const entityFieldMap = getEntityFieldMap(originEntities);
 	
-	return fields.filter(field => {
-		const entityField = entityFieldMap[field.entityId + field.fieldId];
-		let hasEffect = !!entityField;
+	return fields
+		.filter(field => {
+			const entityField = entityFieldMap[field.entityId + field.fieldId];
+			let hasEffect = !!entityField;
 		
-		/** 映射类型，且未映射数据，则过滤 */
-		if (entityField && entityField.bizType === FieldBizType.MAPPING && !entityField?.mapping?.entity?.fieldAry?.length) {
-			return false;
-		}
+			/** 映射类型，且未映射数据，则过滤 */
+			if (entityField && entityField.bizType === FieldBizType.MAPPING && !entityField?.mapping?.entity?.fieldAry?.length) {
+				return false;
+			}
 		
-		if (field.fromPath.length) {
-			for (let idx = 0; idx < field.fromPath.length; idx++) {
-				if (!hasEffect) {
-					break;
-				}
-				const path = field.fromPath[idx];
-				const nextPath = field.fromPath[idx + 1] || field;
-				const entityField = entityFieldMap[path.entityId + path.fieldId];
+			if (field.fromPath.length) {
+				for (let idx = 0; idx < field.fromPath.length; idx++) {
+					if (!hasEffect) {
+						break;
+					}
+					const path = field.fromPath[idx];
+					const nextPath = field.fromPath[idx + 1] || field;
+					const entityField = entityFieldMap[path.entityId + path.fieldId];
 				
-				if (!entityField || !entityField.mapping?.entity?.fieldAry.length || entityField.mapping?.entity?.id !== nextPath.entityId) {
-					hasEffect = false;
-				} else {
-					hasEffect = !!entityField.mapping?.entity?.fieldAry.find(f => f.id === nextPath.fieldId);
+					if (!entityField || !entityField.mapping?.entity?.fieldAry.length || entityField.mapping?.entity?.id !== nextPath.entityId) {
+						hasEffect = false;
+					} else {
+						hasEffect = !!entityField.mapping?.entity?.fieldAry.find(f => f.id === nextPath.fieldId);
+					}
 				}
 			}
-		}
 		
-		return hasEffect;
-	});
+			return hasEffect;
+		})
+		.map(field => {
+			const entityField = entityFieldMap[field.entityId + field.fieldId];
+
+			return {
+				...field,
+				/** Hack 逻辑，判断是否是总数字段 */
+				fieldName: field.fieldName === '总数' && entityField.name === 'id' ? field.fieldName : entityField.name,
+				fromPath: field.fromPath.map(f => ({ ...f, fieldName: entityFieldMap[f.entityId + f.fieldId].name })),
+			};
+		});
 };
 
 export const formatConditionByOriginEntities = (condition: Condition, originEntities: AnyType[]) => {
@@ -101,9 +112,13 @@ export const formatConditionByOriginEntities = (condition: Condition, originEnti
 					con.fieldName = '';
 					con.entityId = '';
 					con.fromPath = [];
+					return;
 				} else if (!con.fromPath) {
 					con.fromPath = [];
 				}
+
+				con.fieldName = entityFieldMap[con.entityId + con.fieldId].name;
+				con.fromPath.forEach(path => (path.fieldName = entityFieldMap[path.entityId + path.fieldId].name));
 			}
 		});
 	};
@@ -140,10 +155,14 @@ export const formatOrderByOriginEntities = (orders: Order[], originEntities: Any
 			order.fieldName = '';
 			order.entityId = '';
 			order.fromPath = [];
+			return;
 		} else if (!order.fromPath) {
 			order.fromPath = [];
 		}
-		
+
+		order.fieldName = entityFieldMap[order.entityId + order.fieldId].name;
+		order.fromPath.forEach(path => (path.fieldName = entityFieldMap[path.entityId + path.fieldId].name));
+
 		return order;
 	});
 };

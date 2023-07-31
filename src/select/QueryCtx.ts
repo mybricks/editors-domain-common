@@ -219,15 +219,16 @@ export default class QueryCtx {
 				&& f.entityId === field.entityId
 				&& f.fromPath.map(ff => ff.fieldId).join('') === field.fromPath.map(ff => ff.fieldId).join('')
 		);
-		
+
 		if (selected) {
+			const pathIdChain = [field.fromPath.map(ff => ff.fieldId), field.fieldId].join('');
 			this.nowValue.fields = this.nowValue.fields
 				.filter(
 					f => f.fieldId !== field.fieldId
 					|| f.entityId !== field.entityId
 					|| f.fromPath.map(ff => ff.fieldId).join('') !== field.fromPath.map(ff => ff.fieldId).join('')
 				)
-				.filter(f => !f.fromPath.some(ff => ff.fieldId === field.fieldId));
+				.filter(f => !f.fromPath.map(ff => ff.fieldId).join('').startsWith(pathIdChain));
 		} else {
 			this.nowValue.fields.push(field);
 		}
