@@ -23,7 +23,7 @@ export const getFieldSchema = (field: Field) => {
 };
 
 /** 获取判断字段查询的条件符号 */
-export const getFieldConditionAry = (dbType: string): Array<{ label: string; value: string }> => {
+export const getFieldConditionAry = (dbType: string): Array<{ label: string; value: string; notNeedValue?: boolean }> => {
 	switch (dbType) {
 	case FieldDBType.VARCHAR: {
 		return [
@@ -33,6 +33,8 @@ export const getFieldConditionAry = (dbType: string): Array<{ label: string; val
 			{ label: '不匹配(NOT LIKE)', value: 'NOT LIKE' },
 			{ label: '包含(IN)', value: 'IN' },
 			{ label: '不包含(NOT IN)', value: 'NOT IN' },
+			{ label: '等于 NULL', value: 'IS NULL', notNeedValue: true },
+			{ label: '不等于 NULL', value: 'IS NOT NULL', notNeedValue: true },
 		];
 	}
 	case FieldDBType.BIGINT: {
@@ -43,6 +45,8 @@ export const getFieldConditionAry = (dbType: string): Array<{ label: string; val
 			{ label: '小于等于(<=)', value: '<=' },
 			{ label: '包含(IN)', value: 'IN' },
 			{ label: '不包含(NOT IN)', value: 'NOT IN' },
+			{ label: '等于 NULL', value: 'IS NULL', notNeedValue: true },
+			{ label: '不等于 NULL', value: 'IS NOT NULL', notNeedValue: true },
 		];
 	}
 	case FieldDBType.MEDIUMTEXT: {
@@ -53,6 +57,8 @@ export const getFieldConditionAry = (dbType: string): Array<{ label: string; val
 			{ label: '不匹配(NOT LIKE)', value: 'NOT LIKE' },
 			{ label: '包含(IN)', value: 'IN' },
 			{ label: '不包含(NOT IN)', value: 'NOT IN' },
+			{ label: '等于 NULL', value: 'IS NULL', notNeedValue: true },
+			{ label: '不等于 NULL', value: 'IS NOT NULL', notNeedValue: true },
 		];
 	}
 	default: return [];

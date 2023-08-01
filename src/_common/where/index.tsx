@@ -148,6 +148,7 @@ const Conditions: FC = () => {
 				if (!condition.operator) {
 					condition.operator = operators[0].value;
 				}
+				const curOperator = operators.find(op => op.value === condition.operator);
 				
 				/** 字段选择时下拉列表 */
 				const fieldSelectOptions: ReactNode[] = [];
@@ -257,7 +258,15 @@ const Conditions: FC = () => {
 						<select
 							value={condition.operator}
 							className={styles.operatorSelect}
-							onChange={e => condition.operator = e.target.value}>
+							onChange={e => {
+								condition.operator = e.target.value;
+								const curOperator = operators.find(op => op.value === e.target.value);
+
+								if (curOperator?.notNeedValue) {
+									condition.value = '';
+								}
+							}}
+						>
 							{
 								operators.map((operator, idx) => {
 									return (
@@ -268,21 +277,24 @@ const Conditions: FC = () => {
 								})
 							}
 						</select>
-						<input
-							className={styles.valueInput}
-							type="text"
-							value={condition.value}
-							onChange={e => condition.value = e.target.value}
-							onClick={evt((e: Event) => {
-								whereContext.popEle = e.target as AnyType;
-								whereContext.popParams = {
-									condition,
-									field: originField
-								};
-								whereContext.addBlur?.(() => {
-									whereContext.popParams = void 0;
-								});
-							}).stop}/>
+						{curOperator?.notNeedValue ? <span style={{ width: '130px', height: '24px' }} /> : (
+							<input
+								className={styles.valueInput}
+								type="text"
+								value={condition.value}
+								onChange={e => condition.value = e.target.value}
+								onClick={evt((e: Event) => {
+									whereContext.popEle = e.target as AnyType;
+									whereContext.popParams = {
+										condition,
+										field: originField
+									};
+									whereContext.addBlur?.(() => {
+										whereContext.popParams = void 0;
+									});
+								}).stop}
+							/>
+						)}
 						<span
 							className={`${styles.addWhere} ${styles.icons}`}
 							onClick={() => remove({ index, parentCondition })}

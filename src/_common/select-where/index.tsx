@@ -227,6 +227,7 @@ const Conditions: FC = () => {
 				condition.operator = operators[0].value;
 			}
 			const selectValue = [...(condition.fromPath?.map(path => path.fieldId) || []), condition.fieldId].join('.');
+			const curOperator = operators.find(op => op.value === condition.operator);
 			
 			return condition.conditions ? (
 				<div key={condition.fieldId} className={styles.conditionGroupContainer}>
@@ -311,7 +312,15 @@ const Conditions: FC = () => {
 					<select
 						value={condition.operator}
 						className={styles.operatorSelect}
-						onChange={e => condition.operator = e.target.value}>
+						onChange={e => {
+							condition.operator = e.target.value;
+							const curOperator = operators.find(op => op.value === e.target.value);
+
+							if (curOperator?.notNeedValue) {
+								condition.value = '';
+							}
+						}}
+					>
 						{
 							operators.map((operator, idx) => {
 								return (
@@ -322,21 +331,24 @@ const Conditions: FC = () => {
 							})
 						}
 					</select>
-					<input
-						className={styles.valueInput}
-						type="text"
-						value={condition.value}
-						onChange={e => condition.value = e.target.value}
-						onClick={evt((e: Event) => {
-							whereContext.popEle = e.target as AnyType;
-							whereContext.popParams = {
-								condition,
-								field: originField
-							};
-							whereContext.addBlur?.(() => {
-								whereContext.popParams = void 0;
-							});
-						}).stop}/>
+					{curOperator?.notNeedValue ? <span style={{ width: '130px', height: '24px' }} /> : (
+						<input
+							className={styles.valueInput}
+							type="text"
+							value={condition.value}
+							onChange={e => condition.value = e.target.value}
+							onClick={evt((e: Event) => {
+								whereContext.popEle = e.target as AnyType;
+								whereContext.popParams = {
+									condition,
+									field: originField
+								};
+								whereContext.addBlur?.(() => {
+									whereContext.popParams = void 0;
+								});
+							}).stop}
+						/>
+					)}
 					<span
 						className={`${styles.addWhere} ${styles.icons}`}
 						onClick={() => remove({ index, parentCondition })}
