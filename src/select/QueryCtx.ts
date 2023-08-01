@@ -208,7 +208,8 @@ export default class QueryCtx {
 					);
 				}
 			} else {
-				this.nowValue.fields = this.nowValue.fields.filter(f => !(f.fieldId === field.id && !f.fromPath.length || (f.fromPath.length === 1 && f.fromPath[0].fieldId === field.id)));
+				this.nowValue.fields = this.nowValue.fields
+					.filter(f => !((f.fieldId === field.id && !f.fromPath.length) || f.fromPath[0]?.fieldId === field.id));
 			}
 		}
 	}

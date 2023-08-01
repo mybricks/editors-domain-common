@@ -156,6 +156,8 @@ const getFieldPathByFieldNames = (filedName: string[], entity: Entity, entityAry
 /** 提取所有计算字段使用到的实体字段 */
 export const getFieldsFromCalcRule = (calcRule: string, entity: Entity, entityAry: Entity[], parentField: Field) => {
 	const fieldNames = calcRule.match(/(\$\.[^$\s\t]+\$)/g) ?? [];
+	const parentSelectedField = { fieldId: parentField.id, fieldName: parentField.name, entityId: (parentField as AnyType).parent.id, fromPath: [] };
+
 	return fieldNames
 		.map(name => {
 			return getFieldPathByFieldNames(name.match(/^\$\.([^$\s\t]+)\$$/)?.[1]?.split('.') ?? [], entity, entityAry);
@@ -173,7 +175,8 @@ export const getFieldsFromCalcRule = (calcRule: string, entity: Entity, entityAr
 			},
 			[]
 		)
-		.map(field => ({ ...field, fromPath: [{ fieldId: parentField.id, fieldName: parentField.name, entityId: (parentField as AnyType).parent.id, fromPath: [] }, ...field.fromPath] }));
+		.map(field => ({ ...field, fromPath: [{ ...parentSelectedField }, ...field.fromPath] }))
+		.concat(parentSelectedField);
 };
 
 /** 获取计算字段类型 */
