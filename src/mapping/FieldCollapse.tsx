@@ -24,7 +24,7 @@ const FieldCollapse: FC<FieldCollapseProps> = props => {
 	const { ctx, field, fromPath, entity, initialOpen, notMapping, entityIdChain, clickField } = props;
 	const [open, setOpen] = useState(initialOpen);
 
-	const isMapping = !notMapping && !!field.mapping?.entity?.fieldAry.length;
+	const isMapping = !notMapping && !!field.mapping?.entity?.fieldAry?.length;
 	let fieldMappingEntity = field.mapping?.entity as AnyType as Entity;
 
 	if (isMapping) {
