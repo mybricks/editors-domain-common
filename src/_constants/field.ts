@@ -60,6 +60,8 @@ export enum SQLOperator {
 	GE = '>=',
 	/** 小于等于 */
 	LE = '<=',
+	IS_NULL = 'IS NULL',
+	IS_NOT_NULL = 'IS NOT NULL',
 }
 
 /** sql 排序规则 */
