@@ -41,6 +41,8 @@ export const getFieldConditionAry = (dbType: string): Array<{ label: string; val
 		return [
 			{ label: '等于(=)', value: '=' },
 			{ label: '不等于(<>)', value: '<>' },
+			{ label: '大于(>)', value: '>' },
+			{ label: '小于(<)', value: '<' },
 			{ label: '大于等于(>=)', value: '>=' },
 			{ label: '小于等于(<=)', value: '<=' },
 			{ label: '包含(IN)', value: 'IN' },

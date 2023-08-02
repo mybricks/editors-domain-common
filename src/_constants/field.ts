@@ -60,6 +60,10 @@ export enum SQLOperator {
 	GE = '>=',
 	/** 小于等于 */
 	LE = '<=',
+	/** 大于 */
+	G = '>',
+	/** 小于 */
+	L = '<',
 	IS_NULL = 'IS NULL',
 	IS_NOT_NULL = 'IS NOT NULL',
 }
