@@ -21,7 +21,7 @@ export const getEntityCompletions = (params: {
 }) => {
 	const { entity, entityAry, isRoot, entityIdChain } = params;
 	const _prop: SuggestionType[] = [];
-	const curEntity = entityAry.find(e => e.id === entity.id);
+	const curEntity = entityAry.find(e => e.id === entity?.id);
 
 	if (curEntity) {
 		const notMapping = entityIdChain[entityIdChain.length - 2] === curEntity.id;
