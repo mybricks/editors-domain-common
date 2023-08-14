@@ -206,7 +206,7 @@ function Limit() {
 			        nowValue.limit = { type: SQLLimitType.ENUM, value: e.target.value ? Number(e.target.value) : e.target.value };
 		        }}
 					>
-						<option value={5}>10条数据</option>
+						<option value={5}>5条数据</option>
 						<option value={10}>10条数据</option>
 						<option value={20}>20条数据</option>
 						<option value={50}>50条数据</option>
