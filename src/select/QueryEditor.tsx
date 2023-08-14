@@ -203,15 +203,17 @@ function Limit() {
 						className={css.selectDom}
 		        value={nowValue.limit.value}
 		        onChange={e => {
-			        nowValue.limit = { type: SQLLimitType.ENUM, value: Number(e.target.value) };
+			        nowValue.limit = { type: SQLLimitType.ENUM, value: e.target.value ? Number(e.target.value) : e.target.value };
 		        }}
 					>
+						<option value={5}>10条数据</option>
 						<option value={10}>10条数据</option>
 						<option value={20}>20条数据</option>
 						<option value={50}>50条数据</option>
 						<option value={100}>100条数据</option>
 						<option value={500}>500条数据</option>
 						<option value={1000}>1000条数据</option>
+						<option value="">不限制</option>
 					</select>
 				) : null}
 				

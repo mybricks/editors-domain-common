@@ -155,7 +155,7 @@ export const formatOrderByOriginEntities = (orders: Order[], originEntities: Any
 			order.fieldName = '';
 			order.entityId = '';
 			order.fromPath = [];
-			return;
+			return order;
 		} else if (!order.fromPath) {
 			order.fromPath = [];
 		}
