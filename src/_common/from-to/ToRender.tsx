@@ -40,7 +40,7 @@ function ProObj({ properties, xpath }: AnyType) {
 	return properties ? (
 		<>
 			{
-				Object.keys(properties).map(key => {
+				Object.keys(properties).sort().map(key => {
 					const nxpath = xpath !== void 0 ? `${xpath}/${key}` : void 0;
 					return <ProItem key={key} val={properties[key]} xpath={nxpath} keyName={key}/>;
 				})
