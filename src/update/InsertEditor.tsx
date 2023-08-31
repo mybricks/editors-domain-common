@@ -14,7 +14,7 @@ import css from './InsertEditor.less';
 
 let ctx: InsertCtx;
 
-export default function InsertEditor({ domainModel, paramSchema, value, close }: AnyType) {
+export default function InsertEditor({ domainModel, paramSchema, value, close, batch }: AnyType) {
 	ctx = useObservable(InsertCtx, next => {
 		const oriVal = value.get();
 		let val;
@@ -50,6 +50,7 @@ export default function InsertEditor({ domainModel, paramSchema, value, close }:
 			paramSchema,
 			nowValue: val,
 			value,
+			batch,
 			close
 		});
 	}, { to: 'children' });
@@ -92,7 +93,7 @@ export default function InsertEditor({ domainModel, paramSchema, value, close }:
 			</div>
 			<FromTo
 				conAry={nowValue.conAry}
-				from={{ title: '参数', schema: { ...(paramSchema || { type: 'object', properties: {} }), root: true } }}
+				from={{ title: '参数', schema: { ...((batch ? paramSchema?.items : paramSchema) || { type: 'object', properties: {} }), root: true } }}
 				to={{ title: nowValue.entities[0]?.name, schema: fieldSchema }}
 				addBlurFn={ctx.addBlur}
 			/>
