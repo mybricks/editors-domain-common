@@ -188,7 +188,7 @@ function SelectFrom() {
 							relationEntityId: curField.relationEntityId,
 						};
 					})?? [],
-				...nowValue.entity.fieldAry.filter(f => f.bizType === FieldBizType.CALC)
+				...(nowValue.entity.fieldAry?.filter(f => f.bizType === FieldBizType.CALC) ?? [])
 			];
 		}
 	}, [selectedAll]);
