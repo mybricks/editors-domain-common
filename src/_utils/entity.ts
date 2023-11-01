@@ -189,3 +189,8 @@ export const formatConAryByEntity = (conAry: Array<{ from: string; to: string }>
 	});
 };
 
+/** 获取可以选择的字段 */
+export const getValidFiledForSelect = (fieldAry: AnyType[] | undefined): AnyType => {
+	return fieldAry?.filter(f => !f.isPrivate || (f.isPrivate && ['_CREATE_TIME', '_UPDATE_TIME'].includes(f.name))) ?? [];
+};
+

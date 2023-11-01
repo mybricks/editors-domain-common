@@ -13,7 +13,8 @@ import {
 	formatConditionByOriginEntities,
 	formatEntitiesByOriginEntities,
 	formatFieldsByOriginEntities,
-	formatOrderByOriginEntities
+	formatOrderByOriginEntities,
+	getValidFiledForSelect,
 } from '../_utils/entity';
 
 import css from './QueryEditor.less';
@@ -65,6 +66,7 @@ export default function QueryEditor({ domainModel, paramSchema, value, close, sh
 	}, { to: 'children' });
 
 	return (
+		// @ts-ignore
 		<PopView close={close} save={ctx.save} clickView={evt(ctx.blurAll).stop}>
 		  <SelectFrom />
 		  {
@@ -94,7 +96,8 @@ function SelectFrom() {
 	const selectedAll = useComputed(() => {
 		const fields = nowValue.fields;
 		
-		return !!currentEntity?.fieldAry.filter(f => !f.isPrivate).every(field => fields.some(f => f.fieldId === field.id && !f.fromPath.length));
+		return !!getValidFiledForSelect(currentEntity?.fieldAry)
+			.every(field => fields.some(f => f.fieldId === field.id && !f.fromPath.length));
 	});
 	const onSelectAll = useCallback(() => {
 		ctx.onSelectAllFields(selectedAll);
@@ -136,19 +139,20 @@ function SelectFrom() {
 									<span onClick={onSelectAll}>{selectedAll ? '取消所有字段' : '选中所有字段'}</span>
 									<span></span>
 								</div>
-								{currentEntity.fieldAry.filter(f => !f.isPrivate).map(field => {
-									return (
-										<SelectFromCollapse
-											key={field.id}
-											initialOpen
-											entityIdChain={[currentEntity.id]}
-											entity={currentEntity as Entity}
-											ctx={ctx}
-											fromPath={[]}
-											field={field as Field}
-										/>
-									);
-								})}
+								{getValidFiledForSelect(currentEntity.fieldAry)
+									.map(field => {
+										return (
+											<SelectFromCollapse
+												key={field.id}
+												initialOpen
+												entityIdChain={[currentEntity.id]}
+												entity={currentEntity as Entity}
+												ctx={ctx}
+												fromPath={[]}
+												field={field as Field}
+											/>
+										);
+									})}
 							</>
 						)
 					) : []}

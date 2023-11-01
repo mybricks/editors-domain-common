@@ -18,6 +18,7 @@ import {
 	getFieldTypeFromCalcRule,
 	getMethodCompletions
 } from './util';
+import { getValidFiledForSelect } from '../_utils/entity';
 
 import styles from './CalcFieldModal.less';
 import css from './FieldCollapse.less';
@@ -140,7 +141,7 @@ const CalcFieldModal: FC<CalcFieldModalProps> = props => {
 							<div className={css.mappingFieldHeader}>
 								所属实体：{currentEntity?.name}
 							</div>
-							{currentEntity ? currentEntity.fieldAry.filter(f => !f.isPrivate).map(field => {
+							{currentEntity ? getValidFiledForSelect(currentEntity.fieldAry).map(field => {
 								return (
 									<FieldCollapse
 										key={field.id}

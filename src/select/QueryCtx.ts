@@ -2,7 +2,7 @@ import { AnyType } from '../_types';
 import { FieldBizType, SQLLimitType, SQLOrder, SQLWhereJoiner } from '../_constants/field';
 import { Entity, Field, SelectedField } from '../_types/domain';
 import { getSchemaTypeByFieldType } from '../_utils/field';
-import { getEntityFieldMap } from '../_utils/entity';
+import { getEntityFieldMap, getValidFiledForSelect } from '../_utils/entity';
 
 export type T_Field = {
 	id: string;
@@ -243,8 +243,7 @@ export default class QueryCtx {
 			
 			if (curEntity) {
 				const curFields: SelectedField[] = [];
-				curEntity.fieldAry
-					.filter(f => !f.isPrivate)
+				getValidFiledForSelect(curEntity.fieldAry)
 					.forEach(field => {
 						const items = { fieldId: field.id, fieldName: field.name, entityId: curEntity.id, fromPath: [] };
 						curFields.push(items);

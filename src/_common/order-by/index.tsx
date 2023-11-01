@@ -5,7 +5,7 @@ import { AnyType } from '../../_types';
 import { FieldBizType, SQLOrder } from '../../_constants/field';
 import { Field, SelectedField } from '../../_types/domain';
 import { Remove } from '../../_constants/icons';
-import { getEntityFieldMap } from '../../_utils/entity';
+import { getEntityFieldMap, getValidFiledForSelect } from '../../_utils/entity';
 
 import styles from './index.less';
 
@@ -130,8 +130,8 @@ const OrderItem: FC<OrderItemProps> = props => {
 	if (currentEntity) {
 		fieldSelectOptions.push(
 			<optgroup label={`来自实体：${currentEntity.name}`}>
-				{currentEntity.fieldAry
-					.filter((field: Field) => !field.isPrivate && field.bizType !== FieldBizType.MAPPING)
+				{getValidFiledForSelect(currentEntity.fieldAry)
+					.filter((field: Field) => field.bizType !== FieldBizType.MAPPING)
 					.map((field) => {
 						const value = field.id;
 						const dataValue = JSON.stringify({ fieldId: field.id, fieldName: field.name, entityId: currentEntity.id, fromPath: [] });

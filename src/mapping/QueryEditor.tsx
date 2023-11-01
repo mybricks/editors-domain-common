@@ -9,6 +9,7 @@ import { Entity, Field } from '../_types/domain';
 import CalcFieldModal from './CalcFieldModal';
 import { CountCondition } from './constant';
 import { FieldBizType } from '../_constants/field';
+import { getValidFiledForSelect } from '../_utils/entity';
 
 import styles from './QueryEditor.less';
 
@@ -69,6 +70,7 @@ export default function QueryEditor({ domainModel, fieldModel, value, close }: A
 	}, { to: 'children' });
 
 	return (
+		// @ts-ignore
 		<PopView close={close} save={ctx.save} clickView={evt(ctx.blurAll).stop}>
 			<SelectFrom/>
 			{ctx.nowValue.entity ? <Where /> : null}
@@ -109,22 +111,21 @@ function SelectFrom() {
 		if (nowEntity && nowEntity.id !== ctx.fieldModel.parent.id) {
 			const oriEntity = ctx.entityAry.find(et => et.id === nowEntity.id);
 			
-			fieldElements = oriEntity.fieldAry
+			fieldElements = getValidFiledForSelect(oriEntity.fieldAry)
 				.map(field => {
-					if (!field.isPrivate) {
-						let checked = false;
-						if (nowEntity.fieldAry) {
-							checked = !!nowEntity.fieldAry.find(f => f.name === field.name);
-						}
-
-						return (
-							<div key={field.id} className={styles.field}>
-								<input type="checkbox" checked={checked} onChange={() => ctx.setField(field.id)} />
-								<span onClick={() => ctx.setField(field.id)}>{field.name}</span>
-								<span>{field.desc}</span>
-							</div>
-						);
+					let checked = false;
+					if (nowEntity.fieldAry) {
+						checked = !!nowEntity.fieldAry.find(f => f.name === field.name);
 					}
+
+					return (
+						<div key={field.id} className={styles.field}>
+							<input type="checkbox" checked={checked} onChange={() => ctx.setField(field.id)} />
+							<span onClick={() => ctx.setField(field.id)}>{field.name}</span>
+							<span>{field.desc}</span>
+						</div>
+					);
+
 				})
 				.filter(f => f);
 
@@ -160,8 +161,7 @@ function SelectFrom() {
 			return false;
 		}
 		
-		return !!oriEntity?.fieldAry
-			.filter(f => !f.isPrivate)
+		return !!getValidFiledForSelect(oriEntity?.fieldAry)
 			.every(field => nowValue.entity.fieldAry?.find(f => f.name === field.name));
 	});
 	const addCalcField = useCallback(() => {
@@ -174,8 +174,7 @@ function SelectFrom() {
 		} else {
 			const oriEntity = ctx.entityAry.find(et => et.id === nowValue.entity?.id);
 			nowValue.entity.fieldAry = [
-				...oriEntity?.fieldAry
-					.filter(f => !f.isPrivate)
+				...getValidFiledForSelect(oriEntity?.fieldAry)
 					.map(f => {
 						const curField = f.toJSON();
 

@@ -6,6 +6,7 @@ import { getFieldConditionAry } from '../../_utils/field';
 import { Remove } from '../../_constants/icons';
 import { Condition, Entity, Field } from '../../_types/domain';
 import { FieldBizType, FieldDBType, SQLWhereJoiner } from '../../_constants/field';
+import { getValidFiledForSelect } from '../../_utils/entity';
 
 import styles from './index.less';
 
@@ -154,8 +155,8 @@ const Conditions: FC = () => {
 				const fieldSelectOptions: ReactNode[] = [];
 				if (currentEntity) {
 					fieldSelectOptions.push(
-						...currentEntity.fieldAry
-							.filter((field: Field) => !field.isPrivate && field.bizType !== FieldBizType.MAPPING)
+						...getValidFiledForSelect(currentEntity.fieldAry)
+							.filter((field: Field) => field.bizType !== FieldBizType.MAPPING)
 							.map((field) => {
 								return (
 									<option key={`${currentEntity.id}&&${field.id}`} value={`${currentEntity.id}&&${field.id}`}>

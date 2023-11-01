@@ -2,6 +2,7 @@ import { Entity, Field } from '../_types/domain';
 import { MethodList } from '../_constants/method';
 import { AnyType } from '../_types';
 import { FieldBizType } from '../_constants/field';
+import { getValidFiledForSelect } from '../_utils/entity';
 
 export type SuggestionType = {
 	label: string;
@@ -25,7 +26,7 @@ export const getEntityCompletions = (params: {
 
 	if (curEntity) {
 		const notMapping = entityIdChain[entityIdChain.length - 2] === curEntity.id;
-		const fieldAry = curEntity.fieldAry.filter(field => entity.fieldAry.some(f => f.id === field.id && !f.isPrivate));
+		const fieldAry = curEntity.fieldAry.filter(field => getValidFiledForSelect(entity.fieldAry).some(f => f.id === field.id));
 		fieldAry.forEach(field => {
 			if (notMapping && field.bizType === FieldBizType.MAPPING) {
 				return;

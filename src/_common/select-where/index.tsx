@@ -6,7 +6,7 @@ import { getFieldConditionAry } from '../../_utils/field';
 import { Remove } from '../../_constants/icons';
 import { Condition, Entity, Field, SelectedField } from '../../_types/domain';
 import { FieldBizType, FieldDBType, SQLWhereJoiner } from '../../_constants/field';
-import { getEntityFieldMap } from '../../_utils/entity';
+import { getEntityFieldMap, getValidFiledForSelect } from '../../_utils/entity';
 
 import styles from './index.less';
 
@@ -175,8 +175,8 @@ const Conditions: FC = () => {
 	if (currentEntity) {
 		fieldSelectOptions.push(
 			<optgroup label={`来自实体：${currentEntity.name}`}>
-				{currentEntity.fieldAry
-					.filter((field: Field) => !field.isPrivate && field.bizType !== FieldBizType.MAPPING)
+				{getValidFiledForSelect(currentEntity.fieldAry)
+					.filter((field: Field) => field.bizType !== FieldBizType.MAPPING)
 					.map((field) => {
 						const value = field.id;
 						const dataValue = JSON.stringify({ fieldId: field.id, fieldName: field.name, entityId: currentEntity.id, fromPath: [] });
